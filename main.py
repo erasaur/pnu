@@ -1,3 +1,5 @@
+from pnu import Pnu
+
 def main ():
     Pnu().run()
 
