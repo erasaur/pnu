@@ -1,13 +1,13 @@
 #! /usr/bin/env python3.5
+
 import email
 import imaplib
 import json
 import re
 import sys
-from User import User
 from JSONConfig import config
 
-class IMAP:
+class PnuRequest:
 
     android_regex = re.compile("maps\.google\.com/maps\?f=q&q=\((?P<lat>.*)?,(?P<lon>.*)?\)")
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
@@ -94,6 +94,7 @@ class IMAP:
                 }
                 yield user
 
+
     def get_attachment(self, msg):
         """ returns the text from the attachment of an iphone message """
         if msg.get_content_maintype() == 'multipart':
@@ -133,6 +134,12 @@ class IMAP:
         result = re.search(self.ios_regex, attach_text.decode('UTF-8'))
 #        print('iPhone (lat, lon): ', (result.group('lat'), result.group('lon'),))
         return (result.group('lat'), result.group('lon'),)
+
+    def run(self):
+        """ yields new unread messages """
+        self.get_inbox()
+        msgs = self.get_unread_messages()
+        return self.parse_msgs(msgs)
 
 
 if __name__ == "__main__":
