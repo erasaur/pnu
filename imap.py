@@ -1,10 +1,11 @@
-#! .venv/bin python3.5
+#! /usr/bin/env python3.5
 import email
 import imaplib
 import json
 import re
 import sys
 from User import User
+from JSONConfig import config
 
 class IMAP:
 
@@ -14,11 +15,8 @@ class IMAP:
     def __init__(self):
         self.mail = imaplib.IMAP4_SSL('imap.gmail.com')
         try:
-            with open('config.json') as config_file:
-                self.config = json.load(config_file)
-                self.gmail = self.config['gmail']
-                u, data = self.mail.login(self.gmail['username'],
-                        self.gmail['password'])
+            u, data = self.mail.login(config['gmail']['username'],
+                        config['gmail']['password'])
         except imaplib.IMAP4.error:
             print("Login Failed")
             sys.exit(1)
@@ -39,7 +37,7 @@ class IMAP:
             returns the INBOX data associated with this email account
 
         """
-        resp, data = self.mail.select(self.gmail['mailbox'])
+        resp, data = self.mail.select(config['gmail']['mailbox'])
         self.check_resp(resp)
         return data
 
