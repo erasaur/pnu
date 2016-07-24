@@ -5,7 +5,7 @@ import imaplib
 import json
 import re
 import sys
-from JSONConfig import config
+from config import JSONConfig
 
 class PnuRequest:
 
@@ -15,8 +15,8 @@ class PnuRequest:
     def __init__(self):
         self.mail = imaplib.IMAP4_SSL('imap.gmail.com')
         try:
-            u, data = self.mail.login(config['gmail']['username'],
-                        config['gmail']['password'])
+            u, data = self.mail.login(JSONConfig['gmail']['username'],
+                        JSONConfig['gmail']['password'])
         except imaplib.IMAP4.error:
             print("Login Failed")
             sys.exit(1)
@@ -37,7 +37,7 @@ class PnuRequest:
             returns the INBOX data associated with this email account
 
         """
-        resp, data = self.mail.select(config['gmail']['mailbox'])
+        resp, data = self.mail.select(JSONConfig['gmail']['mailbox'])
         self.check_resp(resp)
         return data
 
