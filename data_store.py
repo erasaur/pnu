@@ -8,7 +8,25 @@ class PnuDataStore ():
         self._redis = redis.StrictRedis(host=host, port=port, db=0)
 
     def get (key):
-        return self._redis.get(key)
+        try:
+            res = json.loads(self._redis.get(key))
+        except Exception:
+            res = ""
+        return res
 
     def set (key, val):
-        return self._redis.set(key, val)
+        try:
+            res = self._redis.set(key, json.dumps(val))
+        except Exception:
+            res = ""
+        return res
+
+    def list ():
+        res = []
+        for doc in self._redis.lrange(0, -1):
+            try:
+                res.append(json.loads(doc))
+            except Exception:
+                continue
+        return res
+

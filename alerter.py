@@ -60,9 +60,7 @@ class Alert:
         self.pokemon_wanted = self.list_to_str(info['pokemon_wanted'])
         self.link = info['link']
 
-        resp = self.smtp.sendmail(self.private_config['gmail']['username'],
-                [self.phone_number], self.build_message())
-        print(resp)
-        print("sent alert!")
+        self.smtp.sendmail(JSONConfig['gmail']['username'], [self.phone_number],
+                self.build_message())
 
 smtp = Alert()
