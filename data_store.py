@@ -1,11 +1,13 @@
-import redis
+import redis, time
+from config import pub_config
 
-class PnuDataStore ():
+class RedisDataStore ():
     def __init__ (self, host=None, port=None):
         if host is None or port is None:
             raise ValueError('Missing host or port')
 
         self._redis = redis.StrictRedis(host=host, port=port, db=0)
+        self._last_update = time.time()
 
     def get (key):
         try:
@@ -26,6 +28,7 @@ class PnuDataStore ():
     def set (key, val):
         try:
             self._redis.set(key, json.dumps(val))
+            self._last_update = time.time()
         except Exception:
             print('invalid json value') # TODO logging
 
@@ -37,3 +40,11 @@ class PnuDataStore ():
             except Exception:
                 print('unable to load doc') # TODO logging
         return res
+
+    def changed_since (time):
+        return self._last_update > time
+
+PnuDataStore = RedisDataStore(
+    host=pub_config["data_store"]["host"],
+    port=pub_config["data_store"]["port"]
+)

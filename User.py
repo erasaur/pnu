@@ -1,18 +1,35 @@
 class User:
-    def __init__(self, phone_number, pokemon_wanted, lat, lon):
-        self.phone_number = phone_number
-        self.pokemon_wanted = pokemon_wanted
-        self.lat = lat
-        self.lon = lon
+    def __init__(self, **kwargs):
+        if 'data' in kwargs:
+            self.load_json(kwargs.pop('data'))
+        else:
+            self.load(**kwargs)
 
-    def get_all_properties(self):
-        return {"phone_number": self.phone_number,
-                "pokemon_wanted": self.pokemon_wanted,
-                "location": {
-                        "lat": self.lat,
-                        "lon": self.lon
-                    }
-                }
+    def load(self, **kwargs):
+        try:
+            for k in ['phone_number', 'pokemon_wanted', 'lat', 'lon']:
+                self[k] = kwargs.pop(k)
+        except:
+            raise Exception('invalid user arguments')
+
+    def load_json(self, data):
+        try:
+            self.phone_number = data["phone_number"]
+            self.pokemon_wanted = data["pokemon_wanted"]
+            self.lat = data["location"]["lat"]
+            self.lon = data["location"]["lon"]
+        except:
+            raise Exception('invalid user object')
+
+    def get_json(self):
+        return {
+            "phone_number": self.phone_number,
+            "pokemon_wanted": self.pokemon_wanted,
+            "location": {
+                "lat": self.lat,
+                "lon": self.lon
+            }
+        }
 
     def get_lat(self):
         return self.lat

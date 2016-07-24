@@ -9,9 +9,12 @@
         "port": 587
     },
 
+    "data_store": {
+        "host": "localhost",
+        "port": 1337
+    },
+
     "pnu": {
-        "store_host": "localhost",
-        "store_port": 1337,
         "update_interval": 5.0
     },
 
