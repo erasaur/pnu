@@ -1,6 +1,6 @@
 # import asyncio, aiohttp
 
-class PokeApi ():
+class PnuPokeApi ():
     def __init__ (self, loop=None):
         pass
 
