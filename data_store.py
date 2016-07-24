@@ -11,15 +11,23 @@ class PnuDataStore ():
         try:
             res = json.loads(self._redis.get(key))
         except Exception:
-            res = ""
+            res = {}
         return res
+
+    def update (key, val):
+        try:
+            curr = self.get(key)
+            for k, v in val.iteritems():
+                curr[k] = v
+            self.set(key, curr)
+        except Exception:
+            print('invalid json value')
 
     def set (key, val):
         try:
-            res = self._redis.set(key, json.dumps(val))
+            self._redis.set(key, json.dumps(val))
         except Exception:
-            res = ""
-        return res
+            print('invalid json value') # TODO logging
 
     def list ():
         res = []
@@ -27,6 +35,5 @@ class PnuDataStore ():
             try:
                 res.append(json.loads(doc))
             except Exception:
-                continue
+                print('unable to load doc') # TODO logging
         return res
-
