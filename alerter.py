@@ -2,6 +2,7 @@
 
 from smtplib import SMTP
 from config import pub_config, private_config
+from email.mime.text import MIMEText
 
 class Alert:
 
@@ -19,18 +20,22 @@ class Alert:
     def __exit__(self):
         self.smtp.quit()
 
-    def build_message(self):
+    def build_message(self, info):
         """ returns the text message to be sent to the receiver """
-        a_an = self.format_plural_a_an()
+        pokemon_wanted = self.list_to_str(info['pokemon_wanted'])
+        a_an = self.format_plural_a_an(info['pokemon_wanted'])
 
-        msg = ("Subject: {subject}\n\n".format(subject=self.SUBJECT) +
-               "There's {a_an} {pokemon} near you! Go catch 'em!\n{link}"
-               .format(a_an=a_an, pokemon=self.pokemon_wanted, link=self.link))
-        return msg
+        msg = MIMEText("There's {a_an} {pokemon} near you! Go catch 'em!\n{link}"
+                .format(a_an=a_an, pokemon=pokemon_wanted, link=info['link']))
+        msg['To'] = info['phone_number']
+        msg['From'] = private_config['gmail']['username']
+        msg['Subject'] = "Pokemon Alert!"
 
-    def format_plural_a_an(self):
+        return msg.as_string()
+
+    def format_plural_a_an(self, pokemon_wanted):
         """ returns either a or an depending on the 1st letter """
-        if self.pokemon_wanted[0][0].lower() in ['a', 'e', 'i', 'o', 'u']:
+        if pokemon_wanted[0][0].lower() in ['a', 'e', 'i', 'o', 'u']:
             return 'an'
 
         return 'a'
@@ -54,11 +59,8 @@ class Alert:
         Args:
             info (dictionary)
         """
-        self.phone_number = info['phone_number']
-        self.pokemon_wanted = self.list_to_str(info['pokemon_wanted'])
-        self.link = info['link']
 
         self.smtp.sendmail(private_config['gmail']['username'],
-                [self.phone_number], self.build_message())
+                [info['phone_number']], self.build_message(info))
 
 smtp = Alert()
