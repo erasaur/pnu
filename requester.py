@@ -13,7 +13,7 @@ class PnuRequest:
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
 
     def __init__(self):
-        self.mail = imaplib.IMAP4_SSL(config['gmail']['imap'])
+        self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
         try:
             u, data = self.mail.login(private_config['gmail']['username'],
                         private_config['gmail']['password'])
@@ -37,7 +37,7 @@ class PnuRequest:
             returns the INBOX data associated with this email account
 
         """
-        resp, data = self.mail.select(config['gmail']['mailbox'])
+        resp, data = self.mail.select(pub_config['gmail']['mailbox'])
         self.check_resp(resp)
         return data
 
@@ -134,6 +134,7 @@ class PnuRequest:
         result = re.search(self.ios_regex, attach_text.decode('UTF-8'))
 #        print('iPhone (lat, lon): ', (result.group('lat'), result.group('lon'),))
         return (result.group('lat'), result.group('lon'),)
+
 
     def run(self):
         """ yields new unread messages """
