@@ -37,3 +37,6 @@ class PrivateConfig(Configurable):
 
     def load_config(self):
         return super().return_config()
+
+pub_config = Config().load_config()
+private_config = PrivateConfig().load_config()

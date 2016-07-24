@@ -5,7 +5,7 @@ import imaplib
 import json
 import re
 import sys
-from config import Config, PrivateConfig
+from config import pub_config, private_config
 
 class PnuRequest:
 
@@ -13,13 +13,10 @@ class PnuRequest:
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
 
     def __init__(self):
-        self.config = Config().load_config()
-        self.private_config = PrivateConfig().load_config()
-
-        self.mail = imaplib.IMAP4_SSL(self.config['gmail']['imap'])
+        self.mail = imaplib.IMAP4_SSL(config['gmail']['imap'])
         try:
-            u, data = self.mail.login(self.private_config['gmail']['username'],
-                        self.private_config['gmail']['password'])
+            u, data = self.mail.login(private_config['gmail']['username'],
+                        private_config['gmail']['password'])
         except imaplib.IMAP4.error:
             print("Login Failed")
             sys.exit(1)
@@ -40,7 +37,7 @@ class PnuRequest:
             returns the INBOX data associated with this email account
 
         """
-        resp, data = self.mail.select(self.config['gmail']['mailbox'])
+        resp, data = self.mail.select(config['gmail']['mailbox'])
         self.check_resp(resp)
         return data
 

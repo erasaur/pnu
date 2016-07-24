@@ -1,7 +1,7 @@
 #! /usr/bin/env python3.5
 
 from smtplib import SMTP
-from config import Config, PrivateConfig
+from config import pub_config, private_config
 
 class Alert:
 
@@ -9,14 +9,12 @@ class Alert:
 
     def __init__(self):
         """ perform preliminary actions for sending email via SMTP """
-        self.config = Config().load_config()
-        self.private_config = PrivateConfig().load_config()
 
-        self.smtp = SMTP(self.config['smtp']['host'], self.config['smtp']['port'])
+        self.smtp = SMTP(pub_config['smtp']['host'], pub_config['smtp']['port'])
         self.smtp.ehlo()
         self.smtp.starttls()
-        self.smtp.login(self.private_config['gmail']['username'],
-                self.private_config['gmail']['password'])
+        self.smtp.login(private_config['gmail']['username'],
+                private_config['gmail']['password'])
 
     def __exit__(self):
         self.smtp.quit()
@@ -60,7 +58,7 @@ class Alert:
         self.pokemon_wanted = self.list_to_str(info['pokemon_wanted'])
         self.link = info['link']
 
-        self.smtp.sendmail(JSONConfig['gmail']['username'], [self.phone_number],
-                self.build_message())
+        self.smtp.sendmail(private_config['gmail']['username'],
+                [self.phone_number], self.build_message())
 
 smtp = Alert()

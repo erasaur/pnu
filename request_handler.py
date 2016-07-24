@@ -1,8 +1,8 @@
 import threading
 
-from pnu.requester import PnuRequest
-from pnu.runnable import PnuRunnable
-from pnu.config import Config
+from requester import PnuRequest
+from runnable import PnuRunnable
+from config import pub_config
 
 # TODO
 # handler should be responsible for parsing incoming requests and updating the
@@ -16,9 +16,8 @@ class PnuRequestHandler (PnuRunnable):
     def __init__ (self, loop=None, store=None):
         if loop is None or store is None:
             raise ValueError('missing loop or store')
-        self.config = Config().load_config()
 
-        super().__init__(self.config['request_handler']['update_interval'])
+        super().__init__(pub_config['request_handler']['update_interval'])
 
         self._requester = PnuRequest()
 
