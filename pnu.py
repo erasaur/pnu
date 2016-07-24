@@ -5,19 +5,20 @@ from poke_api import PnuPokeApi
 from request_handler import PnuRequestHandler
 from alert_dispatcher import PnuAlertDispatcher
 from data_store import PnuDataStore
-from JSONConfig import config
+from config import Config
 
 
 class Pnu (PnuRunnable):
     def __init__ (self):
         super().__init__(UPDATE_INTERVAL)
+        self.config = Config().load_config()
 
         # initialize event loop
         loop = asyncio.get_event_loop()
 
         # initialize data store
-        # data_store = PnuDataStore(host=config['pnu']['store_host'],
-        #    port=config['pnu']['cache_port'])
+        # data_store = PnuDataStore(host=self.config['pnu']['store_host'],
+        #    port=self.config['pnu']['cache_port'])
 
         # initialize api clients
         self._loop = loop

@@ -5,7 +5,7 @@ import imaplib
 import json
 import re
 import sys
-from JSONConfig import config
+from config import Config, PrivateConfig
 
 class PnuRequest:
 
@@ -13,10 +13,13 @@ class PnuRequest:
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
 
     def __init__(self):
-        self.mail = imaplib.IMAP4_SSL('imap.gmail.com')
+        self.config = Config().load_config()
+        self.private_config = PrivateConfig().load_config()
+
+        self.mail = imaplib.IMAP4_SSL(self.config['gmail']['imap'])
         try:
-            u, data = self.mail.login(config['gmail']['username'],
-                        config['gmail']['password'])
+            u, data = self.mail.login(self.private_config['gmail']['username'],
+                        self.private_config['gmail']['password'])
         except imaplib.IMAP4.error:
             print("Login Failed")
             sys.exit(1)
@@ -37,7 +40,7 @@ class PnuRequest:
             returns the INBOX data associated with this email account
 
         """
-        resp, data = self.mail.select(config['gmail']['mailbox'])
+        resp, data = self.mail.select(self.config['gmail']['mailbox'])
         self.check_resp(resp)
         return data
 
@@ -45,7 +48,7 @@ class PnuRequest:
         """ checks the response from the server for each request """
         if resp != 'OK':
             print("response is: ", resp)
-            sys.exit(1)
+            raise ConnectionError("Response from IMAP was not 'OK'")
 
     def get_unread_messages(self):
         """ retrieve all unread messages from the inbox """
@@ -143,9 +146,9 @@ class PnuRequest:
 
 
 if __name__ == "__main__":
-    imap = IMAP()
-    imap.get_inbox()
-    msgs = imap.get_unread_messages()
-    users = imap.parse_msgs(msgs)
+    req = PnuRequest()
+    req.get_inbox()
+    msgs = req.get_unread_messages()
+    users = req.parse_msgs(msgs)
     for user in users:
         print(user)

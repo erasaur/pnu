@@ -1,8 +1,8 @@
 import threading
 
-from requester import PnuRequest
-from runnable import PnuRunnable
-from JSONConfig import config
+from pnu.requester import PnuRequest
+from pnu.runnable import PnuRunnable
+from pnu.config import Config
 
 # TODO
 # handler should be responsible for parsing incoming requests and updating the
@@ -16,8 +16,9 @@ class PnuRequestHandler (PnuRunnable):
     def __init__ (self, loop=None, store=None):
         if loop is None or store is None:
             raise ValueError('missing loop or store')
+        self.config = Config().load_config()
 
-        super().__init__(config['request_handler']['update_interval'])
+        super().__init__(self.config['request_handler']['update_interval'])
 
         self._requester = PnuRequest()
 
@@ -29,6 +30,6 @@ class PnuRequestHandler (PnuRunnable):
         for new_msg in self._requester.run():
             # the value is a tuple right now so that we can contain the location
             # and pokemon_wanted all in one collection
-            self._store.set(new_msg['phone_number'], (new_msg['location'],
-                    new_msg['pokemon_wanted']))
+            self._store.set(new_msg['phone_number'], {new_msg['location'],
+                    new_msg['pokemon_wanted']})
 

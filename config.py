@@ -3,24 +3,37 @@ import json
 
 
 class Configurable:
-    """ returns public data utilized by pnu """
 
-    @staticmethod
-    def load_config(config_path='etc/config.json'):
+    def __init__(self, config_path=None):
         if config_path is None:
-            config_path = environ.get(
+            self.config_path = environ.get(
                 'PNU_CONFIG',
                 path.join(path.dirname(__file__), 'etc/config.json'),
             )
+        else:
+            self.config_path = config_path
 
-        with open(config_path, 'r') as f:
+
+    def return_config(self):
+        with open(self.config_path, 'r') as f:
             return json.load(f)
+
+
+class Config(Configurable):
+    """ returns public data utilized by pnu """
+
+    def __init__(self):
+        super().__init__('etc/config.json')
+
+    def load_config(self):
+        return super().return_config()
 
 
 class PrivateConfig(Configurable):
     """ return sensitive data utilized by pnu """
 
-    @staticmethod
-    def load_private(config_path='private/config.json'):
-        return self.load_confnig(config_path)
+    def __init__(self):
+        super().__init__('private/config.json')
 
+    def load_config(self):
+        return super().return_config()
