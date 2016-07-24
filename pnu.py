@@ -5,11 +5,8 @@ from poke_api import PnuPokeApi
 from request_handler import PnuRequestHandler
 from alert_dispatcher import PnuAlertDispatcher
 from data_store import PnuDataStore
+from JSONConfig import config
 
-# how often to dispatch alerts
-UPDATE_INTERVAL = 5.0 # seconds
-STORE_HOST = 'localhost'
-STORE_PORT = 1337
 
 class Pnu (PnuRunnable):
     def __init__ (self):
@@ -19,7 +16,8 @@ class Pnu (PnuRunnable):
         loop = asyncio.get_event_loop()
 
         # initialize data store
-        # data_store = PnuDataStore(host=CACHE_HOST, port=CACHE_PORT)
+        # data_store = PnuDataStore(host=config['pnu']['store_host'],
+        #    port=config['pnu']['cache_port'])
 
         # initialize api clients
         self._loop = loop
@@ -39,5 +37,6 @@ class Pnu (PnuRunnable):
         # a user's whitelist
 
         # send alerts with dispatcher
+
         pass
 
