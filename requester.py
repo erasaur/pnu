@@ -11,6 +11,8 @@ class PnuRequest:
 
     android_regex = re.compile("maps\.google\.com/maps\?f=q&q=\((?P<lat>.*)?,(?P<lon>.*)?\)")
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
+    pokemon_regex = re.compile("pokemon\s*[a-z]*:\s*((([a-z]*-*[a-z]*),\s[a-z]*-*[a-z]*){0,4})", re.IGNORECASE)
+    split_regex = re.compile(', |; | |,')
 
     def __init__(self):
         self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
@@ -68,32 +70,59 @@ class PnuRequest:
             User object
         """
         for msg in msgs:
-            # probably android location msg
+            lat = lon = body = None
+            pokemon_wanted = None
+            # probably android msg either location or pokemon wanted
             if msg['Subject']:
                 # message body
                 body = msg.get_payload(decode=True)
-                lat, lon = self.parse_android_lat_lon(body)
-                user = {
-                    "phone_number": msg['From'],
-                    "pokemon_wanted": ['INSERT_POKEMON_WANTED'],
-                    "location": {
-                        "lat": lat,
-                        "lon": lon
-                    }
-                }
-                yield user
-            else:
-                lat, lon = self.parse_iphone_lat_lon(msg)
-                user = {
-                    "phone_number": msg['From'],
-                    "pokemon_wanted": ['INSERT_POKEMON_WANTED'],
-                    "location": {
-                        "lat": lat,
-                        "lon": lon
-                    }
-                }
-                yield user
+                try:
+                    lat, lon = self.parse_android_lat_lon(body)
+                except AttributeError:
+#LOGGING
+                    pass
 
+            else:
+                try:
+                    lat, lon = self.parse_iphone_lat_lon(msg)
+                except AttributeError:
+#LOGGING
+                    pass
+
+            # probably didn't find a location msg, instead is junk or
+            # pokemon wanted msg
+            if not (lat or lon):
+#LOGGING
+                body = msg.get_payload(decode=True)
+
+                try:
+                    pokemon_wanted = self.parse_pokemon_wanted(body)
+
+                except AttributeError:
+                    # both lat, lon, and pokemon_wanted are None
+                    # probably junk message
+                    print("CONTINUE")
+                    continue
+#LOGGING JUNK
+
+            user = {
+                "phone_number": msg['From'],
+                "pokemon_wanted": pokemon_wanted,
+                "location": {
+                    "lat": lat,
+                    "lon": lon
+                }
+            }
+            print(user)
+#LOGGING
+
+            yield user
+
+
+    def parse_pokemon_wanted(self, msg):
+        """ parses input message and returns a list of pokemon wanted """
+        results = re.search(self.pokemon_regex, msg.decode('UTF-8'))
+        return re.split(self.split_regex, results.group(1))
 
     def get_attachment(self, msg):
         """ returns the text from the attachment of an iphone message """
