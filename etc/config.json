@@ -1,0 +1,21 @@
+{
+    "gmail": {
+        "mailbox": "INBOX",
+        "imap": "imap.gmail.com"
+    },
+
+    "smtp": {
+        "host": "smtp.gmail.com",
+        "port": 587
+    },
+
+    "pnu": {
+        "store_host": "localhost",
+        "store_port": 1337,
+        "update_interval": 5.0
+    },
+
+    "request_handler": {
+        "update_interval": 5.0
+    }
+}
