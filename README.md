@@ -1,1 +1,2 @@
-pokemon near u
+Pokemon Near You (pnu, pronounced "new")
+=======================

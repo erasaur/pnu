@@ -1,0 +1,9 @@
+# gmail API creds
+config.json
+Current Location.loc.vcf
+
+# directories
+__pycache__/
+
+# virtualenv
+.venv/
