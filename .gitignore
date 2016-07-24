@@ -3,7 +3,9 @@ config.json
 Current Location.loc.vcf
 
 # directories
-__pycache__/
+*__pycache__/**
+*private/**
+
 
 # virtualenv
 .venv/
