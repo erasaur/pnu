@@ -8,7 +8,6 @@ from pnu.config import pub_config, private_config
 import logging
 logger = logging.getLogger(__name__)
 
-
 class Alert:
 
     SUBJECT = "Pokemon Alert!"

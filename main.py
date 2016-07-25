@@ -22,8 +22,8 @@ class Pnu (PnuRunnable):
 
         with aiohttp.ClientSession(loop=loop) as session:
             self._poke_api = PnuPokeApi(session=session)
-            self._handler = PnuRequestHandler(session=session, store=store)
-            self._dispatcher = PnuAlertDispatcher(session=session)
+            self._handler = PnuRequestHandler(store=store)
+            self._dispatcher = PnuAlertDispatcher()
 
     def run (self):
         super().run()
