@@ -55,7 +55,7 @@ class Alert:
                     + " sending MMS.")
             info['phone_number'] = self.sms_to_mms(info['phone_number'])
 
-        msg['To'] = info['phone_number']
+        msg['To'] = ', '.join(info['phone_number'])
         msg['From'] = private_config['gmail']['username']
         msg['Subject'] = self.SUBJECT
 
@@ -103,7 +103,7 @@ class Alert:
         msg = self.build_message(info)
         logging.info("Sending message: " + msg)
         self.smtp.sendmail(private_config['gmail']['username'],
-                [info['phone_number']], msg)
+                info['phone_number'], msg)
 
 smtp = Alert()
 
