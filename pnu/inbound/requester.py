@@ -175,10 +175,16 @@ class PnuRequest:
         return self.parse_msgs(msgs)
 
 if __name__ == "__main__":
-    import logging.config
-    logging.config.fileConfig(pub_config['logging']['location'],
-            disable_existing_loggers=False)
-    logging.info("Beginning Requester")
+    import logging
+
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
+    logging.basicConfig(filename='../etc/logs/requester.out',
+            level=logging.DEBUG)
+
+    logging.info("Beginning " + __file__)
+
     req = PnuRequest()
     req.get_inbox()
     msgs = req.get_unread_messages()
