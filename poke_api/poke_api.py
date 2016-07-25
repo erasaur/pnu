@@ -22,7 +22,7 @@ class PokeApi ():
     # cache results and reuse if location is close enough?
     # batch-request a minimal set of hotspot locations in order to cover all
     # requests?
-    def get_new_pokemon (self):
+    async def get_new_pokemon (self):
         # update list of locations we need to query for nearby pokes
         self.update_data()
 
@@ -31,7 +31,7 @@ class PokeApi ():
         res = {}
         for user in self._users:
             curr = set()
-            nearby = self._pokevision_api.get_nearby(
+            nearby = await self._pokevision_api.get_nearby(
                 user.get_lat(),
                 user.get_lon()
             )
