@@ -17,6 +17,13 @@ class PnuRequest:
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
     pokemon_regex = re.compile("pokemon\s*[a-z]*:\s*((([a-z]*-*[a-z]*),\s[a-z]*-*[a-z]*){0,4})", re.IGNORECASE)
     split_regex = re.compile(', |; | |,')
+    stop_regex = re.compile('stop', re.IGNORECASE)
+    pause_regex = re.compile('pause', re.IGNORECASE)
+    resume_regex = re.compile('resume', re.IGNORECASE)
+
+    STOP = "STOP"
+    PAUSE = "PAUSE"
+    RESUME = "RESUME"
 
     def __init__(self):
         self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
@@ -77,12 +84,26 @@ class PnuRequest:
             lat = lon = body = None
             pokemon_wanted = None
 
+            body = msg.get_payload(decode=True)
+
+            if self.find_stop_command(body):
+                # RETURN DELETE SIGNAL/STOP SIGNAL FOR USER
+                logging.info("STOP command received for: " + str(msg['From']))
+                return self.STOP
+            elif self.find_pause_command(body):
+                logging.info("PAUSE command received for: " + str(msg['From']))
+                # RETURN PAUSE COMMAND FOR USER
+                return self.PAUSE
+            elif self.find_resume_command(body):
+                logging.info("RESUME command received for: " + str(msg['From']))
+                # RETURN RESUME COMMAND FOR USER
+                return self.RESUME
+
             lat, lon = self.parse_lat_lon(msg)
 
             # probably didn't find a location msg, instead is junk or
             # pokemon wanted msg
             if not (lat or lon):
-                body = msg.get_payload(decode=True)
 
                 try:
                     pokemon_wanted = self.parse_pokemon_wanted(body)
@@ -91,7 +112,7 @@ class PnuRequest:
                             "phone_number": msg['From'],
                             "pokemon_wanted": pokemon_wanted
                     }
-
+                    logging.info("Updating user: " + str(user))
                     yield User(user)
 
                 except AttributeError:
@@ -183,6 +204,24 @@ class PnuRequest:
         logging.info('iOS (lat, lon): ' + str(result.group('lat'))
                 + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
+
+
+    def find_stop_command(self, body):
+        return self.find_command(body, self.stop_regex)
+
+    def find_resume_command(self, body):
+        return self.find_command(body, self.resume_regex)
+
+    def find_pause_command(self, body):
+        return self.find_command(body, self.pause_regex)
+
+    def find_command(self, body, regex):
+        try:
+            results = re.search(regex, body.decode('UTF-8'))
+            results.group(0)
+            return True
+        except AttributeError as e:
+            return False
 
     def run(self):
         """ yields new unread messages """
