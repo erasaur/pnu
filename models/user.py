@@ -1,13 +1,36 @@
 from base import Base
 
 class User (Base):
+    def load_args (self, phone_number, pokemon_wanted, latitude, longitude):
+        self.load_json(
+            "phone_number"=phone_number,
+            "pokemon_wanted"=pokemon_wanted,
+            "latitude"=latitude,
+            "longitude"=longitude
+        )
+
+    def load_json (self, *args, **kwargs):
+        try:
+            self["phone_number"] = kwargs["phone_number"]
+            self["pokemon_wanted"] = kwargs["pokemon_wanted"]
+
+            if "location" in kwargs:
+                loc = kwargs["location"]
+                self["latitude"] = loc["lat"]
+                self["longitude"] = loc["lon"]
+            else:
+                self["latitude"] = kwargs["latitude"]
+                self["longitude"] = kwargs["longitude"]
+        except:
+            raise Exception('trying to load invalid data')
+
     def get_json(self):
         return {
             "phone_number": self["phone_number"],
             "pokemon_wanted": self["pokemon_wanted"],
             "location": {
-                "lat": self["lat"],
-                "lon": self["lon"]
+                "lat": self["latitude"],
+                "lon": self["longitude"]
             }
         }
 
