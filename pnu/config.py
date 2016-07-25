@@ -9,7 +9,7 @@ class Configurable:
                 path.join(path.dirname(__file__), 'etc/config.json'),
             )
         else:
-            self.config_path = config_path
+            self.config_path = path.join(path.dirname(__file__), config_path)
 
     def return_config(self):
         with open(self.config_path, 'r') as f:
@@ -28,7 +28,7 @@ class PrivateConfig(Configurable):
     """ return sensitive data utilized by pnu """
 
     def __init__(self):
-        super().__init__('private/config.json')
+        super().__init__('etc/private/config.json')
 
     def load_config(self):
         return super().return_config()

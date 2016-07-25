@@ -1,0 +1,13 @@
+INFO:root:Beginning __main__
+INFO:root:List of pokemon_wanted is: ['abra', 'snorlax', 'ekans']
+INFO:root:List of pokemon from string is: abra, snorlax, and ekans
+INFO:root:Sending message: Content-Type: text/plain; charset="us-ascii"
+MIME-Version: 1.0
+Content-Transfer-Encoding: 7bit
+To: 2694913303@vtext.com
+From: pokemonnearyou@gmail.com
+Subject: Pokemon Alert!
+
+There's an abra, snorlax, and ekans near you! Go catch 'em!
+https://pnu.space
+
