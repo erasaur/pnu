@@ -1,4 +1,7 @@
 import redis, time
+import logging
+logger = logging.getLogger(__name__)
+
 from config import pub_config
 
 class RedisDataStore ():
@@ -22,15 +25,17 @@ class RedisDataStore ():
             for k, v in val.iteritems():
                 curr[k] = v
             self.set(key, curr)
-        except Exception:
-            print('invalid json value')
+        except Exception as e:
+            logging.info('update failed, got exception: {}'.format(e))
+            logging.info('tried to set {} to {}'.format(key, val))
 
     def set (key, val):
         try:
             self._redis.set(key, json.dumps(val))
             self._last_update = time.time()
-        except Exception:
-            print('invalid json value') # TODO logging
+        except Exception as e:
+            logging.info('set failed, got exception: {}'.format(e))
+            logging.info('tried to set {} to {}'.format(key, val))
 
     def list ():
         res = []
@@ -38,7 +43,8 @@ class RedisDataStore ():
             try:
                 res.append(json.loads(doc))
             except Exception:
-                print('unable to load doc') # TODO logging
+                logging.info('list failed, got exception: {}'.format(e))
+                logging.info('tried to load {}'.format(doc))
         return res
 
     def changed_since (time):
