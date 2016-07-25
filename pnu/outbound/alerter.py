@@ -1,22 +1,22 @@
 #! /usr/bin/env python3.5
 
 from smtplib import SMTP
-from email.mime.text import MIMEText
-
 from pnu.config import pub_config, private_config
+from email.mime.text import MIMEText
 
 import logging
 logger = logging.getLogger(__name__)
+
 
 class Alert:
 
     SUBJECT = "Pokemon Alert!"
     SMS_CARRIERS = ["message.alltel.com", "txt.att.net", "myboostmobile.com",
-                    "messaging.sprintpcs.com", "tmomail.net", "email.uscc.net",
-                    "vtext.com", "vmobl.com"]
+            "messaging.sprintpcs.com", "tmomail.net", "email.uscc.net",
+            "vtext.com", "vmobl.com"]
     MMS_CARRIERS = ["mms.alltelwireless.com", "mms.att.net", "myboostmobile.com",
-                    "pm.sprint.com", "tmomail.net", "mms.uscc.net", "vzwpix.com",
-                    "vmpix.com"]
+            "pm.sprint.com", "tmomail.net", "mms.uscc.net", "vzwpix.com",
+            "vmpix.com"]
 
     def __init__(self):
         """ perform preliminary actions for sending email via SMTP """
@@ -28,8 +28,8 @@ class Alert:
         self.smtp.login(private_config['gmail']['username'],
                 private_config['gmail']['password'])
 
-    def __exit__(self):
-        self.smtp.quit()
+        def __exit__(self):
+            self.smtp.quit()
 
     def build_message(self, info):
         """ returns the text message to be sent to the receiver
@@ -55,7 +55,12 @@ class Alert:
                     + " sending MMS.")
             info['phone_number'] = self.sms_to_mms(info['phone_number'])
 
-        msg['To'] = ', '.join(info['phone_number'])
+
+        if isinstance(info['phone_number'], list):
+            msg['To'] = ', '.join(info['phone_number'])
+        else:
+            msg['To'] = info['phone_number']
+
         msg['From'] = private_config['gmail']['username']
         msg['Subject'] = self.SUBJECT
 
@@ -108,15 +113,20 @@ class Alert:
 smtp = Alert()
 
 if __name__ == "__main__":
-    import logging.config
-    logging.config.fileConfig(pub_config['logging']['location'],
-            disable_existing_loggers=False)
-    logging.info("Beginning Alerter")
+    import logging
+
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+
+    logging.basicConfig(filename='../etc/logs/alerter.out',
+            level=logging.DEBUG)
+
+    logging.info("Beginning " + __name__)
 
     info = {
-        "phone_number": "2694913303@vtext.com",
-        "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
-        "link": "https://exmaple.com"
+            "phone_number": "2694913303@vtext.com",
+            "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
+            "link": "https://pnu.space"
     }
-    smtp.send_message(info)
 
+    smtp.send_message(info)
