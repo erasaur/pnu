@@ -1,6 +1,6 @@
 #! /usr/bin/env python3.5
 
-import asyncio
+import asyncio, aiohttp
 
 from pnu.core.runnable import PnuRunnable
 from pnu.core.data_store import PnuDataStore
