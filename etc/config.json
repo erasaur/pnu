@@ -20,5 +20,9 @@
 
     "request_handler": {
         "update_interval": 5.0
+    },
+
+    "logging": {
+        "location": "./etc/logging.ini"
     }
 }

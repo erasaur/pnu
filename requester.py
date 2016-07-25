@@ -7,6 +7,9 @@ import re
 import sys
 from config import pub_config, private_config
 
+import logging
+logger = logging.getLogger(__name__)
+
 class PnuRequest:
 
     android_regex = re.compile("maps\.google\.com/maps\?f=q&q=\((?P<lat>.*)?,(?P<lon>.*)?\)")
@@ -19,9 +22,10 @@ class PnuRequest:
         try:
             u, data = self.mail.login(private_config['gmail']['username'],
                         private_config['gmail']['password'])
-        except imaplib.IMAP4.error:
-            print("Login Failed")
-            sys.exit(1)
+        except imaplib.IMAP4.error as e:
+            logging.error("Login to retrieve emails failed!")
+            logging.error(e)
+            raise ConnectionError("Login to retrieve emails failed!")
 
 
     def __exit__(self):
@@ -46,7 +50,7 @@ class PnuRequest:
     def check_resp(self, resp):
         """ checks the response from the server for each request """
         if resp != 'OK':
-            print("response is: ", resp)
+            logging.info("Response is: " + str(resp))
             raise ConnectionError("Response from IMAP was not 'OK'")
 
     def get_unread_messages(self):
@@ -79,20 +83,19 @@ class PnuRequest:
                 try:
                     lat, lon = self.parse_android_lat_lon(body)
                 except AttributeError:
-#LOGGING
+                    logger.info("Android location not found")
                     pass
 
             else:
                 try:
-                    lat, lon = self.parse_iphone_lat_lon(msg)
+                    lat, lon = self.parse_ios_lat_lon(msg)
                 except AttributeError:
-#LOGGING
+                    logger.info("iOS location not found")
                     pass
 
             # probably didn't find a location msg, instead is junk or
             # pokemon wanted msg
             if not (lat or lon):
-#LOGGING
                 body = msg.get_payload(decode=True)
 
                 try:
@@ -101,9 +104,9 @@ class PnuRequest:
                 except AttributeError:
                     # both lat, lon, and pokemon_wanted are None
                     # probably junk message
-                    print("CONTINUE")
+                    logging.info("Latitude, Longitude, and pokemon_wanted, are "
+                                 + "not found. Probably a junk message")
                     continue
-#LOGGING JUNK
 
             user = {
                 "phone_number": msg['From'],
@@ -113,8 +116,7 @@ class PnuRequest:
                     "lon": lon
                 }
             }
-            print(user)
-#LOGGING
+            logging.info("Creating user: " + str(user))
 
             yield user
 
@@ -125,7 +127,7 @@ class PnuRequest:
         return re.split(self.split_regex, results.group(1))
 
     def get_attachment(self, msg):
-        """ returns the text from the attachment of an iphone message """
+        """ returns the text from the attachment of an iOS message """
         if msg.get_content_maintype() == 'multipart':
             for part in msg.walk():
                 # find the vcard attachment part
@@ -146,11 +148,12 @@ class PnuRequest:
         """
 
         result = re.search(self.android_regex, body.decode('UTF-8'))
-#        print('Android (lat, lon): ', (result.group('lat'), result.group('lon'),))
+        logging.info('Android (lat, lon): ' + str(result.group('lat'))
+                + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
-    def parse_iphone_lat_lon(self, msg):
-        """ gets the latitude and longitude from an iphone message attachment
+    def parse_ios_lat_lon(self, msg):
+        """ gets the latitude and longitude from an iOS message attachment
 
         Args:
             msg     most of the email including the attachment, subject,
@@ -161,7 +164,8 @@ class PnuRequest:
         """
         attach_text = self.get_attachment(msg)
         result = re.search(self.ios_regex, attach_text.decode('UTF-8'))
-#        print('iPhone (lat, lon): ', (result.group('lat'), result.group('lon'),))
+        logging.info('iOS (lat, lon): ' + str(result.group('lat'))
+                + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
 
@@ -173,9 +177,14 @@ class PnuRequest:
 
 
 if __name__ == "__main__":
+    import logging.config
+    logging.config.fileConfig(pub_config['logging']['location'],
+            disable_existing_loggers=False)
+    logging.info("Beginning Requester")
     req = PnuRequest()
     req.get_inbox()
     msgs = req.get_unread_messages()
     users = req.parse_msgs(msgs)
+
     for user in users:
-        print(user)
+        pass

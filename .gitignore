@@ -4,6 +4,7 @@ Current Location.loc.vcf
 # directories
 *__pycache__/**
 *private/**
+etc/logs/**
 
 
 # virtualenv
