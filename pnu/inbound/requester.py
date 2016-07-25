@@ -86,18 +86,10 @@ class PnuRequest:
 
             body = msg.get_payload(decode=True)
 
-            if self.find_stop_command(body):
-                # RETURN DELETE SIGNAL/STOP SIGNAL FOR USER
-                logging.info("STOP command received for: " + str(msg['From']))
-                return self.STOP
-            elif self.find_pause_command(body):
-                logging.info("PAUSE command received for: " + str(msg['From']))
-                # RETURN PAUSE COMMAND FOR USER
-                return self.PAUSE
-            elif self.find_resume_command(body):
-                logging.info("RESUME command received for: " + str(msg['From']))
-                # RETURN RESUME COMMAND FOR USER
-                return self.RESUME
+            # check for PAUSE, RESUME, STOP
+            cmd = self.check_for_command(body, msg)
+            if cmd:
+                yield cmd
 
             lat, lon = self.parse_lat_lon(msg)
 
@@ -110,7 +102,8 @@ class PnuRequest:
 
                     user = {
                             "phone_number": msg['From'],
-                            "pokemon_wanted": pokemon_wanted
+                            "pokemon_wanted": pokemon_wanted,
+                            "status": self.RESUME
                     }
                     logging.info("Updating user: " + str(user))
                     yield User(user)
@@ -128,7 +121,8 @@ class PnuRequest:
                 "location": {
                     "lat": lat,
                     "lon": lon
-                }
+                },
+                "status": self.RESUME
             }
             logging.info("Creating user: " + str(user))
 
@@ -205,6 +199,19 @@ class PnuRequest:
                 + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
+    def check_for_command(self, body, msg):
+        if self.find_stop_command(body):
+            logging.info("STOP command received for: " + str(msg['From']))
+            return User({'phone_number': msg['From'], 'status': self.STOP})
+        elif self.find_pause_command(body):
+            logging.info("PAUSE command received for: " + str(msg['From']))
+            return User({'phone_number': msg['From'], 'status': self.PAUSE})
+        elif self.find_resume_command(body):
+            logging.info("RESUME command received for: " + str(msg['From']))
+            # RETURN RESUME COMMAND FOR USER
+            return User({'phone_number': msg['From'], 'status': self.RESUME})
+
+        return None
 
     def find_stop_command(self, body):
         return self.find_command(body, self.stop_regex)
