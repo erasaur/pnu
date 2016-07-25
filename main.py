@@ -22,7 +22,7 @@ class Pnu (PnuRunnable):
 
         with aiohttp.ClientSession(loop=loop) as session:
             self._poke_api = PnuPokeApi(session=session)
-            self._handler = PnuRequestHandler(store=store)
+            self._handler = PnuRequestHandler()
             self._dispatcher = PnuAlertDispatcher()
 
     def run (self):

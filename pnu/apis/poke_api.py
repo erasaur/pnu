@@ -1,5 +1,7 @@
 import asyncio, aiohttp, time
 from pnu.core.data_store import PnuDataStore
+from pnu.apis.pokevision_api import PokevisionAPI
+from pnu.apis.sprite_api import PokeDBAPI
 from pnu.config import pub_config
 from pnu.models.user import User
 
@@ -8,8 +10,8 @@ class PnuPokeApi ():
         # TODO add other apis for backup
         self._pokevision_api = PokevisionAPI(session=session)
         self._poke_db_api = PokeDBAPI(session=session)
-        self._scan_lat_dist = pub_config["poke_api"]["scan_lat_dist"]
-        self._scan_lon_dist = pub_config["poke_api"]["scan_lon_dist"]
+        # self._scan_lat_dist = pub_config["poke_api"]["scan_lat_dist"]
+        # self._scan_lon_dist = pub_config["poke_api"]["scan_lon_dist"]
         self._last_update = 0
         self._users = []
 
