@@ -2,10 +2,10 @@
 Current Location.loc.vcf
 
 # directories
-*__pycache__/**
-*private/**
-etc/logs/**
-
+__pycache__/
+private/
+etc/logs/
+redis/
 
 # virtualenv
 .venv/
