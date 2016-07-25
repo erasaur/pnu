@@ -24,7 +24,7 @@ class PnuRequestHandler (PnuRunnable):
         self._loop = loop
         self._store = store
 
-    def update (self):
+    async def update (self):
         # query using PnuRequest api, write changes to store
         for new_msg in self._requester.run():
             # the value is a tuple right now so that we can contain the location

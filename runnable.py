@@ -3,7 +3,7 @@ import threading, time
 class PnuRunnable ():
     def __init__ (self, update_interval=None):
         if update_interval is None:
-            raise ValueError('missing interval')
+            raise ValueError("missing interval")
 
         self._update_interval = update_interval
         self._next_tick = 0

@@ -27,8 +27,8 @@ class Pnu (PnuRunnable):
         self._handler.run()
         self._loop.run_forever()
 
-    def update (self):
-        alerts = self._poke_api.get_new_pokemon()
+    async def update (self):
+        alerts = await self._poke_api.get_new_pokemon()
 
         # send alerts with dispatcher
         self._dispatcher.send(alerts)
