@@ -2,7 +2,7 @@ import redis, time
 import logging
 logger = logging.getLogger(__name__)
 
-from config import pub_config
+from pnu.config import pub_config
 
 class RedisDataStore ():
     def __init__ (self, host=None, port=None):
@@ -19,6 +19,12 @@ class RedisDataStore ():
             res = {}
         return res
 
+    # pass json document with ONLY the fields that need to be updated.
+    # for example, suppose we have stored:
+    # < "elemA": { "fieldA": 1, "fieldB": 2 } >
+    # to update "fieldA" but keep "fieldB" intact, call:
+    # update("elemA", { "fieldA": 2 })
+    # if the key "elemA" doesn't exist, it will be set.
     def update (key, val):
         try:
             curr = self.get(key)
@@ -27,7 +33,7 @@ class RedisDataStore ():
             self.set(key, curr)
         except Exception as e:
             logging.info('update failed, got exception: {}'.format(e))
-            logging.info('tried to set {} to {}'.format(key, val))
+            logging.info('tried to update {} to {}'.format(key, val))
 
     def set (key, val):
         try:
