@@ -3,7 +3,7 @@ from pnu.core.data_store import PnuDataStore
 from pnu.config import pub_config
 from pnu.models.user import User
 
-class PokeApi ():
+class PnuPokeApi ():
     def __init__ (self, session=None):
         # TODO add other apis for backup
         self._pokevision_api = PokevisionAPI(session=session)

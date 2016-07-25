@@ -3,10 +3,10 @@ from pnu.models.base import Base
 class User (Base):
     def load_args (self, phone_number, pokemon_wanted, latitude, longitude):
         self.load_json(
-            "phone_number"=phone_number,
-            "pokemon_wanted"=pokemon_wanted,
-            "latitude"=latitude,
-            "longitude"=longitude
+            phone_number=phone_number,
+            pokemon_wanted=pokemon_wanted,
+            latitude=latitude,
+            longitude=longitude
         )
 
     def load_json (self, *args, **kwargs):
