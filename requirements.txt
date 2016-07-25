@@ -1,2 +1,5 @@
+aiohttp==0.22.2
+chardet==2.3.0
+multidict==1.2.1
 redis==2.10.5
 requests==2.10.0
