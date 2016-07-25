@@ -17,7 +17,5 @@ if [ -n "$pid" ]; then
   ./main.py
 else 
    echo -e "${RED}Please start redis with ./run_redis first.${NC}"
-   ./run_redis.sh
-   ./main.py
 fi
 
