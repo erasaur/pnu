@@ -101,6 +101,12 @@ class PnuRequest:
                 try:
                     pokemon_wanted = self.parse_pokemon_wanted(body)
 
+                    user = {
+                            "phone_number": msg['From'],
+                            "pokemon_wanted": pokemon_wanted
+                    }
+                    yield user
+
                 except AttributeError:
                     # both lat, lon, and pokemon_wanted are None
                     # probably junk message
