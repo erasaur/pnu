@@ -6,7 +6,11 @@ class PnuHTTPClient ():
             raise ValueError('missing session')
         self._session = session
 
-    async def get (self, url):
+    async def get_json (self, url):
         async with self._session.get(url) as resp:
-            print(resp.status)
-            return await resp.text()
+            try:
+                res = await resp.json()
+            except:
+                print(resp.status)
+                res = {}
+            return res
