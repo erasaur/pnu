@@ -1,6 +1,12 @@
 from pnu.models.base import Base
+import logging
+logger = logging.getLogger(__name__)
 
 class User (Base):
+
+    def __init__ (self, *args):
+        self.load_json(args)
+
     def load_args (self, phone_number, pokemon_wanted, latitude, longitude):
         self.load_json(
             phone_number=phone_number,
@@ -9,28 +15,32 @@ class User (Base):
             longitude=longitude
         )
 
-    def load_json (self, *args, **kwargs):
+    def load_json (self, *args):
+        # access the 1st element of the tuple
+        args = args[0][0]
         try:
-            self["phone_number"] = kwargs["phone_number"]
-            self["pokemon_wanted"] = kwargs["pokemon_wanted"]
+            self.phone_number = args["phone_number"]
+            self.pokemon_wanted = args["pokemon_wanted"]
 
-            if "location" in kwargs:
-                loc = kwargs["location"]
-                self["latitude"] = loc["lat"]
-                self["longitude"] = loc["lon"]
+            if "location" in args.keys():
+                loc = args["location"]
+                self.lat = loc["lat"]
+                self.lon = loc["lon"]
             else:
-                self["latitude"] = kwargs["latitude"]
-                self["longitude"] = kwargs["longitude"]
-        except:
-            raise Exception('trying to load invalid data')
+                self.lat = None
+                self.lon = None
+        except KeyError as e:
+            logging.error("Invalid user data")
+            logging.error(e)
+            raise e
 
     def get_json(self):
         return {
-            "phone_number": self["phone_number"],
-            "pokemon_wanted": self["pokemon_wanted"],
+            "phone_number": self.phone_number,
+            "pokemon_wanted": self.pokemon_wanted,
             "location": {
-                "lat": self["latitude"],
-                "lon": self["longitude"]
+                "lat": self.lat,
+                "lon": self.lon
             }
         }
 
@@ -47,7 +57,7 @@ class User (Base):
         return self.phone_number
 
     def __str__ (self):
-        return ("Phone #: " + self.phone_number + "\n" +
-               "Pokemon wanted: " + self.pokemon_wanted + "\n" +
-               "Latitude: " + self.lat + "\n" +
-               "Longitude: " + self.lon + "\n")
+        return ("Phone #: " + str(self.phone_number) + "\n" +
+               "Pokemon wanted: " + str(self.pokemon_wanted) + "\n" +
+               "Latitude: " + str(self.lat) + "\n" +
+               "Longitude: " + str(self.lon) + "\n")

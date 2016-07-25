@@ -6,6 +6,7 @@ import json
 import re
 import sys
 
+from pnu.models.user import User
 from pnu.config import pub_config, private_config
 
 import logging
@@ -66,32 +67,17 @@ class PnuRequest:
 
     def parse_msgs(self, msgs):
         """ yields Users with lat/lon, and phone number filled in
-
         Args:
-            msgs    byte string containing all of the message details
-
+            msgs    (byte string)
+                Contains all of the message details
         Returns:
             User object
         """
         for msg in msgs:
             lat = lon = body = None
             pokemon_wanted = None
-            # probably android msg either location or pokemon wanted
-            if msg['Subject']:
-                # message body
-                body = msg.get_payload(decode=True)
-                try:
-                    lat, lon = self.parse_android_lat_lon(body)
-                except AttributeError:
-                    logger.info("Android location not found")
-                    pass
 
-            else:
-                try:
-                    lat, lon = self.parse_ios_lat_lon(msg)
-                except AttributeError:
-                    logger.info("iOS location not found")
-                    pass
+            lat, lon = self.parse_lat_lon(msg)
 
             # probably didn't find a location msg, instead is junk or
             # pokemon wanted msg
@@ -105,7 +91,8 @@ class PnuRequest:
                             "phone_number": msg['From'],
                             "pokemon_wanted": pokemon_wanted
                     }
-                    yield user
+
+                    yield User(user)
 
                 except AttributeError:
                     # both lat, lon, and pokemon_wanted are None
@@ -124,8 +111,31 @@ class PnuRequest:
             }
             logging.info("Creating user: " + str(user))
 
-            yield user
+            yield User(user)
 
+    def parse_lat_lon(self, msg):
+        """ parses for the latitude and longitude from the email """
+        # probably android msg either location or pokemon wanted
+        lat = lon = None
+        if msg['Subject']:
+            logger.info("Possibly Android device")
+            # message body
+            body = msg.get_payload(decode=True)
+            try:
+                lat, lon = self.parse_android_lat_lon(body)
+            except AttributeError:
+                logger.info("Android location not found")
+                pass
+
+        else:
+            logging.info("Possibly iOS device")
+            try:
+                lat, lon = self.parse_ios_lat_lon(msg)
+            except AttributeError:
+                logger.info("iOS location not found")
+                pass
+
+        return lat, lon
 
     def parse_pokemon_wanted(self, msg):
         """ parses input message and returns a list of pokemon wanted """
@@ -197,4 +207,4 @@ if __name__ == "__main__":
     users = req.parse_msgs(msgs)
 
     for user in users:
-        pass
+        print(user)
