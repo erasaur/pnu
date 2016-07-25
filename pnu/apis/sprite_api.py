@@ -1,4 +1,4 @@
-from pnu.utils.http import PnuHTTPClient
+from pnu.core.http import PnuHTTPClient
 
 API_URL = "https://img.pokemondb.net/sprites/emerald/normal/{}.png"
 
