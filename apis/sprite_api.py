@@ -3,14 +3,12 @@ from pnu.utils.http import PnuHTTPClient
 API_URL = "https://img.pokemondb.net/sprites/emerald/normal/{}.png"
 
 class PokeDBAPI (PnuHTTPClient):
-    def __init__ (self, loop=None):
-        super().__init__(loop)
+    def __init__ (self, session=None):
+        super().__init__(session)
 
         # load poke list
         with open('data/pokemon.csv') as f:
             reader = csv.reader(f)
-            for line in reader:
-                self._poke_list
             self._poke_list = list(reader)
 
     def get_name_from_id (poke_id):
@@ -27,7 +25,3 @@ class PokeDBAPI (PnuHTTPClient):
     def get_sprite_from_id (poke_id):
         poke_name = self.get_name_from_id(poke_id)
         return self.get_sprite_from_name(poke_name)
-
-    async def get_nearby_pokemon (self, lat, lon):
-        url = API_URL.format(lat, lon)
-        return await self.get(url)
