@@ -6,6 +6,7 @@ __pycache__/
 private/
 **/etc/logs/
 redis/
+db/
 
 # virtualenv
 .venv/
