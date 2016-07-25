@@ -28,8 +28,8 @@ class Alert:
         self.smtp.login(private_config['gmail']['username'],
                 private_config['gmail']['password'])
 
-        def __exit__(self):
-            self.smtp.quit()
+    def __exit__(self):
+        self.smtp.quit()
 
     def build_message(self, info):
         """ returns the text message to be sent to the receiver
@@ -121,7 +121,7 @@ if __name__ == "__main__":
     logging.basicConfig(filename='../etc/logs/alerter.out',
             level=logging.DEBUG)
 
-    logging.info("Beginning " + __name__)
+    logging.info("Beginning " + __file__)
 
     info = {
             "phone_number": "2694913303@vtext.com",
