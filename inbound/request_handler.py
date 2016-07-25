@@ -1,8 +1,8 @@
 import threading
 
-from requester import PnuRequest
-from runnable import PnuRunnable
-from config import pub_config
+from pnu.core.runnable import PnuRunnable
+from pnu.config import pub_config
+from pnu.inbound.requester import PnuRequest
 
 # TODO
 # handler should be responsible for parsing incoming requests and updating the

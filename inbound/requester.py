@@ -5,13 +5,13 @@ import imaplib
 import json
 import re
 import sys
-from config import pub_config, private_config
+
+from pnu.config import pub_config, private_config
 
 import logging
 logger = logging.getLogger(__name__)
 
 class PnuRequest:
-
     android_regex = re.compile("maps\.google\.com/maps\?f=q&q=\((?P<lat>.*)?,(?P<lon>.*)?\)")
     ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
     pokemon_regex = re.compile("pokemon\s*[a-z]*:\s*((([a-z]*-*[a-z]*),\s[a-z]*-*[a-z]*){0,4})", re.IGNORECASE)
@@ -168,13 +168,11 @@ class PnuRequest:
                 + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
-
     def run(self):
         """ yields new unread messages """
         self.get_inbox()
         msgs = self.get_unread_messages()
         return self.parse_msgs(msgs)
-
 
 if __name__ == "__main__":
     import logging.config

@@ -1,4 +1,4 @@
-from ..http import PnuHTTPClient
+from pnu.utils.http import PnuHTTPClient
 
 API_URL = "https://pokevision.com/map/data/{}/{}"
 

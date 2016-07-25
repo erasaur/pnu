@@ -2,7 +2,7 @@
 # dispatcher should be responsible for batch-sending alerts to a list of phone
 # numbers
 
-from alerter import smpt
+from pnu.outbound.alerter import smtp
 
 class PnuAlertDispatcher (PnuHTTPClient):
     def dispatch (self, data):

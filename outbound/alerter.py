@@ -1,8 +1,9 @@
 #! /usr/bin/env python3.5
 
 from smtplib import SMTP
-from config import pub_config, private_config
 from email.mime.text import MIMEText
+
+from pnu.config import pub_config, private_config
 
 import logging
 logger = logging.getLogger(__name__)

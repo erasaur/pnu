@@ -1,7 +1,7 @@
 import asyncio, aiohttp, time
-from ..data_store import PnuDataStore
-from ..config import pub_config
-from ..user import User
+from pnu.core.data_store import PnuDataStore
+from pnu.config import pub_config
+from pnu.models.user import User
 
 class PokeApi ():
     def __init__ (self, session=None):

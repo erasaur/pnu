@@ -1,4 +1,4 @@
-from base import Base
+from pnu.models.base import Base
 
 class User (Base):
     def load_args (self, phone_number, pokemon_wanted, latitude, longitude):

@@ -1,4 +1,4 @@
-from base import Base
+from pnu.models.base import Base
 
 class Pokemon (Base):
     def get_json (self):
