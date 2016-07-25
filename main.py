@@ -41,6 +41,6 @@ def main ():
 
 if __name__ == "__main__":
     import logging.config
-    logging.config.fileConfig(pub_config['logging']['location'],
+    logging.config.fileConfig(pub_config["logging"]["location"],
             disable_existing_loggers=False)
     main()

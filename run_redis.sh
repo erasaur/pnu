@@ -1,3 +1,3 @@
 #!/bin/bash
 
-redis-server pnu/etc/private/redis.conf
+redis-server pnu/etc/redis.conf

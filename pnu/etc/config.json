@@ -23,6 +23,6 @@
     },
 
     "logging": {
-        "location": "./etc/logging.ini"
+        "location": "./pnu/etc/logging.ini"
     }
 }
