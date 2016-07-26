@@ -1,4 +1,5 @@
 import asyncio, aiohttp
+from pnu.config import pub_config
 
 class PnuHTTPClient ():
     def __init__ (self, session=None):
