@@ -16,8 +16,8 @@ class PnuRunnable ():
     def run (self):
         scheduler = AsyncIOScheduler()
         scheduler.add_job(
-            self.update, 
-            'interval', 
+            self.update,
+            'interval',
             seconds=self._update_interval
         )
         scheduler.start()
