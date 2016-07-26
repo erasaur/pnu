@@ -18,6 +18,6 @@ class Base ():
     def load_json (self, data):
         try:
             for key, value in data.items():
-                self[key] = value
+                setattr(self, key, value)
         except:
             raise Exception('trying to load invalid data')

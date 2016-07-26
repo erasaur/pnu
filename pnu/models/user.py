@@ -3,43 +3,38 @@ import logging
 logger = logging.getLogger(__name__)
 
 class User (Base):
-
-    def __init__ (self, *args):
-        self.load_json(args)
-
-    def load_args (self, phone_number, pokemon_wanted, latitude, longitude,
-            status):
+    def load_args (self, phone_number, pokemon_wanted, lat, lon, status):
         self.load_json(
             phone_number=phone_number,
             pokemon_wanted=pokemon_wanted,
-            latitude=latitude,
-            longitude=longitude,
+            latitude=lat,
+            longitude=lon,
             status=status,
         )
 
-    def load_json (self, *args):
-        # access the 1st element of the tuple
-        args = args[0][0]
+    def load_json (self, data):
         try:
-            self.phone_number = args["phone_number"]
-            self.status = args["status"]
+            self.phone_number = data["phone_number"]
+            self.status = data["status"]
 
             # returns None if key doesn't exist
-            self.pokemon_wanted = args.get('pokemon_wanted')
+            self.pokemon_wanted = data.get('pokemon_wanted')
 
-            if args.get("location"):
-                loc = args["location"]
+            if "location" in data:
+                loc = data["location"]
                 self.lat = loc["lat"]
                 self.lon = loc["lon"]
+            elif "latitude" in data and "longitude" in data:
+                self.lat = data["latitude"]
+                self.lon = data["longitude"]
             else:
-                self.lat = None
-                self.lon = None
+                self.lat = self.lon = None
         except KeyError as e:
             logging.error("Invalid user data")
             logging.error(e)
             raise e
 
-    def get_json(self):
+    def get_json (self):
         return {
             "phone_number": self.phone_number,
             "pokemon_wanted": self.pokemon_wanted,
