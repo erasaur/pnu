@@ -4,7 +4,6 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 class PnuRunnable ():
     def __init__ (self, update_interval=None):
-        print(update_interval)
         if update_interval is None:
             raise ValueError("missing interval")
 
