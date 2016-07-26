@@ -1,5 +1,5 @@
 from email.mime.text import MIMEText
-from pnu.config import private_config
+from pnu.config import private_config, constants
 
 import logging
 logging = logging.getLogger(__name__)
@@ -15,12 +15,22 @@ class Response:
             "pm.sprint.com", "tmomail.net", "mms.uscc.net", "vzwpix.com",
             "vmpix.com"]
 
-    def __init__(self, user, link):
-        self.status = user.get_status()
-        self.to = user.get_phone_number()
-        self.pokemon_wanted = user.get_pokemon_wanted()
+    def __init__(self, user, link = None, pokemon = None):
+        if isinstance(user, list):
+            self.status = constants.ACTIVE
+            # user in this case is a list of users' phone numbers
+            self.to = user
+            self.pokemon_wanted = pokemon
+            # spoofed since we have a list of users we presume to be
+            # already valid
+            self.location = True
+        else:
+            self.status = user.get_status()
+            self.to = user.get_phone_number()
+            self.pokemon_wanted = user.get_pokemon_wanted()
+            self.location = (user.get_lat() or user.get_lon())
+
         self.link = link
-        self.location = (user.get_lat() or user.get_lon())
 
     def _make_welcome_msg(self):
         logging.info("Sending WELCOME message")
