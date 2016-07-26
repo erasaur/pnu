@@ -20,10 +20,16 @@ class Pnu (PnuRunnable):
         self._loop = loop
         self._curr_task = None
 
-        with aiohttp.ClientSession(loop=loop) as session:
-            self._poke_api = PnuPokeApi(session=session)
-            self._handler = PnuRequestHandler()
-            self._dispatcher = PnuAlertDispatcher()
+        session = aiohttp.ClientSession(loop=loop)
+        self._session = session
+
+        self._poke_api = PnuPokeApi(session=session)
+        self._handler = PnuRequestHandler()
+        self._dispatcher = PnuAlertDispatcher()
+
+    # def __exit__ (self):
+    #     self._session.close()
+    #     self._loop.close()
 
     def run (self):
         super().run()
@@ -31,8 +37,7 @@ class Pnu (PnuRunnable):
         self._loop.run_forever()
 
     async def fetch_new_pokemon (self):
-        alerts = await self._poke_api.get_new_pokemon()
-        print(alerts)
+        alerts = await self._poke_api.get_pokemon_alerts()
         # send alerts with dispatcher
         self._dispatcher.dispatch(alerts)
 
