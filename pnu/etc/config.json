@@ -9,17 +9,26 @@
         "port": 587
     },
 
-    "data_store": {
+    "user_data_store": {
         "host": "localhost",
-        "port": 1337
+        "port": 6379
+    },
+
+    "enroll_data_store": {
+        "host": "localhost",
+        "port": 6380
     },
 
     "pnu": {
-        "update_interval": 5.0
+        "update_interval": 3.0
+    },
+
+    "http": {
+        "timeout_seconds": 2.0
     },
 
     "request_handler": {
-        "update_interval": 5.0
+        "update_interval": 3.0
     },
 
     "logging": {

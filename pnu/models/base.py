@@ -17,7 +17,7 @@ class Base ():
 
     def load_json (self, data):
         try:
-            for key, value in data.iteritems():
+            for key, value in data.items():
                 self[key] = value
         except:
             raise Exception('trying to load invalid data')

@@ -12,7 +12,7 @@ class RedisDataStore ():
         self._redis = redis.StrictRedis(host=host, port=port, db=0)
         self._last_update = time.time()
 
-    def get (key):
+    def get (self, key):
         try:
             res = json.loads(self._redis.get(key))
         except Exception:
@@ -25,17 +25,17 @@ class RedisDataStore ():
     # to update "fieldA" but keep "fieldB" intact, call:
     # update("elemA", { "fieldA": 2 })
     # if the key "elemA" doesn't exist, it will be set.
-    def update (key, val):
+    def update (self, key, val):
         try:
             curr = self.get(key)
-            for k, v in val.iteritems():
+            for k, v in val.items():
                 curr[k] = v
             self.set(key, curr)
         except Exception as e:
             logging.info('update failed, got exception: {}'.format(e))
             logging.info('tried to update {} to {}'.format(key, val))
 
-    def set (key, val):
+    def set (self, key, val):
         try:
             self._redis.set(key, json.dumps(val))
             self._last_update = time.time()
@@ -43,20 +43,26 @@ class RedisDataStore ():
             logging.info('set failed, got exception: {}'.format(e))
             logging.info('tried to set {} to {}'.format(key, val))
 
-    def list ():
+    def list (self):
         res = []
-        for doc in self._redis.lrange(0, -1):
+        keys = self._redis.keys(pattern="*")
+        for key in keys:
             try:
-                res.append(json.loads(doc))
+                res.append(self.get(key))
             except Exception:
                 logging.info('list failed, got exception: {}'.format(e))
                 logging.info('tried to load {}'.format(doc))
         return res
 
-    def changed_since (time):
+    def changed_since (self, time):
         return self._last_update > time
 
-PnuDataStore = RedisDataStore(
-    host=pub_config["data_store"]["host"],
-    port=pub_config["data_store"]["port"]
+PnuUserDataStore = RedisDataStore(
+    host=pub_config["user_data_store"]["host"],
+    port=pub_config["user_data_store"]["port"]
+)
+
+PnuEnrollDataStore = RedisDataStore(
+    host=pub_config["enroll_data_store"]["host"],
+    port=pub_config["enroll_data_store"]["port"]
 )

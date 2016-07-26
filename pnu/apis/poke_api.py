@@ -1,5 +1,5 @@
 import asyncio, aiohttp, time
-from pnu.core.data_store import PnuDataStore
+from pnu.core.data_store import PnuUserDataStore
 from pnu.apis.pokevision_api import PokevisionAPI
 from pnu.apis.sprite_api import PokeDBAPI
 from pnu.config import pub_config
@@ -17,8 +17,8 @@ class PnuPokeApi ():
 
     def update_data (self):
         # TODO find the minimal set of locations to cover everybody
-        if PnuDataStore.changed_since(self._last_update):
-            self._users = [User(data=l) for l in PnuDataStore.list()]
+        if PnuUserDataStore.changed_since(self._last_update):
+            self._users = [User(data=l) for l in PnuUserDataStore.list()]
             self._last_update = time.time()
 
     # cache results and reuse if location is close enough?
@@ -29,14 +29,16 @@ class PnuPokeApi ():
         self.update_data()
 
         # for each such location, get the nearby pokes, and filter out the
-        # desired ones
         res = {}
+        fut_list = []
         for user in self._users:
-            curr = set()
-            nearby = await self._pokevision_api.get_nearby(
-                user.get_lat(),
-                user.get_lon()
+            fut = asyncio.ensure_future(
+                self._pokevision_api.get_nearby(user.get_lat(), user.get_lon())
             )
+            fut_list.append((user, fut,))
+
+        for user, fut in fut_list:
+            pokes_nearby = await fut
             for poke in nearby:
                 if poke in user.get_pokemon_wanted():
                     curr.add(poke)
@@ -47,6 +49,7 @@ class PnuPokeApi ():
                     res[curr].append(user.get_phone_number())
                 else:
                     res[curr] = [user.get_phone_number()]
+
         return res
 
     # def is_nearby (self, first, second, lat_dist=None, lon_dist=None):

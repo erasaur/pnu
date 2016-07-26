@@ -12,18 +12,19 @@ from pnu.inbound.requester import PnuRequest
 # sms api, etc. but should expose an interface that is agnostic to the method by
 # which we are obtaining data (gmail, sms, and so on)
 
-from pnu.core.data_store import PnuDataStore
+from pnu.core.data_store import PnuUserDataStore
 
 class PnuRequestHandler (PnuRunnable):
     def __init__ (self):
-        super().__init__(pub_config["request_handler"]["update_interval"])
+        super().__init__(update_interval=pub_config["request_handler"]["update_interval"])
 
         self._requester = PnuRequest()
 
-    async def update (self):
-        # query using PnuRequest api, write changes to store
-        for new_msg in self._requester.run():
-            # each new message represents a new user
-            user = User(new_msg)
-            PnuDataStore.update(user.get_phone_number(), user.get_json())
+    def update (self):
+        print("Update req hander")
+        # # query using PnuRequest api, write changes to store
+        # for new_msg in self._requester.run():
+        #     # each new message represents a new user
+        #     user = User(new_msg)
+        #     PnuUserDataStore.update(user.get_phone_number(), user.get_json())
 
