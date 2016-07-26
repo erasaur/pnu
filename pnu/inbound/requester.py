@@ -24,6 +24,8 @@ class PnuRequest:
     STOP = "STOP"
     PAUSE = "PAUSE"
     RESUME = "RESUME"
+    ACTIVE = "ACTIVE"
+    ENROLL = "ENROLL"
 
     def __init__(self):
         self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
@@ -103,9 +105,9 @@ class PnuRequest:
                     user = {
                             "phone_number": msg['From'],
                             "pokemon_wanted": pokemon_wanted,
-                            "status": self.RESUME
+                            "status": self.ACTIVE
                     }
-                    logging.info("Updating user: " + str(user))
+                    logging.info("Need to update user: " + str(user))
                     yield User(user)
 
                 except AttributeError:
@@ -122,7 +124,7 @@ class PnuRequest:
                     "lat": lat,
                     "lon": lon
                 },
-                "status": self.RESUME
+                "status": self.ENROLL
             }
             logging.info("Creating user: " + str(user))
 

@@ -62,8 +62,9 @@ class User (Base):
     def get_phone_number (self):
         return self.phone_number
 
-    def get_phone_number (self):
+    def get_status (self):
         return self.status
+
 
     def __str__ (self):
         return ("Phone #: " + str(self.phone_number) + "\n" +

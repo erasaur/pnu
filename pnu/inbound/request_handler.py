@@ -27,4 +27,3 @@ class PnuRequestHandler (PnuRunnable):
         #     # each new message represents a new user
         #     user = User(new_msg)
         #     PnuUserDataStore.update(user.get_phone_number(), user.get_json())
-

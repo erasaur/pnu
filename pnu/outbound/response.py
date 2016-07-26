@@ -15,11 +15,12 @@ class Response:
             "pm.sprint.com", "tmomail.net", "mms.uscc.net", "vzwpix.com",
             "vmpix.com"]
 
-    def __init__(self, info):
-        self.status = info['status']
-        self.to = info['phone_number']
-        self.pokemon_wanted = info['pokemon_wanted']
-        self.link = info['link']
+    def __init__(self, user, link):
+        self.status = user.get_status()
+        self.to = user.get_phone_number()
+        self.pokemon_wanted = user.get_pokemon_wanted()
+        self.link = link
+        self.location = (user.get_lat() or user.get_lon())
 
     def _make_welcome_msg(self):
         logging.info("Sending WELCOME message")
@@ -37,6 +38,24 @@ class Response:
     def _make_pause_msg(self):
         logging.info("Sending PAUSE message")
         return "Respond with RESUME to begin alerts"
+
+    def _make_resume_msg(self):
+        logging.info("Sending RESUME message")
+        return "Alerts will now be sent for new pokemon near you!"
+
+    def _make_no_pokemon_listed_msg(self):
+        logging.info("Sending no pokemon message")
+        return "There are no pokemon listed for your user."
+
+    def _make_no_location_msg(self):
+        logging.info("Sending no location message")
+        return ("It does not look like we have your location. Please send us "
+                + "your location and try your request again.")
+
+    def _make_reenroll_msg(self):
+        logging.info("Sending no re-enroll message")
+        return ("There seems to be a miscommunication. Please try re-enrolling by"
+                + " sending us your location first.")
 
     def _make_active_msg(self):
         """ returns the text message to be sent to the receiver
@@ -115,15 +134,24 @@ class Response:
     def build_message(self):
         """ returns the text message to be sent to the receiver
         Args:
-            None
+            self.status, self.pokemon_wanted, self.location
         Returns:
             One of four messages. Either the STOP message, PAUSE message,
             RESUME message, or ACTIVE
         """
-        logging.info("Deciding which message to send.")
-
-        if self.status == 'RESUME':
+        # new user, no pokemon listed
+        if self.status == 'ENROLL':
+            if not self.location:
+                return self._make_no_location_msg(), self.to
             return self._make_welcome_msg(), self.to
+
+        elif self.status == 'RESUME':
+            if not self.location:
+                return self._make_no_location_msg(), self.to
+            elif not self.pokemon_wanted:
+                return self._make_no_pokemon_listed_msg(), self.to
+            else:
+                return self._make_resume_msg(), self.to
 
         elif self.status == 'PAUSE':
             return self._make_pause_msg(), self.to
@@ -131,10 +159,13 @@ class Response:
         elif self.status == 'STOP':
             return self._make_stop_msg(), self.to
 
-        elif self.pokemon_wanted and self.status == 'ACTIVE':
-            return self._make_active_msg(), self.to
+        elif self.status == 'ACTIVE':
+            if not self.location:
+                return self._make_no_location_msg(), self.to
+            elif self.pokemon_wanted:
+                return self._make_active_msg(), self.to
 
         logging.error("Type of message is undetermined. Here's some data to help")
         logging.error("Pokemon wanted: " + str(self.pokemon_wanted))
         logging.error("Status of user: " + str(self.status))
-        raise AttributeError("Type of message to be sent could not be determined")
+        return self._make_reenroll_msg(), self.to

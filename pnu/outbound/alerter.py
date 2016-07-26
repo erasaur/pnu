@@ -3,12 +3,13 @@
 from smtplib import SMTP
 from pnu.config import pub_config, private_config
 from pnu.outbound.response import Response
+from pnu.models.user import User
 
 import logging
 logging = logging.getLogger(__name__)
 
 
-class PnuAlert:
+class PnuAlertDispatcher:
 
 
     def __init__(self):
@@ -24,18 +25,18 @@ class PnuAlert:
     def __exit__(self):
         self.smtp.quit()
 
-    def send_message(self, info):
+    def send_message(self, user, link = None):
         """ sends a text message alert to the specified user
         Args:
             info (dictionary)
         """
-        msg, phone_number = Response(info).build_message()
+        msg, phone_number = Response(user, link).build_message()
         logging.info("MESSAGE IS: " + msg)
         logging.info("Sending to: " + phone_number)
         self.smtp.sendmail(private_config['gmail']['username'],
                 phone_number, msg)
 
-smtp = PnuAlert()
+smtp = PnuAlertDispatcher()
 
 if __name__ == "__main__":
     import logging
@@ -47,36 +48,60 @@ if __name__ == "__main__":
             level=logging.DEBUG)
 
     logging.info("Beginning " + __file__)
+    link = "https://pnu.space"
 
     info = {
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
-            "link": "https://pnu.space",
-            "status": "ACTIVE"
+            "status": "ACTIVE",
+            "location":{
+                    "lat": 12,
+                    "lon": 10
+            }
     }
 
-    smtp.send_message(info)
-
-    info = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": [],
-            "link": "https://pnu.space",
-            "status": "PAUSE"
-    }
-    smtp.send_message(info)
+    smtp.send_message(User(info), link)
 
     info = {
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": [],
-            "link": "https://pnu.space",
-            "status": "RESUME"
+            "status": "PAUSE",
+            "location":{
+                    "lat": 12,
+                    "lon": 10
+            }
     }
-    smtp.send_message(info)
+    smtp.send_message(User(info), link)
+
+    info = {
+            "phone_number": "2694913303@vtext.com",
+            "pokemon_wanted": [],
+            "status": "RESUME",
+            "location":{
+                    "lat": 12,
+                    "lon": 10
+            }
+    }
+    smtp.send_message(User(info), link)
 
     info = {
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": ['abra', 'snorlax'],
-            "link": "https://pnu.space",
-            "status": "STOP"
+            "status": "STOP",
+            "location":{
+                    "lat": 12,
+                    "lon": 10
+            }
     }
-    smtp.send_message(info)
+    smtp.send_message(User(info), link)
+
+    info = {
+            "phone_number": "2694913303@vtext.com",
+            "pokemon_wanted": [],
+            "status": "ENROLL",
+            "location":{
+                    "lat": 12,
+                    "lon": 10
+            }
+    }
+    smtp.send_message(User(info), link)

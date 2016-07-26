@@ -7,5 +7,6 @@ class PnuAlertDispatcher ():
             smtp.send_message({
                 "phone_number": phone_num_list,
                 "pokemon_wanted": poke_list,
-                "link": "example.com"
+                "link": "https://pnu.space",
+                "status": "RESUME"
             })
