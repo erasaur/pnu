@@ -36,7 +36,7 @@ class Pnu (PnuRunnable):
         self._handler.run()
         self._loop.run_forever()
 
-    async def fetch_new_pokemon (self):
+    async def send_alerts (self):
         alerts = await self._poke_api.get_pokemon_alerts()
         # send alerts with dispatcher
         self._dispatcher.dispatch(alerts)
@@ -57,7 +57,7 @@ class Pnu (PnuRunnable):
         self.clear_tasks()
 
         # start new batch of tasks
-        asyncio.ensure_future(self.fetch_new_pokemon(), loop=self._loop)
+        asyncio.ensure_future(self.send_alerts(), loop=self._loop)
 
 def main ():
     Pnu().run()
