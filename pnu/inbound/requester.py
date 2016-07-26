@@ -200,18 +200,23 @@ class PnuRequest:
         return (result.group('lat'), result.group('lon'),)
 
     def check_for_command(self, body, msg):
+        status = None
         if self.find_stop_command(body):
             logging.info("STOP command received for: " + str(msg['From']))
-            return User({'phone_number': msg['From'], 'status': self.STOP})
+            status = self.STOP
+
         elif self.find_pause_command(body):
             logging.info("PAUSE command received for: " + str(msg['From']))
-            return User({'phone_number': msg['From'], 'status': self.PAUSE})
+            status = self.PAUSE
+
         elif self.find_resume_command(body):
             logging.info("RESUME command received for: " + str(msg['From']))
-            # RETURN RESUME COMMAND FOR USER
-            return User({'phone_number': msg['From'], 'status': self.RESUME})
+            status = self.RESUME
 
-        return None
+        if status == None:
+            return status
+
+        return User({'phone_number': msg['From'], 'status': status})
 
     def find_stop_command(self, body):
         return self.find_command(body, self.stop_regex)
