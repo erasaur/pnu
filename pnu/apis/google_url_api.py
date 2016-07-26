@@ -51,7 +51,7 @@ if __name__ == "__main__":
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
 
-    logging.basicConfig(filename='../etc/logs/getShortURL.out',
+    logging.basicConfig(filename='../etc/logs/google_url_api.out',
             level=logging.DEBUG)
 
     logging.info("Beginning " + __file__)
