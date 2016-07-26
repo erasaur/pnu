@@ -24,3 +24,9 @@ class Alert:
 
     def get_long_url(self):
         return self.link
+
+    def get_phone_numbers(self):
+        return self.phone_numbers
+
+    def get_pokemon_names(self):
+        return [pokemon.get_name() for pokemon in self.pokemon]
