@@ -3,6 +3,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 from pnu.config import pub_config
+from pnu.models.base import Base
 
 class RedisDataStore ():
     def __init__ (self, host=None, port=None):
@@ -29,7 +30,8 @@ class RedisDataStore ():
         try:
             curr = self.get(key)
             for k, v in val.items():
-                curr[k] = v
+                if v is not None:
+                    curr[k] = v
             self.set(key, curr)
         except Exception as e:
             logging.info('update failed, got exception: {}'.format(e))
@@ -37,6 +39,9 @@ class RedisDataStore ():
 
     def set (self, key, val):
         try:
+            if (isinstance(val, Base)):
+                val = val.get_json()
+
             self._redis.set(key, json.dumps(val))
             self._last_update = time.time()
         except Exception as e:
