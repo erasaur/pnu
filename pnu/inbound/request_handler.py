@@ -1,8 +1,13 @@
 import threading
 
-from pnu.core.runnable import PnuRunnable
 from pnu.config import pub_config
+from pnu.config import constants
+from pnu.core.runnable import PnuRunnable
+from pnu.core.data_store import PnuEnrollDataStore
 from pnu.inbound.requester import PnuRequest
+
+import logging
+logger = logging.getLogger(__name__)
 
 # TODO
 # handler should be responsible for parsing incoming requests and updating the
@@ -21,9 +26,12 @@ class PnuRequestHandler (PnuRunnable):
         self._requester = PnuRequest()
 
     def update (self):
-        print("Update req hander")
-        # # query using PnuRequest api, write changes to store
-        # for new_msg in self._requester.run():
-        #     # each new message represents a new user
-        #     user = User(new_msg)
-        #     PnuUserDataStore.update(user.get_phone_number(), user.get_json())
+        # query using PnuRequest api, write changes to store
+        for new_msg in self._requester.run():
+            # if the user is not active, then we'll be sending them
+            # an immediate message
+            if user.get_status() != constants.ACTIVE:
+                PnuEnrollDataStore.set(user.get_phone_number(), user)
+            # user is active so we add them to the alert queue
+            else:
+                PnuUserDataStore.update(user.get_phone_number(), user.get_json())
