@@ -4,6 +4,8 @@ from pnu.apis.pokevision_api import PokevisionAPI
 from pnu.apis.sprite_api import PokeDBAPI
 from pnu.config import pub_config
 from pnu.models.user import User
+from pnu.models.pokemon import Pokemon
+from pnu.models.alert import Alert
 
 class PnuPokeApi ():
     def __init__ (self, session=None):
@@ -21,15 +23,16 @@ class PnuPokeApi ():
             self._users = [User(data=l) for l in PnuUserDataStore.list()]
             self._last_update = time.time()
 
-    # cache results and reuse if location is close enough?
-    # batch-request a minimal set of hotspot locations in order to cover all
-    # requests?
-    async def get_new_pokemon (self):
+    async def get_pokemon_alerts (self):
+        # XXX cache results and reuse if location is close enough?
+        # XXX batch-request a minimal set of hotspot locations in order to 
+        # cover all requests?
+
         # update list of locations we need to query for nearby pokes
         self.update_data()
 
         # for each such location, get the nearby pokes, and filter out the
-        res = {}
+        temp = {} # result to return
         fut_list = []
         for user in self._users:
             fut = asyncio.ensure_future(
@@ -39,16 +42,39 @@ class PnuPokeApi ():
 
         for user, fut in fut_list:
             pokes_nearby = await fut
-            for poke in nearby:
-                if poke in user.get_pokemon_wanted():
-                    curr.add(poke)
+            curr = set() # don't want duplicates
+
+            for poke in pokes_nearby:
+                poke_id = poke.get_id()
+                curr.add((
+                    poke_id, 
+                    poke.get_lat(), 
+                    poke.get_lon(),
+                    poke.get_expiration_time()
+                ))
+                # if poke_id in user.get_pokemon_wanted():
+                #     curr.add(poke_id)
 
             if len(curr) > 0:
-                curr = tuple(sorted(curr))
-                if curr in res:
-                    res[curr].append(user.get_phone_number())
+                # sort so that multiple tuples with the same elements (but
+                # potentially in different order) still map to same key
+                curr = sorted(curr)
+
+                # convert poke tuples into poke objects
+                poke_list = []
+                for poke_args in curr:
+                    poke_list.append(Pokemon(*poke_args))
+
+                # convert back to tuple because dicts need immutable keys
+                poke_tuple = tuple(poke_list)
+                if poke_tuple in temp:
+                    temp[poke_tuple].append(user.get_phone_number())
                 else:
-                    res[curr] = [user.get_phone_number()]
+                    temp[poke_tuple] = [user.get_phone_number()]
+
+        res = []
+        for poke_tuple, phone_list in temp:
+            res.append(Alert(poke_tuple, phone_list))
 
         return res
 
