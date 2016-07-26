@@ -20,5 +20,5 @@ logging.basicConfig(filename='../etc/logs/FILENAME.out',
 
 logging.info("Beginning " + __file__)
 ```
-*Just make sure you update the relative path to where the logging file should
-be sent to*
+**Just make sure you update the relative path to where the logging file should
+be sent to**
