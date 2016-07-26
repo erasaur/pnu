@@ -5,7 +5,7 @@ Pokemon Near You (pnu, pronounced "new")
 At the top of each file put
 ```python
 import logging
-logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 ```
 
 If the file has an `if __name__ == "__main__":` line, add:
