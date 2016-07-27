@@ -6,8 +6,6 @@ from pnu.etc import constants
 import logging
 logging = logging.getLogger(__name__)
 
-import time
-
 class PnuAlertDispatcher (PnuRunnable):
     def run (self):
         self.run_once(self.prompt_alerts)
