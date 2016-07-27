@@ -31,8 +31,7 @@ class PnuAlertDispatcher:
             info (dictionary)
         """
         msg, phone_number = BuildResponse(user, link).build_message()
-        logging.info("MESSAGE IS: " + msg)
-        logging.info("Sending to: " + phone_number)
+        logging.info("MESSAGE IS: {}\nSending to: {}".format(msg, phone_number))
         self.smtp.sendmail(private_config['gmail']['username'],
                 phone_number, msg)
 
