@@ -102,8 +102,7 @@ class BuildResponse:
     def _check_len_of_msg(self, msg):
         """ checks if the message length is longer than 159 chars """
         if (len(msg) > (159)):
-            logging.info("Message too long: " + str(len(msg))
-                    + " Sending MMS.")
+            logging.info("Message too long: {}. Sending MMS".format(len(msg)))
             return self._sms_to_mms()
 
         return self.to
@@ -133,12 +132,12 @@ class BuildResponse:
             string A string of pokemon such as "poke1, poke2, and poke3"
         """
         str_of_poke = self.pokemon_wanted[0]
-        logging.info("List of pokemon_wanted is: " + str(self.pokemon_wanted))
+        logging.info("List of pokemon_wanted is: {}".format(self.pokemon_wanted))
 
         if len(self.pokemon_wanted) > 1:
             str_of_poke = (', '.join(self.pokemon_wanted[:-1]) + ", and "
                     + self.pokemon_wanted[-1])
-            logging.info("List of pokemon from string is: " + str(str_of_poke))
+            logging.info("List of pokemon from string is: {}".format(str_of_poke))
 
         return str_of_poke
 
@@ -180,6 +179,6 @@ class BuildResponse:
                 return self._make_active_msg(), self.to
 
         logging.error("Type of message is undetermined. Here's some data to help")
-        logging.error("Pokemon wanted: " + str(self.pokemon_wanted))
-        logging.error("Status of user: " + str(self.status))
+        logging.error("Pokemon wanted: {}".format(self.pokemon_wanted))
+        logging.error("Status of user: {}".format(self.status))
         return self._make_reenroll_msg(), self.to
