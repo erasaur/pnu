@@ -1,9 +1,9 @@
 from email.mime.text import MIMEText
-from pnu.config import private_config, constants
+from pnu.config import private_config
+from pnu.etc import constants
 
 import logging
 logging = logging.getLogger(__name__)
-
 
 class Response:
 

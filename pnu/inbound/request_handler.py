@@ -1,7 +1,7 @@
 import threading
 
 from pnu.config import pub_config
-from pnu.config import constants
+from pnu.etc import constants
 from pnu.core.runnable import PnuRunnable
 from pnu.core.data_store import PnuEnrollDataStore
 from pnu.inbound.requester import PnuRequest
