@@ -150,8 +150,7 @@ class PnuRequest:
         try:
             return re.split(self.split_regex, results.group(1))
         except AttributeError:
-            logging.info("Latitude, Longitude, and pokemon_wanted, are "
-                            + "not found. Probably a junk message")
+            logging.info("No pokemon found in message!")
             return None
 
     def get_attachment(self, msg):
@@ -177,7 +176,7 @@ class PnuRequest:
 
         result = re.search(self.android_regex, body.decode('UTF-8'))
         logging.info('Android (lat, lon): ' + str(result.group('lat'))
-                + str(result.group('lon')))
+                + ', ' + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
     def parse_ios_lat_lon(self, msg):
@@ -193,7 +192,7 @@ class PnuRequest:
         attach_text = self.get_attachment(msg)
         result = re.search(self.ios_regex, attach_text.decode('UTF-8'))
         logging.info('iOS (lat, lon): ' + str(result.group('lat'))
-                + str(result.group('lon')))
+                + ', ' + str(result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
     def check_for_command(self, body, msg):
