@@ -150,6 +150,7 @@ class PnuRequest:
         """ parses input message and returns a list of pokemon wanted """
         results = re.search(self.pokemon_regex, msg.decode('UTF-8'))
         try:
+            logging.info("Looking for pokemon wanted in body of messgae")
             pokemon_wanted = re.split(self.split_regex, results.group(1))
         except AttributeError:
             logging.info("No pokemon found in message!")
@@ -166,6 +167,7 @@ class PnuRequest:
         Returns:
             pokemon_validated (list of ints of pokemon ids)
         """
+        logging.info("Filtering pokemon...")
         valid_pokemon = []
         for pokemon in pokemon_wanted:
             try:
