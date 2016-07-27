@@ -154,6 +154,8 @@ class BuildResponse:
         if self.status == 'ENROLL':
             if not self.location:
                 return self._make_no_location_msg(), self.to
+            elif not self.pokemon_wanted:
+                return self._make_no_pokemon_listed_msg(), self.to
             return self._make_welcome_msg(), self.to
 
         elif self.status == 'RESUME':
