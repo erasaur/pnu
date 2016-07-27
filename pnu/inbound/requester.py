@@ -61,7 +61,7 @@ class PnuRequest:
     def check_resp(self, resp):
         """ checks the response from the server for each request """
         if resp != 'OK':
-            logging.info("Response is: " + str(resp))
+            logging.info("Response is: {}".format(resp))
             raise ConnectionError("Response from IMAP was not 'OK'")
 
     def get_unread_messages(self):

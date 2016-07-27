@@ -22,7 +22,7 @@ class ShortenURL:
             'longUrl': link
         }
 
-        logging.info("Requesting shortened URL for: " + str(link))
+        logging.info("Requesting shortened URL for: {}".format(link))
 
         for i in range(3):
             resp = requests.post(cls.POST_TO_URL, data=json.dumps(payload),
@@ -33,14 +33,13 @@ class ShortenURL:
                 i = 0
                 break
             else:
-                logging.warning("Google URL API status code is "
-                        + str(resp.status_code) + " trying again...")
+                logging.warning("Google URL API status code is {}. Trying again...".format(resp.status_code))
 
         if i == 2:
             logging.error("Could not connect to Google URL API")
             raise ConnectionError("Could not connect to Google URL API")
 
-        logging.info("Got shortened URL: " + str(resp.json()))
+        logging.info("Got shortened URL: {}".format(resp.json()))
 
         return resp.json()['id']
 
