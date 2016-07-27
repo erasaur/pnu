@@ -52,30 +52,35 @@ class User (Base):
         }
 
     def get_lat (self):
-        return self.lat
+        return self.get("lat")
 
     def get_lon (self):
-        return self.lon
-
-    def get_location_is_set(self):
-        return self.lat is not None and self.lon is not None
+        return self.get("lon")
 
     def get_pokemon_wanted (self):
-        return self.pokemon_wanted
-
-    def get_pokemon_wanted_is_set (self):
-        return len(self.pokemon_wanted) > 0
+        return self.get("pokemon_wanted")
 
     def get_phone_number (self):
-        return self.phone_number
+        return self.get("phone_number")
 
     def get_status (self):
-        return self.status
+        return self.get("status")
+
+    def is_location_set(self):
+        return self.get_lat() is not None and self.get_lon() is not None
+
+    def is_pokemon_wanted_set (self):
+        pw = self.get_pokemon_wanted()
+        return isinstance(pw, list) and len(pw) > 0
+
+    def is_active (self):
+        return self.is_location_set() and self.is_pokemon_wanted_set()
 
     def empty (self):
-        return not (self.status or self.phone_number or
-                self.get_location_is_set() or self.pokemon_wanted)
-
+        status = self.get_status()
+        number = self.get_phone_number()
+        is_active = self.is_active()
+        return not (status or phone_number or is_active)
 
     def __str__ (self):
         return ("Phone #: {}\nPokemon wanted: {}\nLatitude: {}\nLongitude: {}\n"
