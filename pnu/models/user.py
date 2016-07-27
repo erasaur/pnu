@@ -1,6 +1,6 @@
 from pnu.models.base import Base
 import logging
-logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 
 class User (Base):
     def load_args (self, phone_number, pokemon_wanted, lat, lon, status):
@@ -51,6 +51,9 @@ class User (Base):
     def get_lon (self):
         return self.lon
 
+    def get_location_is_set(self):
+        return (self.lat or self.lon)
+
     def get_pokemon_wanted (self):
         return self.pokemon_wanted
 
@@ -59,6 +62,10 @@ class User (Base):
 
     def get_status (self):
         return self.status
+
+    def empty (self):
+        return not (self.status or self.phone_number or
+                self.get_location_is_set() or self.pokemon_wanted)
 
 
     def __str__ (self):

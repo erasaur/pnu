@@ -1,5 +1,5 @@
 import logging
-logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 from pnu.core.http_client import PnuHTTPClient
 from pnu.models.pokemon import Pokemon
 
