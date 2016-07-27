@@ -14,7 +14,7 @@
         "port": 6379
     },
 
-    "enroll_data_store": {
+    "pending_data_store": {
         "host": "localhost",
         "port": 6380
     },

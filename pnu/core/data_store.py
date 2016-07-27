@@ -65,6 +65,9 @@ class RedisDataStore ():
     def changed_since (self, time):
         return self._last_update > time
 
+    def append (self, key, val):
+        self._redis.lpush(key, val)
+
     def pop(self, pop_key):
         _, raw_user = self._redis.blpop(pop_key)
         return raw_user
@@ -80,6 +83,6 @@ PnuUserDataStore = RedisDataStore(
 )
 
 PnuPendingDataStore = RedisDataStore(
-    host=pub_config["enroll_data_store"]["host"],
-    port=pub_config["enroll_data_store"]["port"]
+    host=pub_config["pending_data_store"]["host"],
+    port=pub_config["pending_data_store"]["port"]
 )

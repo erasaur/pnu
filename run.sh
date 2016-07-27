@@ -23,6 +23,6 @@ if [ -n "$pid" ]; then
    echo -e "${GREEN}Redis is running with pid: $pid${NC}"
   ./main.py
 else 
-  echo -e "${RED}Please start redis with ./run_user_redis (user store) and ./run_enroll_redis (enroll store) first.${NC}"
+  echo -e "${RED}Please start redis with ./run_user_redis (user store) and ./run_pending_redis (pending store) first.${NC}"
 fi
 
