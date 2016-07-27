@@ -1,6 +1,6 @@
 import redis, time
 import logging
-logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 
 from pnu.config import pub_config
 from pnu.models.base import Base
@@ -62,12 +62,21 @@ class RedisDataStore ():
     def changed_since (self, time):
         return self._last_update > time
 
+    def pop(self, pop_key):
+        _, raw_user = self._redis.blpop(pop_key)
+        return raw_user
+
+    def delete_user(self, del_key):
+        logging.info("Deleting user: " + str(del_key))
+        _ = self._redis.delete(del_key)
+
+
 PnuUserDataStore = RedisDataStore(
     host=pub_config["user_data_store"]["host"],
     port=pub_config["user_data_store"]["port"]
 )
 
-PnuEnrollDataStore = RedisDataStore(
+PnuPendingDataStore = RedisDataStore(
     host=pub_config["enroll_data_store"]["host"],
     port=pub_config["enroll_data_store"]["port"]
 )
