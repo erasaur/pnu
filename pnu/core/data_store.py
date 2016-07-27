@@ -15,14 +15,14 @@ class RedisDataStore ():
 
     def get (self, key):
         try:
-            val = self._redis.get(key)
-            res = json.loads(val)
-        except json.decoder.JSONDecodeError:
-            # redis returned dict with single quotes
-            res = res.replace("'", "\"")
+            res = self._redis.get(key)
+            logging.info("loading: {}".format(res))
+            res = res.decode("utf-8")
+            logging.info("decoded: {}".format(res))
             res = json.loads(res)
-        except Exception:
-            # give up
+        except Exception as e:
+            logging.info('get failed, got exception: {}'.format(e))
+            logging.info('tried to get {}'.format(key))
             res = {}
         return res
 
@@ -38,9 +38,12 @@ class RedisDataStore ():
                 val = val.get_json()
 
             curr = self.get(key)
+            logging.info("{}".format(curr))
             for k, v in val.items():
-                if v is not None:
-                    curr[k] = v
+                logging.info("{}, {}, {}".format(k,v, v is None))
+                curr[k] = v
+
+            logging.info("{}, {}".format(curr, type(curr)))
             self.set(key, curr)
         except Exception as e:
             logging.info('update failed, got exception: {}'.format(e))
@@ -63,7 +66,7 @@ class RedisDataStore ():
         for key in keys:
             try:
                 res.append(self.get(key))
-            except Exception:
+            except Exception as e:
                 logging.info('list failed, got exception: {}'.format(e))
                 logging.info('tried to load {}'.format(doc))
         return res
@@ -76,7 +79,7 @@ class RedisDataStore ():
             if (isinstance(val, Base)):
                 val = val.get_json()
 
-            self._redis.lpush(key, val)
+            self._redis.lpush(key, json.dumps(val))
         except Exception as e:
             logging.info('append failed, got exception: {}'.format(e))
             logging.info('tried to append {} to {}'.format(key, val))
@@ -84,12 +87,9 @@ class RedisDataStore ():
     def pop (self, pop_key):
         try:
             _, raw_user = self._redis.blpop(pop_key)
+            raw_user = raw_user.decode("utf-8")
             raw_user = json.loads(raw_user)
-        except json.decoder.JSONDecodeError:
-            # redis returned dict with single quotes
-            raw_user = raw_user.replace("'", "\"")
-            raw_user = json.loads(raw_user)
-        except Exception:
+        except Exception as e:
             raw_user = {}
         return raw_user
 
