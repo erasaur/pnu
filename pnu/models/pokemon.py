@@ -1,4 +1,5 @@
 from pnu.models.base import Base
+from pnu.etc.constants import POKEMON_ID_TO_NAME
 
 class Pokemon (Base):
     def load_args (self, pokemonId, lat, lon, expiration_time):
@@ -8,6 +9,14 @@ class Pokemon (Base):
             longitude=lon,
             expiration_time=expiration_time
         )
+
+    def load_json (self, data):
+        super().load_json(data)
+        
+        try:
+            self.pokemon_name = POKEMON_ID_TO_NAME[self.pokemonId]
+        except:
+            self.pokemon_name = None
 
     def get_json (self):
         return {
@@ -25,6 +34,9 @@ class Pokemon (Base):
             self.longitude,
             self.expiration_time
         )
+
+    def get_name (self):
+        return self.pokemon_name
 
     def get_id (self):
         return self.pokemonId
