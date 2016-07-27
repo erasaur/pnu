@@ -30,9 +30,10 @@ class User (Base):
             else:
                 self.lat = self.lon = None
         except KeyError as e:
-            logging.error("Invalid user data")
-            logging.error(e)
-            raise e
+            self.phone_number = None
+            self.status = None
+            self.pokemon_wanted = None
+            self.lat = self.lon = None
 
     def get_json (self):
         return {

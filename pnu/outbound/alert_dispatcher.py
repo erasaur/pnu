@@ -30,4 +30,5 @@ class PnuAlertDispatcher (PnuRunnable):
     def prompt_alerts(self):
         while True:
             raw_user = PnuPendingDataStore.pop(constants.ENROLL)
+            loggin.info("got pending user:", raw_user)
             smtp.send_message(json.loads(raw_user))

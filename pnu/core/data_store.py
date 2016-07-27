@@ -1,4 +1,4 @@
-import redis, time
+import redis, time, json
 import logging
 logging = logging.getLogger(__name__)
 
@@ -28,6 +28,9 @@ class RedisDataStore ():
     # if the key "elemA" doesn't exist, it will be set.
     def update (self, key, val):
         try:
+            if (isinstance(val, Base)):
+                val = val.get_json()
+
             curr = self.get(key)
             for k, v in val.items():
                 if v is not None:
