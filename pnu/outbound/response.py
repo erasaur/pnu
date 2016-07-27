@@ -33,7 +33,7 @@ class BuildResponse:
 
         self.link = link
 
-    def _make_welcome_msg(self):
+    def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
         msg = ("PAUSE - temporarily suspend alerts\nRESUME "
                 + "- resume previous alerts\nSTOP - quit receiving alerts"
@@ -152,11 +152,7 @@ class BuildResponse:
         """
         # new user, no pokemon listed
         if self.status == 'ENROLL':
-            if not self.location:
-                return self._make_no_location_msg(), self.to
-            elif not self.pokemon_wanted:
-                return self._make_no_pokemon_listed_msg(), self.to
-            return self._make_welcome_msg(), self.to
+            return self._make_enroll_msg(), self.to
 
         elif self.status == 'RESUME':
             if not self.location:
