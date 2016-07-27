@@ -15,8 +15,14 @@ class RedisDataStore ():
 
     def get (self, key):
         try:
-            res = json.loads(self._redis.get(key))
+            val = self._redis.get(key)
+            res = json.loads(val)
+        except json.decoder.JSONDecodeError:
+            # redis returned dict with single quotes
+            res = res.replace("'", "\"")
+            res = json.loads(res)
         except Exception:
+            # give up
             res = {}
         return res
 
@@ -66,14 +72,28 @@ class RedisDataStore ():
         return self._last_update > time
 
     def append (self, key, val):
-        logging.log("Appending: " + str(key) + ' ' + str(val))
-        self._redis.lpush(key, val)
+        try:
+            if (isinstance(val, Base)):
+                val = val.get_json()
 
-    def pop(self, pop_key):
-        _, raw_user = self._redis.blpop(pop_key)
+            self._redis.lpush(key, val)
+        except Exception as e:
+            logging.info('append failed, got exception: {}'.format(e))
+            logging.info('tried to append {} to {}'.format(key, val))
+
+    def pop (self, pop_key):
+        try:
+            _, raw_user = self._redis.blpop(pop_key)
+            raw_user = json.loads(raw_user)
+        except json.decoder.JSONDecodeError:
+            # redis returned dict with single quotes
+            raw_user = raw_user.replace("'", "\"")
+            raw_user = json.loads(raw_user)
+        except Exception:
+            raw_user = {}
         return raw_user
 
-    def delete_user(self, del_key):
+    def delete_user (self, del_key):
         logging.info("Deleting user: " + str(del_key))
         _ = self._redis.delete(del_key)
 

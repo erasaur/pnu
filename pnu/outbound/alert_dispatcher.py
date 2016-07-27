@@ -1,3 +1,4 @@
+import json
 from pnu.core.runnable import PnuRunnable
 from pnu.outbound.alerter import smtp
 from pnu.core.data_store import PnuPendingDataStore
@@ -5,6 +6,8 @@ from pnu.etc import constants
 
 import logging
 logging = logging.getLogger(__name__)
+
+from pnu.models.user import User
 
 class PnuAlertDispatcher (PnuRunnable):
     def run (self):
@@ -29,4 +32,4 @@ class PnuAlertDispatcher (PnuRunnable):
         while True:
             raw_user = PnuPendingDataStore.pop(constants.ENROLL)
             logging.info("Got pending user:", raw_user)
-            smtp.send_message(json.loads(raw_user))
+            smtp.send_message(User(raw_user))
