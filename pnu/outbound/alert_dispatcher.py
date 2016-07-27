@@ -1,8 +1,14 @@
+from pnu.core.runnable import PnuRunnable
 from pnu.outbound.alerter import smtp
 import logging
 logging = logging.getLogger(__name__)
 
-class PnuAlertDispatcher ():
+import time
+
+class PnuAlertDispatcher (PnuRunnable):
+    def run (self):
+        self.run_once(self.prompt_alerts)
+
     def dispatch (self, alerts):
         # pokemon object tuples will be returned
         # followed by a list of users who need to be notified
@@ -17,3 +23,8 @@ class PnuAlertDispatcher ():
                 "link": link,
                 "status": 'ACTIVE'
             })
+
+    def prompt_alerts (self):
+        while True:
+            print("prompting alerts")
+            time.sleep(5)

@@ -27,7 +27,7 @@ class PnuRequestHandler (PnuRunnable):
 
     def update (self):
         # query using PnuRequest api, write changes to store
-        for new_msg in self._requester.run():
+        for user in self._requester.run():
             # if the user is not active, then we'll be sending them
             # an immediate message
             if user.get_status() != constants.ACTIVE:

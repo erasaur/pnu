@@ -34,6 +34,7 @@ class Pnu (PnuRunnable):
     def run (self):
         super().run()
         self._handler.run()
+        self._dispatcher.run()
         self._loop.run_forever()
 
     async def send_alerts (self):
