@@ -14,22 +14,23 @@ class User (Base):
 
     def load_json (self, data):
         try:
-            self.phone_number = data["phone_number"]
-            self.status = data["status"]
+            self.phone_number = data.get("phone_number")
+            self.status = data.get("status")
 
             # returns None if key doesn't exist
-            self.pokemon_wanted = data.get('pokemon_wanted')
+            self.pokemon_wanted = data.get("pokemon_wanted")
 
             if "location" in data:
                 loc = data["location"]
-                self.lat = loc["lat"]
-                self.lon = loc["lon"]
+                self.lat = loc.get("lat")
+                self.lon = loc.get("lon")
             elif "latitude" in data and "longitude" in data:
-                self.lat = data["latitude"]
-                self.lon = data["longitude"]
+                self.lat = data.get("latitude")
+                self.lon = data.get("longitude")
             else:
                 self.lat = self.lon = None
         except KeyError as e:
+            logging.info("Error loading user model: {}".format(e))
             self.phone_number = None
             self.status = None
             self.pokemon_wanted = None
