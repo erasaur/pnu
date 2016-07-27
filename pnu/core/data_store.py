@@ -66,6 +66,7 @@ class RedisDataStore ():
         return self._last_update > time
 
     def append (self, key, val):
+        logging.log("Appending: " + str(key) + ' ' + str(val))
         self._redis.lpush(key, val)
 
     def pop(self, pop_key):
