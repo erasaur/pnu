@@ -108,7 +108,7 @@ class PnuRequest:
             lat, lon = self.parse_lat_lon(msg)
             user['location']['lat'] = lat
             user['location']['lon'] = lon
-            if not body:
+            if body:
                 pokemon_wanted = self.parse_pokemon_wanted(body)
 
             user['pokemon_wanted'] = pokemon_wanted
