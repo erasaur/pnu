@@ -156,11 +156,11 @@ class PnuRequest:
             logging.info("No pokemon found in message!")
             return None
 
-        validated_pokemon_wanted =  filter_pokemon_wanted(pokemon_wanted)
+        validated_pokemon_wanted =  self.filter_pokemon_wanted(pokemon_wanted)
         return validated_pokemon_wanted
 
 
-    def filter_pokemon_wanted(pokemon_wanted):
+    def filter_pokemon_wanted(self, pokemon_wanted):
         """ returns a list of pokemon ids the user wants
         Args:
             pokemon_wanted (list of strings of pokemon names)
