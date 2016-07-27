@@ -55,7 +55,7 @@ class Pnu (PnuRunnable):
         super().update()
 
         # cancel all tasks that are still pending
-        self.clear_tasks()
+        # self.clear_tasks()
 
         # start new batch of tasks
         asyncio.ensure_future(self.send_alerts(), loop=self._loop)
@@ -67,4 +67,6 @@ if __name__ == "__main__":
     import logging.config
     logging.config.fileConfig(pub_config["logging"]["location"],
             disable_existing_loggers=False)
+    logging.getLogger('apscheduler').setLevel(logging.ERROR)
+    # logging.getLogger('apscheduler').propagate = False
     main()
