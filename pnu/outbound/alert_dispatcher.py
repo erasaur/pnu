@@ -18,9 +18,10 @@ class PnuAlertDispatcher (PnuRunnable):
         # followed by a list of users who need to be notified
         # for the said pokemon
         for alert in alerts:
-            logging.info("Dispatching message for "
-                    + str(alert.get_pokemon_names()) + " to "
-                    + str(alert.get_phone_numbers()))
+            log_msg = "Dispatching message for {} to {}".format(
+                alert.get_pokemon_names(),
+                alert.get_phone_numbers())
+            logging.info(log_msg)
             smtp.send_message({
                 "phone_number": alert.get_phone_numbers(),
                 "pokemon_wanted": alert.get_pokemon_names(),
@@ -31,5 +32,5 @@ class PnuAlertDispatcher (PnuRunnable):
     def prompt_alerts(self):
         while True:
             raw_user = PnuPendingDataStore.pop(constants.ENROLL)
-            logging.info("Got pending user:", raw_user)
+            logging.info("Got pending user: {}".format(raw_user))
             smtp.send_message(User(raw_user))
