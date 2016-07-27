@@ -35,7 +35,7 @@ class BuildResponse:
 
     def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
-        msg = ("List of commands:\nPAUSE - temporarily suspend alerts\nRESUME "
+        msg = ("PAUSE - temporarily suspend alerts\nRESUME "
                 + "- resume previous alerts\nSTOP - quit receiving alerts"
                 + "\nTo activate your user, respond in the form of 'Pokemon wanted: "
                 + "poke1, poke2, poke3' up to five pokemon")
