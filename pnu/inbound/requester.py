@@ -90,10 +90,7 @@ class PnuRequest:
             user = {
                 'phone_number': msg['From'],
                 'pokemon_wanted': pokemon_wanted,
-                'location': {
-                    'lat': lat,
-                    'lon': lon
-                },
+                'location': None,
                 'status': status
             }
 
@@ -106,8 +103,12 @@ class PnuRequest:
                 yield User(user)
 
             lat, lon = self.parse_lat_lon(msg)
-            user['location']['lat'] = lat
-            user['location']['lon'] = lon
+            if (lat or lon):
+                user['location'] = {
+                    "lat": lat,
+                    "lon": lon
+                }
+
             if body:
                 pokemon_wanted = self.parse_pokemon_wanted(body)
 
