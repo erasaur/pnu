@@ -5,7 +5,8 @@ from pnu.etc import constants
 import logging
 logging = logging.getLogger(__name__)
 
-class Response:
+
+class BuildResponse:
 
     SUBJECT = "Pokemon Alert!"
     SMS_CARRIERS = ["message.alltel.com", "txt.att.net", "myboostmobile.com",

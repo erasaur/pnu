@@ -2,7 +2,7 @@
 
 from smtplib import SMTP
 from pnu.config import pub_config, private_config
-from pnu.outbound.response import Response
+from pnu.outbound.response import BuildResponse
 from pnu.models.user import User
 
 import logging
