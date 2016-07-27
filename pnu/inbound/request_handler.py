@@ -35,6 +35,7 @@ class PnuRequestHandler (PnuRunnable):
 
             # check for status update on the inbound_user
             if inbound_user.get_status() in constants.RESPONSE_STATUS_LIST:
+                logging.info("Status update!")
                 # sends correct status message based on status field
                 if inbound_user.get_status() == constants.STOP:
                     PnuUserDataStore.delete_user(inbound_user.get_phone_number())
@@ -42,6 +43,8 @@ class PnuRequestHandler (PnuRunnable):
                 else:
                     PnuUserDataStore.update(inbound_user.get_phone_number(),
                             inbound_user)
+
+                logging.info("Setting user to be notified")
                 PnuPendingDataStore.set(inbound_user.get_phone_number(),
                         inbound_user)
                 continue
@@ -53,4 +56,5 @@ class PnuRequestHandler (PnuRunnable):
             user = User(json_user)
             # user still needs to fully enroll
             if (user.get_location_is_set() != user.get_pokemon_wanted()):
+                logging.info("User needs to send us more data")
                 PnuPendingDataStore.set(inbound_user.get_phone_number(), inbound_user)
