@@ -8,6 +8,7 @@ import sys
 
 from pnu.models.user import User
 from pnu.config import pub_config, private_config
+from pnu.etc import constants
 
 import logging
 logging = logging.getLogger(__name__)
@@ -148,10 +149,32 @@ class PnuRequest:
         """ parses input message and returns a list of pokemon wanted """
         results = re.search(self.pokemon_regex, msg.decode('UTF-8'))
         try:
-            return re.split(self.split_regex, results.group(1))
+            pokemon_wanted = re.split(self.split_regex, results.group(1))
         except AttributeError:
             logging.info("No pokemon found in message!")
             return None
+
+        validated_pokemon_wanted =  filter_pokemon_wanted(pokemon_wanted)
+        return validated_pokemon_wanted
+
+
+    def filter_pokemon_wanted(pokemon_wanted):
+        """ returns a list of pokemon ids the user wants
+        Args:
+            pokemon_wanted (list of strings of pokemon names)
+        Returns:
+            pokemon_validated (list of ints of pokemon ids)
+        """
+        valid_pokemon = []
+        for pokemon in pokemon_wanted:
+            try:
+                valid_pokemon.append(constants.POKEMON_NAME_TO_ID[pokemon])
+
+            except KeyError:
+                logging.log("User submitted fake pokemon: " + str(pokemon))
+                continue
+
+        return valid_pokemon
 
     def get_attachment(self, msg):
         """ returns the text from the attachment of an iOS message """
