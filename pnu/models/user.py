@@ -63,6 +63,9 @@ class User (Base):
     def get_pokemon_wanted (self):
         return self.pokemon_wanted
 
+    def get_pokemon_wanted_is_set (self):
+        return (len(self.pokemon_wanted) > 0)
+
     def get_phone_number (self):
         return self.phone_number
 
@@ -75,8 +78,6 @@ class User (Base):
 
 
     def __str__ (self):
-        return ("Phone #: " + str(self.phone_number) + "\n" +
-               "Pokemon wanted: " + str(self.pokemon_wanted) + "\n" +
-               "Latitude: " + str(self.lat) + "\n" +
-               "Longitude: " + str(self.lon) + "\n" +
-               "Status: " + str(self.status) + "\n")
+        return ("Phone #: {}\nPokemon wanted: {}\nLatitude: {}\nLongitude: {}\n"
+                "Status: {}".format(self.phone_number, self.pokemon_wanted,
+                                    self.lat, self.lon, self.status))
