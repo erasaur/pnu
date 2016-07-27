@@ -40,7 +40,8 @@ class RedisDataStore ():
             logging.info("prev: {}".format(curr))
 
             for k, v in val.items():
-                curr[k] = v
+                if v is not None:
+                    curr[k] = v
             self.set(key, curr)
 
             logging.info("now: {}".format(self.get(key)))

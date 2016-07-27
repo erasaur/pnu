@@ -20,8 +20,8 @@ class User (Base):
             # returns None if key doesn't exist
             self.pokemon_wanted = data.get("pokemon_wanted")
 
-            if "location" in data:
-                loc = data["location"]
+            loc = data.get("location")
+            if loc is not None:
                 self.lat = loc.get("lat")
                 self.lon = loc.get("lon")
             elif "latitude" in data and "longitude" in data:
