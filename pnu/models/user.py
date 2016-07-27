@@ -52,19 +52,19 @@ class User (Base):
         }
 
     def get_lat (self):
-        return self.get("lat")
+        return self.lat
 
     def get_lon (self):
-        return self.get("lon")
+        return self.lon
 
     def get_pokemon_wanted (self):
-        return self.get("pokemon_wanted")
+        return self.pokemon_wanted
 
     def get_phone_number (self):
-        return self.get("phone_number")
+        return self.phone_number
 
     def get_status (self):
-        return self.get("status")
+        return self.status
 
     def is_location_set(self):
         return self.get_lat() is not None and self.get_lon() is not None
@@ -80,7 +80,7 @@ class User (Base):
         status = self.get_status()
         number = self.get_phone_number()
         is_active = self.is_active()
-        return not (status or phone_number or is_active)
+        return not (status or number or is_active)
 
     def __str__ (self):
         return ("Phone #: {}\nPokemon wanted: {}\nLatitude: {}\nLongitude: {}\n"

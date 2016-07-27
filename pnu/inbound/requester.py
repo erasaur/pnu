@@ -136,7 +136,6 @@ class PnuRequest:
                 lat, lon = self.parse_android_lat_lon(body)
             except AttributeError:
                 logging.info("Android location not found")
-                pass
 
         else:
             logging.info("Possibly iOS device")
@@ -144,7 +143,6 @@ class PnuRequest:
                 lat, lon = self.parse_ios_lat_lon(msg)
             except AttributeError:
                 logging.info("iOS location not found")
-                pass
 
         return lat, lon
 
@@ -157,7 +155,7 @@ class PnuRequest:
             logging.info("No pokemon found in message!")
             return None
 
-        validated_pokemon_wanted =  self.filter_pokemon_wanted(pokemon_wanted)
+        validated_pokemon_wanted = self.filter_pokemon_wanted(pokemon_wanted)
         return validated_pokemon_wanted
 
 
