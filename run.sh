@@ -7,7 +7,14 @@ NC='\033[0m' # No Color
 
 get_pid_redis () {
   # returns the process id of the redis process
-  echo `ps -fe | grep $REDIS_PROCESS | grep -v grep | tr -s " "| cut -d " " -f2`
+  echo `
+    ps -f | # display pid
+    grep $REDIS_PROCESS | # get lines with redis-server
+    grep -v grep | # ignore lines with grep
+    tr -s " " | # collapse spaces
+    cut -d " " -f2 | # cut spaces
+    head -n 1 # get first line
+  `
 }
 
 # check if redis server is running or not
