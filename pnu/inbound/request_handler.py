@@ -45,8 +45,7 @@ class PnuRequestHandler (PnuRunnable):
                             inbound_user)
 
                 logging.info("Setting user to be notified")
-                PnuPendingDataStore.set(inbound_user.get_phone_number(),
-                        inbound_user)
+                PnuPendingDataStore.append(constants.ENROLL, inbound_user)
                 continue
 
             # we don't have BOTH the location and pokemon wanted, so they still
@@ -57,4 +56,4 @@ class PnuRequestHandler (PnuRunnable):
             # user still needs to fully enroll
             if (user.get_location_is_set() != user.get_pokemon_wanted()):
                 logging.info("User needs to send us more data")
-                PnuPendingDataStore.set(inbound_user.get_phone_number(), inbound_user)
+                PnuPendingDataStore.append(constants.ENROLL, inbound_user)
