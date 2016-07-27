@@ -61,4 +61,4 @@ class PnuRequestHandler (PnuRunnable):
             # user still needs to fully enroll
             if (user.get_location_is_set() != user.get_pokemon_wanted()):
                 logging.info("User needs to send us more data")
-                PnuPendingDataStore.append(constants.ENROLL, inbound_user)
+                PnuPendingDataStore.append(constants.ENROLL, user)
