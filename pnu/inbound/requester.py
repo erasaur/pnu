@@ -10,7 +10,7 @@ from pnu.models.user import User
 from pnu.config import pub_config, private_config
 
 import logging
-logger = logging.getLogger(__name__)
+logging = logging.getLogger(__name__)
 
 class PnuRequest:
     android_regex = re.compile("maps\.google\.com/maps\?f=q&q=\((?P<lat>.*)?,(?P<lon>.*)?\)")
@@ -85,48 +85,38 @@ class PnuRequest:
         for msg in msgs:
             lat = lon = body = None
             pokemon_wanted = None
+            status = None
+            user = {
+                'phone_number': msg['From'],
+                'pokemon_wanted': pokemon_wanted,
+                'location': {
+                        'lat': lat,
+                        'lon': lon
+                },
+                'status': status
+            }
 
             body = msg.get_payload(decode=True)
 
             # check for PAUSE, RESUME, STOP
-            cmd = self.check_for_command(body, msg)
-            if cmd:
-                yield cmd
+            status = self.check_for_command(body, msg)
+            if status:
+                user['status'] = status
+                yield user
 
             lat, lon = self.parse_lat_lon(msg)
+            user['location']['lat'] = lat
+            user['location']['lon'] = lon
+            pokemon_wanted = self.parse_pokemon_wanted(body)
+            user['pokemon_wanted'] = pokemon_wanted
 
             # probably didn't find a location msg, instead is junk or
             # pokemon wanted msg
-            if not (lat or lon):
+            if not (lat or lon or pokemon_wanted):
+                # JUNK MESSAGEEEE
+                continue
 
-                try:
-                    pokemon_wanted = self.parse_pokemon_wanted(body)
-
-                    user = {
-                            "phone_number": msg['From'],
-                            "pokemon_wanted": pokemon_wanted,
-                            "status": self.ACTIVE
-                    }
-                    logging.info("Need to update user: " + str(user))
-                    yield User(user)
-
-                except AttributeError:
-                    # both lat, lon, and pokemon_wanted are None
-                    # probably junk message
-                    logging.info("Latitude, Longitude, and pokemon_wanted, are "
-                                 + "not found. Probably a junk message")
-                    continue
-
-            user = {
-                "phone_number": msg['From'],
-                "pokemon_wanted": pokemon_wanted,
-                "location": {
-                    "lat": lat,
-                    "lon": lon
-                },
-                "status": self.ENROLL
-            }
-            logging.info("Creating user: " + str(user))
+            logging.info("Returning user: " + str(user))
 
             yield User(user)
 
@@ -135,13 +125,13 @@ class PnuRequest:
         # probably android msg either location or pokemon wanted
         lat = lon = None
         if msg['Subject']:
-            logger.info("Possibly Android device")
+            logging.info("Possibly Android device")
             # message body
             body = msg.get_payload(decode=True)
             try:
                 lat, lon = self.parse_android_lat_lon(body)
             except AttributeError:
-                logger.info("Android location not found")
+                logging.info("Android location not found")
                 pass
 
         else:
@@ -149,7 +139,7 @@ class PnuRequest:
             try:
                 lat, lon = self.parse_ios_lat_lon(msg)
             except AttributeError:
-                logger.info("iOS location not found")
+                logging.info("iOS location not found")
                 pass
 
         return lat, lon
@@ -157,7 +147,12 @@ class PnuRequest:
     def parse_pokemon_wanted(self, msg):
         """ parses input message and returns a list of pokemon wanted """
         results = re.search(self.pokemon_regex, msg.decode('UTF-8'))
-        return re.split(self.split_regex, results.group(1))
+        try:
+            return re.split(self.split_regex, results.group(1))
+        except AttributeError:
+            logging.info("Latitude, Longitude, and pokemon_wanted, are "
+                            + "not found. Probably a junk message")
+            return None
 
     def get_attachment(self, msg):
         """ returns the text from the attachment of an iOS message """
@@ -215,10 +210,7 @@ class PnuRequest:
             logging.info("RESUME command received for: " + str(msg['From']))
             status = self.RESUME
 
-        if status == None:
-            return status
-
-        return User({'phone_number': msg['From'], 'status': status})
+        return status
 
     def find_stop_command(self, body):
         return self.find_command(body, self.stop_regex)

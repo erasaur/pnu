@@ -1,5 +1,8 @@
 from pnu.core.runnable import PnuRunnable
 from pnu.outbound.alerter import smtp
+from pnu.core.data_store import PnuPendingDataStore
+from pnu.etc import constants
+
 import logging
 logging = logging.getLogger(__name__)
 
@@ -24,7 +27,7 @@ class PnuAlertDispatcher (PnuRunnable):
                 "status": 'ACTIVE'
             })
 
-    def prompt_alerts (self):
+    def prompt_alerts(self):
         while True:
-            print("prompting alerts")
-            time.sleep(5)
+            raw_user = PnuPendingDataStore.pop(constants.ENROLL)
+            smtp.send_message(json.loads(raw_user))
