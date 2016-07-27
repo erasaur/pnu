@@ -12,7 +12,7 @@ get_pid_redis () {
     grep $REDIS_PROCESS | # get lines with redis-server
     grep -v grep | # ignore lines with grep
     tr -s " " | # collapse spaces
-    cut -d " " -f2 | # cut spaces
+    cut -d " " -f2 | # cut by spaces and grab pid column
     head -n 1 # get first line
   `
 }
