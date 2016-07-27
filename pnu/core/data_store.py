@@ -16,9 +16,7 @@ class RedisDataStore ():
     def get (self, key):
         try:
             res = self._redis.get(key)
-            logging.info("loading: {}".format(res))
             res = res.decode("utf-8")
-            logging.info("decoded: {}".format(res))
             res = json.loads(res)
         except Exception as e:
             logging.info('get failed, got exception: {}'.format(e))
@@ -38,12 +36,8 @@ class RedisDataStore ():
                 val = val.get_json()
 
             curr = self.get(key)
-            logging.info("{}".format(curr))
             for k, v in val.items():
-                logging.info("{}, {}, {}".format(k,v, v is None))
                 curr[k] = v
-
-            logging.info("{}, {}".format(curr, type(curr)))
             self.set(key, curr)
         except Exception as e:
             logging.info('update failed, got exception: {}'.format(e))
