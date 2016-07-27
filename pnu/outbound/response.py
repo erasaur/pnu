@@ -165,7 +165,12 @@ class BuildResponse:
                 return self._make_resume_msg(), self.to
 
         elif self.status == 'PAUSE':
-            return self._make_pause_msg(), self.to
+            if not self.location:
+                return self._make_no_location_msg(), self.to
+            elif not self.pokemon_wanted:
+                return self._make_no_pokemon_listed_msg(), self.to
+            else:
+                return self._make_pause_msg(), self.to
 
         elif self.status == 'STOP':
             return self._make_stop_msg(), self.to
