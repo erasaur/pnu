@@ -37,13 +37,17 @@ class User (Base):
             self.lat = self.lon = None
 
     def get_json (self):
+        location = None
+        if self.lat and self.lon:
+            location = {
+                "lat": self.lat,
+                "lon": self.lon
+            }
+
         return {
             "phone_number": self.phone_number,
             "pokemon_wanted": self.pokemon_wanted,
-            "location": {
-                "lat": self.lat,
-                "lon": self.lon
-            },
+            "location": location,
             "status": self.status
         }
 

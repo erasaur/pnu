@@ -36,9 +36,14 @@ class RedisDataStore ():
                 val = val.get_json()
 
             curr = self.get(key)
+
+            logging.info("prev: {}".format(curr))
+
             for k, v in val.items():
                 curr[k] = v
             self.set(key, curr)
+
+            logging.info("now: {}".format(self.get(key)))
         except Exception as e:
             logging.info('update failed, got exception: {}'.format(e))
             logging.info('tried to update {} to {}'.format(key, val))
