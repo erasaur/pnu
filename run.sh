@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 get_pid_redis () {
   # returns the process id of the redis process
   echo `
-    ps -f | # display pid
+    ps -f | # display processes with their pids
     grep $REDIS_PROCESS | # get lines with redis-server
     grep -v grep | # ignore lines with grep
     tr -s " " | # collapse spaces
@@ -23,6 +23,6 @@ if [ -n "$pid" ]; then
    echo -e "${GREEN}Redis is running with pid: $pid${NC}"
   ./main.py
 else 
-   echo -e "${RED}Please start redis with ./run_redis first.${NC}"
+  echo -e "${RED}Please start redis with ./run_user_redis (user store) and ./run_enroll_redis (enroll store) first.${NC}"
 fi
 
