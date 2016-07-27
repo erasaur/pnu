@@ -30,7 +30,7 @@ class PnuAlertDispatcher:
         Args:
             info (dictionary)
         """
-        msg, phone_number = Response(user, link).build_message()
+        msg, phone_number = BuildResponse(user, link).build_message()
         logging.info("MESSAGE IS: " + msg)
         logging.info("Sending to: " + phone_number)
         self.smtp.sendmail(private_config['gmail']['username'],

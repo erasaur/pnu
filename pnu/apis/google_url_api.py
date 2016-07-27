@@ -59,4 +59,4 @@ if __name__ == "__main__":
     ShortenURL.get_short_url('http://google.com')
 
 
-shortenURL = ShortenURL.get_short_url
+PnuUrlShortener = ShortenURL.get_short_url

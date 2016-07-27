@@ -1,3 +1,5 @@
+from pnu.apis.google_url_api import PnuUrlShortener
+
 class Alert:
 
     BASE = 'https://pnu.space/map/?'
@@ -17,7 +19,7 @@ class Alert:
         url = BASE
         for pokemon in self.pokemon:
             url += (pokemon.get_id() + '=' + pokemon.get_lat() + ','
-                    + pokemon.get_lon() + ',' + pokemon.get_time_to_exp() + '&')
+                    + pokemon.get_lon() + ',' + pokemon.get_expiration_time() + '&')
 
         # remove the very last '&' from the long url
         self.link = url[:-1]
@@ -30,3 +32,7 @@ class Alert:
 
     def get_pokemon_names(self):
         return [pokemon.get_name() for pokemon in self.pokemon]
+
+    def get_short_link(self):
+        self.short_link = PnuUrlShortener(self.link)
+        return self.short_link

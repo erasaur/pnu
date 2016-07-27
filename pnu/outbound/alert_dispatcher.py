@@ -23,12 +23,12 @@ class PnuAlertDispatcher (PnuRunnable):
             smtp.send_message({
                 "phone_number": alert.get_phone_numbers(),
                 "pokemon_wanted": alert.get_pokemon_names(),
-                "link": link,
+                "link": alert.get_short_link(),
                 "status": 'ACTIVE'
             })
 
     def prompt_alerts(self):
         while True:
             raw_user = PnuPendingDataStore.pop(constants.ENROLL)
-            loggin.info("got pending user:", raw_user)
+            logging.info("Got pending user:", raw_user)
             smtp.send_message(json.loads(raw_user))
