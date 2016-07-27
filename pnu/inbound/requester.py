@@ -119,7 +119,7 @@ class PnuRequest:
                 # JUNK MESSAGEEEE
                 continue
 
-            logging.info("Returning user: " + str(user))
+            logging.info("Returning user: {}".format(user))
 
             yield User(user)
 
@@ -173,7 +173,7 @@ class PnuRequest:
                 valid_pokemon.append(constants.POKEMON_NAME_TO_ID[pokemon])
 
             except KeyError:
-                logging.log("User submitted fake pokemon: " + str(pokemon))
+                logging.info("User submitted fake pokemon: {}".format(pokemon))
                 continue
 
         return valid_pokemon
@@ -200,8 +200,7 @@ class PnuRequest:
         """
 
         result = re.search(self.android_regex, body.decode('UTF-8'))
-        logging.info('Android (lat, lon): ' + str(result.group('lat'))
-                + ', ' + str(result.group('lon')))
+        logging.info('Android (lat, lon): {}, {}'.format(result.group('lat'), result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
     def parse_ios_lat_lon(self, msg):
@@ -216,22 +215,21 @@ class PnuRequest:
         """
         attach_text = self.get_attachment(msg)
         result = re.search(self.ios_regex, attach_text.decode('UTF-8'))
-        logging.info('iOS (lat, lon): ' + str(result.group('lat'))
-                + ', ' + str(result.group('lon')))
+        logging.info('iOS (lat, lon): {}, {}'.format(result.group('lat'), result.group('lon')))
         return (result.group('lat'), result.group('lon'),)
 
     def check_for_command(self, body, msg):
         status = None
         if self.find_stop_command(body):
-            logging.info("STOP command received for: " + str(msg['From']))
+            logging.info("STOP command received for: {}".format(msg['From']))
             status = self.STOP
 
         elif self.find_pause_command(body):
-            logging.info("PAUSE command received for: " + str(msg['From']))
+            logging.info("PAUSE command received for: {}".format(msg['From']))
             status = self.PAUSE
 
         elif self.find_resume_command(body):
-            logging.info("RESUME command received for: " + str(msg['From']))
+            logging.info("RESUME command received for: {}".format(msg['From']))
             status = self.RESUME
 
         return status
