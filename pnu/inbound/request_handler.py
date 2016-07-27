@@ -1,7 +1,7 @@
 import threading
 
 from pnu.config import pub_config
-from pnu.etc import constants
+from pnu.etc.constants import RESPONSE_STATUS_LIST
 from pnu.core.runnable import PnuRunnable
 from pnu.core.data_store import PnuPendingDataStore
 from pnu.core.data_store import PnuUserDataStore
@@ -20,7 +20,6 @@ logging = logging.getLogger(__name__)
 
 
 class PnuRequestHandler (PnuRunnable):
-    RESPONSE_STATUS_LIST = [constants.PAUSE, constants.RESUME, constants.STOP]
 
     def __init__ (self):
         super().__init__(update_interval=pub_config["request_handler"]["update_interval"])
