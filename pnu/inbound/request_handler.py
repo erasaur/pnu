@@ -5,6 +5,7 @@ from pnu.etc.constants import RESPONSE_STATUS_LIST
 from pnu.core.runnable import PnuRunnable
 from pnu.core.data_store import PnuPendingDataStore
 from pnu.core.data_store import PnuUserDataStore
+from pnu.models.user import User
 from pnu.inbound.requester import PnuRequest
 
 import logging
