@@ -48,16 +48,13 @@ class PnuRequestHandler (PnuRunnable):
                 PnuPendingDataStore.append(constants.ENROLL, inbound_user)
                 continue
 
-            logging.info("Got inbound user: {}\n".format(inbound_user))
-
             # we don't have BOTH the location and pokemon wanted, so they still
             # need to fully enroll
             PnuUserDataStore.update(inbound_user.get_phone_number(), inbound_user)
             json_user = PnuUserDataStore.get(inbound_user.get_phone_number())
-            logging.info("\n\nUpdating json_user: \n{}".format(json_user))
             json_user['status'] = constants.ENROLL
             user = User(json_user)
-            logging.info("\n\nUpdating user: \n{}".format(user))
+
             # user still needs to fully enroll
             if user.get_location_is_set() != user.get_pokemon_wanted_is_set():
                 logging.info("User needs to send us more data")

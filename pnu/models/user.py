@@ -58,13 +58,13 @@ class User (Base):
         return self.lon
 
     def get_location_is_set(self):
-        return (self.lat or self.lon)
+        return self.lat is not None and self.lon is not None
 
     def get_pokemon_wanted (self):
         return self.pokemon_wanted
 
     def get_pokemon_wanted_is_set (self):
-        return (len(self.pokemon_wanted) > 0)
+        return len(self.pokemon_wanted) > 0
 
     def get_phone_number (self):
         return self.phone_number
