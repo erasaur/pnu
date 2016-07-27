@@ -1,7 +1,7 @@
 import threading
 
 from pnu.config import pub_config
-from pnu.etc.constants import RESPONSE_STATUS_LIST
+from pnu.etc import constants
 from pnu.core.runnable import PnuRunnable
 from pnu.core.data_store import PnuPendingDataStore
 from pnu.core.data_store import PnuUserDataStore
@@ -34,7 +34,7 @@ class PnuRequestHandler (PnuRunnable):
                 continue
 
             # check for status update on the inbound_user
-            if inbound_user.get_status() in RESPONSE_STATUS_LIST:
+            if inbound_user.get_status() in constants.RESPONSE_STATUS_LIST:
                 # sends correct status message based on status field
                 if inbound_user.get_status() == constants.STOP:
                     PnuUserDataStore.delete_user(inbound_user.get_phone_number())

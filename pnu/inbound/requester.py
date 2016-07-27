@@ -90,8 +90,8 @@ class PnuRequest:
                 'phone_number': msg['From'],
                 'pokemon_wanted': pokemon_wanted,
                 'location': {
-                        'lat': lat,
-                        'lon': lon
+                    'lat': lat,
+                    'lon': lon
                 },
                 'status': status
             }
@@ -102,7 +102,7 @@ class PnuRequest:
             status = self.check_for_command(body, msg)
             if status:
                 user['status'] = status
-                yield user
+                yield User(user)
 
             lat, lon = self.parse_lat_lon(msg)
             user['location']['lat'] = lat
