@@ -3,12 +3,12 @@ from pnu.etc.constants import POKEMON_ID_TO_NAME
 
 class Pokemon (Base):
     def load_args (self, pokemonId, lat, lon, expiration_time):
-        self.load_json(
-            pokemonId=pokemonId,
-            latitude=lat,
-            longitude=lon,
-            expiration_time=expiration_time
-        )
+        self.load_json({
+            "pokemonId": pokemonId,
+            "latitude": lat,
+            "longitude": lon,
+            "expiration_time": expiration_time
+        })
 
     def load_json (self, data):
         super().load_json(data)
