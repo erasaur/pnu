@@ -22,12 +22,7 @@ class PnuAlertDispatcher (PnuRunnable):
                 alert.get_pokemon_names(),
                 alert.get_phone_numbers())
             logging.info(log_msg)
-            smtp.send_message({
-                "phone_number": alert.get_phone_numbers(),
-                "pokemon_wanted": alert.get_pokemon_names(),
-                "link": alert.get_short_link(),
-                "status": 'ACTIVE'
-            })
+            smtp.send_message(alert)
 
     def prompt_alerts(self):
         while True:
