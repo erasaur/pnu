@@ -74,7 +74,7 @@ class PnuPokeApi ():
 
         res = []
         for poke_tuple, user_list in temp.items():
-            res.append(Alert(list(poke_tuple), user_list))
+            res.append(Alert(poke_tuple, user_list))
 
         return res
 
