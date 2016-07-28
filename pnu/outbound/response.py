@@ -37,10 +37,11 @@ class BuildResponse:
 
     def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
-        msg = ("PAUSE - temporarily suspend alerts\nRESUME " +
-               "- resume previous alerts\nSTOP - quit receiving alerts" +
-               "\nTo activate your user, respond in the form of \"Pokemon "
-               "wanted: poke1, poke2, poke3\" with up to five pokemon")
+        msg = ("To activate your user, respond in the form of \"Pokemon " +
+               "wanted: poke1, poke2, poke3...\" with up to five Pokemon" +
+               "A list of commands are:\nPAUSE - temporarily suspend alerts" +
+               "\nRESUME - resume previous alerts\nSTOP - quit receiving " +
+               "alerts")
         self.to = self._check_len_of_msg(msg)
         return msg
 
