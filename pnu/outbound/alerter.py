@@ -13,7 +13,6 @@ logging = logging.getLogger(__name__)
 
 class PnuAlertDispatcher:
 
-
     def __init__(self):
         """ perform preliminary actions for sending email via SMTP """
 
