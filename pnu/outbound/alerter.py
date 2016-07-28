@@ -68,14 +68,26 @@ if __name__ == "__main__":
     link = "https://pnu.space"
 
     # test sending ALERTS
-    info = {
+    poke_json= {
         "pokemonId": 16,
         "latitude": 12,
         "longitude": 10,
         "expiration_time": 123456789
     }
-    poke_tuple = Pokemon(info)
-    phone_numbers = ["2694913303@vtext.com", "2694913303@vtext.com"]
+    user_json = {
+            "phone_number": "2694913303@vtext.com",
+            "pokemon_wanted": [],
+            "status": "PAUSE",
+            "location": {
+                    "lat": 12,
+                    "lon": 10
+            }
+    }
+
+    poke_tuple = Pokemon(poke_json)
+    user1 = User(user_json)
+    user2 = User(user_json)
+    phone_numbers = [user1,user2]
     alert = Alert((poke_tuple,), phone_numbers)
     smtp.send_message(alert)
 

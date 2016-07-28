@@ -11,13 +11,17 @@ class Alert:
             pokemon  (List or tuple of pokemon objects)
             user (List or tuple of user objects)
         """
+        # the pokemon_tuple are used as keys prior, that's why it's a tuple
         if isinstance(pokemon, tuple):
-            pokemon = list(pokemon)
+            self.pokemon = list(pokemon)
+
+        # if the users are not a tuple, but a list, then we won't error out
         if isinstance(users, tuple):
-            users = list(users)
+            self.users = list(users)
+        else:
+            self.users = users
 
         self.pokemon = pokemon
-        self.users = users
         self.phone_numbers = [
             user.get_phone_number() for user in self.users
         ]
