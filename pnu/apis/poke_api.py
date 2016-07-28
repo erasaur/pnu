@@ -35,7 +35,7 @@ class PnuPokeApi ():
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
         fut_list = []
-        logging.info("Processng {} users...".format(len(self._users)))
+        logging.info("Processing {} users...".format(len(self._users)))
         for user in self._users:
             fut = asyncio.ensure_future(
                 self._pokevision_api.get_nearby(user.get_lat(), user.get_lon())
@@ -47,15 +47,13 @@ class PnuPokeApi ():
             curr = set() # don't want duplicates
 
             for poke in pokes_nearby:
-                poke_id = poke.get_id()
-                poke = (
-                    poke_id, 
-                    poke.get_lat(), 
-                    poke.get_lon(),
-                    poke.get_expiration_time()
-                )
-                if poke_id in user.get_pokemon_wanted():
-                    curr.add(poke)
+                if user.should_be_alerted(poke):
+                    curr.add(( # order matters here
+                        poke.get_id(), 
+                        poke.get_lat(), 
+                        poke.get_lon(),
+                        poke.get_expiration_time()
+                    ))
 
             if len(curr) > 0:
                 # sort so that multiple tuples with the same elements (but
@@ -70,13 +68,13 @@ class PnuPokeApi ():
                 # convert back to tuple because dicts need immutable keys
                 poke_tuple = tuple(poke_list)
                 if poke_tuple in temp:
-                    temp[poke_tuple].append(user.get_phone_number())
+                    temp[poke_tuple].append(user)
                 else:
-                    temp[poke_tuple] = [user.get_phone_number()]
+                    temp[poke_tuple] = [user]
 
         res = []
-        for poke_tuple, phone_list in temp.items():
-            res.append(Alert(poke_tuple, phone_list))
+        for poke_tuple, user_list in temp.items():
+            res.append(Alert(list(poke_tuple), user_list))
 
         return res
 

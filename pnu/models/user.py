@@ -4,13 +4,14 @@ logging = logging.getLogger(__name__)
 
 class User (Base):
     def load_args (self, phone_number, pokemon_wanted, lat, lon, status):
-        self.load_json(
-            phone_number=phone_number,
-            pokemon_wanted=pokemon_wanted,
-            latitude=lat,
-            longitude=lon,
-            status=status,
-        )
+        self.load_json({
+            "phone_number": phone_number,
+            "pokemon_wanted": pokemon_wanted,
+            "latitude": lat,
+            "longitude": lon,
+            "status": status,
+            "last_notif": last_notif
+        })
 
     def load_json (self, data):
         try:
@@ -19,6 +20,7 @@ class User (Base):
 
             # returns None if key doesn't exist
             self.pokemon_wanted = data.get("pokemon_wanted")
+            self.last_notif = data.get("last_notif", default={})
 
             loc = data.get("location")
             if loc is not None:
@@ -35,6 +37,7 @@ class User (Base):
             self.status = None
             self.pokemon_wanted = None
             self.lat = self.lon = None
+            self.last_notif = {}
 
     def get_json (self):
         location = None
@@ -48,7 +51,8 @@ class User (Base):
             "phone_number": self.phone_number,
             "pokemon_wanted": self.pokemon_wanted,
             "location": location,
-            "status": self.status
+            "status": self.status,
+            "last_notif": self.last_notif
         }
 
     def get_lat (self):
@@ -75,6 +79,37 @@ class User (Base):
 
     def is_active (self):
         return self.is_location_set() and self.is_pokemon_wanted_set()
+
+    def get_last_notif (self):
+        return self.last_notif
+
+    def set_last_notif_for_poke (self, poke):
+        if not isinstance(self.last_notif, dict):
+            self.last_notif = {}
+
+        expiration_time = poke.get_expiration_time()
+        last_notif = self.get_last_notif_for_poke(poke)
+
+        if last_notif is not None and expiration_time > last_notif:
+            self.last_notif[poke.get_id()] = expiration_time
+
+    # returns the latest expiration time (i.e newest copy) of
+    # the poke that the user has seen so far
+    def get_last_notif_for_poke (self, poke):
+        if not isinstance(self.last_notif, dict):
+            return None
+        return self.last_notif.get(poke.get_id())
+
+    def should_be_alerted (self, poke):
+        # user should be alerted of pokemon if:
+        # - the pokemon is one that the user wants
+        # - it's a new appearance of the pokemon
+        poke_id = poke.get_id()
+        expiration = poke.get_expiration_time()
+        last_notif = self.get_last_notif_for_poke(poke_id)
+
+        return poke_id in self.get_pokemon_wanted() and
+            last_notif is None or expiration > last_notif
 
     def empty (self):
         status = self.get_status()
