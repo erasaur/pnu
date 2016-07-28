@@ -107,13 +107,13 @@ class User (Base):
         # - it's a new appearance of the pokemon
         expiration = poke.get_expiration_time()
         last_notif = self.get_last_notif_for_poke(poke)
-        poke_id_str = str(poke.get_id())
+        poke_id = poke.get_id()
 
         wanted = self.get_pokemon_wanted()
         if not isinstance(wanted, list):
             wanted = []
 
-        return (poke_id_str in wanted and 
+        return (poke_id in wanted and 
             (last_notif is None or expiration > last_notif))
 
     def empty (self):
