@@ -22,7 +22,7 @@ class Alert:
             user.get_phone_number() for user in self.users
         ]
         self.pokemon_names = [
-            pokemon.get_name().capitalize() for pokemon in self.pokemon
+            pokemon.get_name().capitalize().strip() for pokemon in self.pokemon
         ]
         self._gen_url()
 
