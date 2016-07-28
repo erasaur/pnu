@@ -22,7 +22,16 @@ class PnuAlertDispatcher(PnuRunnable):
                 alert.get_pokemon_names(),
                 alert.get_phone_numbers())
             logging.info(log_msg)
+
             smtp.send_message(alert)
+
+            # update users' last notified times so we don't
+            # keep alerting them about the same pokemon
+            for user in alert.get_users():
+                for poke in alert.get_pokemon():
+                    user.set_last_notif_for_poke(poke)
+
+                PnuUserDataStore.update(user.get_phone_number(), user)
 
     def prompt_alerts(self):
         while True:
