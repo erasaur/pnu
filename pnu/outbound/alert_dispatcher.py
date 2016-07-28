@@ -1,19 +1,19 @@
-import json
 from pnu.core.runnable import PnuRunnable
-from pnu.outbound.alerter import smtp
 from pnu.core.data_store import PnuPendingDataStore
 from pnu.etc import constants
+from pnu.outbound.alerter import smtp
+from pnu.models.user import User
 
+import json
 import logging
 logging = logging.getLogger(__name__)
 
-from pnu.models.user import User
 
-class PnuAlertDispatcher (PnuRunnable):
-    def run (self):
+class PnuAlertDispatcher(PnuRunnable):
+    def run(self):
         self.run_once(self.prompt_alerts)
 
-    def dispatch (self, alerts):
+    def dispatch(self, alerts):
         # pokemon object tuples will be returned
         # followed by a list of users who need to be notified
         # for the said pokemon
