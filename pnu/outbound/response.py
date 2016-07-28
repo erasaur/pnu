@@ -81,9 +81,9 @@ class BuildResponse:
         """
         logging.info("Sending ACTIVE message")
         self.pokemon_wanted = self.poke_list_to_str()
-        msg = MIMEText("There's a wild {pokemon} near you! Go catch 'em!\n" +
-                       "{link}\n".format(pokemon=self.pokemon_wanted,
-                                         link=self.link))
+        msg = MIMEText("There's a wild {pokemon} near you! Go catch 'em!\n"
+                       .format(pokemon=self.pokemon_wanted) +
+                       "{link}\n".format(link=self.link))
 
         # if the message to send is over 160 characters, send it via the mms
         # gateway instead of sms. The minus 2 is for parenthesis that get added
