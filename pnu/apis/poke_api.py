@@ -6,6 +6,9 @@ from pnu.models.user import User
 from pnu.models.pokemon import Pokemon
 from pnu.models.alert import Alert
 
+import logging
+logging = logging.getLogger(__name__)
+
 class PnuPokeApi ():
     def __init__ (self, session=None):
         # TODO add other apis for backup
@@ -18,7 +21,7 @@ class PnuPokeApi ():
     def update_data (self):
         # TODO find the minimal set of locations to cover everybody
         if PnuUserDataStore.changed_since(self._last_update):
-            self._users = [User(data=l) for l in PnuUserDataStore.list()]
+            self._users = [User(l) for l in PnuUserDataStore.list()]
             self._last_update = time.time()
 
     async def get_pokemon_alerts (self):
@@ -32,6 +35,7 @@ class PnuPokeApi ():
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
         fut_list = []
+        logging.info("Processng {} users...".format(len(self._users)))
         for user in self._users:
             fut = asyncio.ensure_future(
                 self._pokevision_api.get_nearby(user.get_lat(), user.get_lon())
@@ -44,14 +48,14 @@ class PnuPokeApi ():
 
             for poke in pokes_nearby:
                 poke_id = poke.get_id()
-                curr.add((
+                poke = (
                     poke_id, 
                     poke.get_lat(), 
                     poke.get_lon(),
                     poke.get_expiration_time()
-                ))
-                # if poke_id in user.get_pokemon_wanted():
-                #     curr.add(poke_id)
+                )
+                if poke_id in user.get_pokemon_wanted():
+                    curr.add(poke)
 
             if len(curr) > 0:
                 # sort so that multiple tuples with the same elements (but
@@ -71,7 +75,7 @@ class PnuPokeApi ():
                     temp[poke_tuple] = [user.get_phone_number()]
 
         res = []
-        for poke_tuple, phone_list in temp:
+        for poke_tuple, phone_list in temp.items():
             res.append(Alert(poke_tuple, phone_list))
 
         return res
