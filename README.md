@@ -1,6 +1,6 @@
 Pokemon Near You (pnu, pronounced "new")
 =======================
-# Styling #
+# Style #
 Run `install_style.sh` located in the root of the project to install a local git hook that runs a pep8 check against any newly committed files.
 
 # Logging #
