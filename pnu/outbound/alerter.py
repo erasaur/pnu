@@ -19,22 +19,23 @@ class PnuAlertDispatcher:
 
         logging.info("Starting up Alert")
         try:
-            self.smtp = SMTP(pub_config['smtp']['host'], pub_config['smtp']['port'])
+            self.smtp = SMTP(pub_config['smtp']['host'],
+                             pub_config['smtp']['port'])
             self.smtp.ehlo()
             self.smtp.starttls()
             self.smtp.login(private_config['gmail']['username'],
-                    private_config['gmail']['password'])
+                            private_config['gmail']['password'])
         except SMTPHeloError:
-            logging.error("Error the email server didn't properly reply "
-                    + "to the ehlo/helo request")
+            logging.error("Error the email server didn't properly reply " +
+                          "to the ehlo/helo request")
 
         except SMTPAuthenticationError:
-            logging.error("The username or password was not accepted by the "
-                    + "email server")
+            logging.error("The username or password was not accepted by the " +
+                          "email server")
 
         except SMTPNotSupportedError:
-            logging.error("The AUTH command is not supported by the email "
-                    + "server")
+            logging.error("The AUTH command is not supported by the email " +
+                          "server")
 
         except SMTPException:
             logging.error("Could not connect with the email server!!")
@@ -48,9 +49,10 @@ class PnuAlertDispatcher:
             info (dictionary)
         """
         msg, phone_number = BuildResponse(user).build_message()
-        logging.info("MESSAGE IS: {}\nSending to: {}".format(msg, phone_number))
+        logging.info("MESSAGE IS: {}\nSending to: {}".format(
+                     msg, phone_number))
         self.smtp.sendmail(private_config['gmail']['username'],
-                phone_number, msg)
+                           phone_number, msg)
 
 smtp = PnuAlertDispatcher()
 
@@ -61,12 +63,12 @@ if __name__ == "__main__":
         logging.root.removeHandler(handler)
 
     logging.basicConfig(filename='../etc/logs/alerter.out',
-            level=logging.DEBUG)
+                        level=logging.DEBUG)
 
     logging.info("Beginning " + __file__)
     link = "https://pnu.space"
 
-    ### test sending ALERTS
+    # test sending ALERTS
     info = {
         "pokemonId": 16,
         "latitude": 12,
@@ -74,7 +76,7 @@ if __name__ == "__main__":
         "expiration_time": 123456789
     }
     poke_tuple = Pokemon(info)
-    phone_numbers = ["2694913303@vtext.com","2694913303@vtext.com"]
+    phone_numbers = ["2694913303@vtext.com", "2694913303@vtext.com"]
     alert = Alert((poke_tuple,), phone_numbers)
     smtp.send_message(alert)
 
@@ -82,7 +84,7 @@ if __name__ == "__main__":
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
             "status": "STOP",
-            "location":{
+            "location": {
                     "lat": 12,
                     "lon": 10
             }
@@ -94,7 +96,7 @@ if __name__ == "__main__":
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": [],
             "status": "PAUSE",
-            "location":{
+            "location": {
                     "lat": 12,
                     "lon": 10
             }
@@ -105,7 +107,7 @@ if __name__ == "__main__":
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": [],
             "status": "RESUME",
-            "location":{
+            "location": {
                     "lat": 12,
                     "lon": 10
             }
@@ -116,7 +118,7 @@ if __name__ == "__main__":
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": ['abra', 'snorlax'],
             "status": "STOP",
-            "location":{
+            "location": {
                     "lat": 12,
                     "lon": 10
             }
@@ -127,7 +129,7 @@ if __name__ == "__main__":
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": [],
             "status": "ENROLL",
-            "location":{
+            "location": {
                     "lat": 12,
                     "lon": 10
             }
