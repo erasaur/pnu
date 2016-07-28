@@ -50,3 +50,6 @@ class Pokemon (Base):
 
     def get_expiration_time(self):
         return self.expiration_time
+
+    def __str__ (self):
+        return "{}".format(self.get_name())

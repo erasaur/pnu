@@ -20,7 +20,7 @@ class User (Base):
 
             # returns None if key doesn't exist
             self.pokemon_wanted = data.get("pokemon_wanted")
-            self.last_notif = data.get("last_notif", {})
+            self.last_notif = data.get("last_notif")
 
             loc = data.get("location")
             if loc is not None:
@@ -37,7 +37,7 @@ class User (Base):
             self.status = None
             self.pokemon_wanted = None
             self.lat = self.lon = None
-            self.last_notif = {}
+            self.last_notif = None
 
     def get_json (self):
         location = None
@@ -109,7 +109,11 @@ class User (Base):
         last_notif = self.get_last_notif_for_poke(poke)
         poke_id_str = str(poke.get_id())
 
-        return (poke_id_str in self.get_pokemon_wanted() and 
+        wanted = self.get_pokemon_wanted()
+        if not isinstance(wanted, list):
+            wanted = []
+
+        return (poke_id_str in wanted and 
             (last_notif is None or expiration > last_notif))
 
     def empty (self):
