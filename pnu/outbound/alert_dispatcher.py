@@ -28,9 +28,11 @@ class PnuAlertDispatcher(PnuRunnable):
             # update users' last notified times so we don't
             # keep alerting them about the same pokemon
             for user in alert.get_users():
+                logging.info("before lnu: {}".format(user))
                 for poke in alert.get_pokemon():
                     user.set_last_notif_for_poke(poke)
 
+                logging.info("after lnu: {}".format(user))
                 PnuUserDataStore.update(
                     user.get_phone_number(), 
                     # only modify last_notif

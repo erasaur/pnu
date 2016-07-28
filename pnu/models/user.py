@@ -89,9 +89,10 @@ class User (Base):
 
         expiration_time = poke.get_expiration_time()
         last_notif = self.get_last_notif_for_poke(poke)
+        poke_id_str = str(poke.get_id())
 
-        if last_notif is not None and expiration_time > last_notif:
-            self.last_notif[poke.get_id()] = expiration_time
+        if last_notif is None or expiration_time > last_notif:
+            self.last_notif[poke_id_str] = expiration_time
 
     # returns the latest expiration time (i.e newest copy) of
     # the poke that the user has seen so far
@@ -106,8 +107,9 @@ class User (Base):
         # - it's a new appearance of the pokemon
         expiration = poke.get_expiration_time()
         last_notif = self.get_last_notif_for_poke(poke)
+        poke_id_str = str(poke.get_id())
 
-        return (poke.get_id() in self.get_pokemon_wanted() and 
+        return (poke_id_str in self.get_pokemon_wanted() and 
             (last_notif is None or expiration > last_notif))
 
     def empty (self):
@@ -117,6 +119,16 @@ class User (Base):
         return not (status or number or is_active)
 
     def __str__ (self):
-        return ("Phone #: {}\nPokemon wanted: {}\nLatitude: {}\nLongitude: {}\n"
-                "Status: {}".format(self.phone_number, self.pokemon_wanted,
-                                    self.lat, self.lon, self.status))
+        template = ("Phone #: {}\n"
+                    "Pokemon wanted: {}\n"
+                    "Latitude: {}\n"
+                    "Longitude: {}\n"
+                    "Status: {}\n"
+                    "Last Notif: {}\n")
+        return template.format(
+            self.phone_number,
+            self.pokemon_wanted,
+            self.lat, self.lon,
+            self.status,
+            self.last_notif
+        )
