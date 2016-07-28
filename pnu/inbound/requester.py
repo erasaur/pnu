@@ -14,9 +14,9 @@ import logging
 logging = logging.getLogger(__name__)
 
 class PnuRequest:
-    android_regex = re.compile("maps\.google\.com/maps\?f=q&q=\((?P<lat>.*)?,(?P<lon>.*)?\)")
-    ios_regex = re.compile("maps\.apple\.com/\?ll=(?P<lat>.*)?\\\,(?P<lon>.*)?&")
+    location_regex = re.compile("[@|\(\=](?P<lat>[\d|.|-]*)?,(?P<lon>[\d|.|-]*)?[,|&|\)]", re.IGNORECASE)
     pokemon_regex = re.compile("pokemon\s*[a-z]*:\s*((([a-z]*-*[a-z]*),\s[a-z]*-*[a-z]*){0,4})", re.IGNORECASE)
+
     split_regex = re.compile(', |; | |,')
     stop_regex = re.compile('stop', re.IGNORECASE)
     pause_regex = re.compile('pause', re.IGNORECASE)
@@ -99,7 +99,6 @@ class PnuRequest:
 
             for part in msg.walk():
                 if part.get_content_type() == 'text/html':
-#                    import ipdb; ipdb.set_trace()
                     body = part.get_payload(decode=True)
 
             if not body:
@@ -135,23 +134,15 @@ class PnuRequest:
 
     def parse_lat_lon(self, msg):
         """ parses for the latitude and longitude from the email """
-        # probably android msg either location or pokemon wanted
         lat = lon = None
-        if msg['Subject']:
-            logging.info("Possibly Android device")
-            # message body
-            body = msg.get_payload(decode=True)
-            try:
-                lat, lon = self.parse_android_lat_lon(body)
-            except AttributeError:
-                logging.info("Android location not found")
+        # get the payload if it is an android since the message body contains
+        # the location and it's not in an attachment
+        body = msg.get_payload(decode=True)
+        lat, lon = self.parse_android_lat_lon(body)
 
-        else:
-            logging.info("Possibly iOS device")
-            try:
-                lat, lon = self.parse_ios_lat_lon(msg)
-            except AttributeError:
-                logging.info("iOS location not found")
+        # check for an attachment that may have come from an ios device
+        if not (lat and lon):
+            lat, lon = self.parse_ios_lat_lon(msg)
 
         return lat, lon
 
@@ -159,7 +150,7 @@ class PnuRequest:
         """ parses input message and returns a list of pokemon wanted """
         results = re.search(self.pokemon_regex, msg.decode('UTF-8'))
         try:
-            logging.info("Looking for pokemon wanted in body of messgae")
+            logging.info("Looking for pokemon wanted in body of message")
             pokemon_wanted = re.split(self.split_regex, results.group(1))
         except AttributeError:
             logging.info("No pokemon found in message!")
@@ -180,7 +171,8 @@ class PnuRequest:
         valid_pokemon = []
         for pokemon in pokemon_wanted:
             try:
-                valid_pokemon.append(constants.POKEMON_NAME_TO_ID[pokemon])
+                valid_pokemon.append(
+                        constants.POKEMON_NAME_TO_ID[pokemon.lower()])
 
             except KeyError:
                 logging.info("User submitted fake pokemon: {}".format(pokemon))
@@ -210,9 +202,9 @@ class PnuRequest:
             a tuple containing the (lat, long) of the message
         """
 
-        result = re.search(self.android_regex, body.decode('UTF-8'))
-        logging.info('Android (lat, lon): {}, {}'.format(result.group('lat'), result.group('lon')))
-        return (result.group('lat'), result.group('lon'),)
+        lat, lon = self.parse_for_location(body)
+        logging.info('Android (lat, lon): {}, {}'.format(lat, lon))
+        return (lat, lon,)
 
     def parse_ios_lat_lon(self, msg):
         """ gets the latitude and longitude from an iOS message attachment
@@ -225,9 +217,20 @@ class PnuRequest:
             a tuple containing the (lat, long) of the message
         """
         attach_text = self.get_attachment(msg)
-        result = re.search(self.ios_regex, attach_text.decode('UTF-8'))
-        logging.info('iOS (lat, lon): {}, {}'.format(result.group('lat'), result.group('lon')))
-        return (result.group('lat'), result.group('lon'),)
+        lat, lon = self.parse_for_location(attach_text)
+        logging.info('iOS (lat, lon): {}, {}'.format(lat, lon))
+        return (lat, lon,)
+
+    def parse_for_location(self, body):
+        try:
+            # if body is None, then it will also throw an AttributeError
+            result = re.search(self.location_regex, body.decode('UTF-8'))
+            lat = result.group('lat')
+            lon = result.group('lon')
+        except AttributeError:
+            return None, None
+
+        return lat, lon
 
     def check_for_command(self, body, msg):
         status = None
