@@ -94,7 +94,16 @@ class PnuRequest:
                 'status': status
             }
 
-            body = msg.get_payload(decode=True)
+            # need to check if multipart message, walk or don't walk
+            # based on that
+
+            for part in msg.walk():
+                if part.get_content_type() == 'text/html':
+#                    import ipdb; ipdb.set_trace()
+                    body = part.get_payload(decode=True)
+
+            if not body:
+                body = msg.get_payload(decode=True)
 
             # check for PAUSE, RESUME, STOP
             status = self.check_for_command(body, msg)
@@ -187,7 +196,8 @@ class PnuRequest:
                 if part.get_content_type() != 'text/x-vcard':
                     continue
                 filename = part.get_filename()
-                return part.get_payload(decode=True)
+                if filename == "Current Location.loc.vcf":
+                    return part.get_payload(decode=True)
 
     def parse_android_lat_lon(self, body):
         """ gets the latitude and longitude from an android message
