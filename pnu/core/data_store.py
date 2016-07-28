@@ -98,11 +98,20 @@ class RedisDataStore ():
         _ = self._redis.delete(del_key)
 
 
-PnuUserDataStore = RedisDataStore(
-    host=pub_config["user_data_store"]["host"],
-    port=pub_config["user_data_store"]["port"]
-)
+class UserDataStore (RedisDataStore):
+    def __init__ (self):
+        super().__init__(
+            host=pub_config["user_data_store"]["host"],
+            port=pub_config["user_data_store"]["port"]
+        )
 
+    def update (self, key, val):
+        # reset last_notif if changing pokemon list
+        if "pokemon_wanted" in val:
+            val["last_notif"] = {}
+        super().update(key, val)
+
+PnuUserDataStore = UserDataStore()
 PnuPendingDataStore = RedisDataStore(
     host=pub_config["pending_data_store"]["host"],
     port=pub_config["pending_data_store"]["port"]
