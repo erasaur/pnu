@@ -39,8 +39,8 @@ class BuildResponse:
         logging.info("Sending WELCOME message")
         msg = ("PAUSE - temporarily suspend alerts\nRESUME " +
                "- resume previous alerts\nSTOP - quit receiving alerts" +
-               "\nTo activate your user, respond in the form of \"Pokemon"
-               "wanted: poke1, poke2, poke3\" up to five pokemon")
+               "\nTo activate your user, respond in the form of \"Pokemon "
+               "wanted: poke1, poke2, poke3\" with up to five pokemon")
         self.to = self._check_len_of_msg(msg)
         return msg
 
