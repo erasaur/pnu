@@ -111,13 +111,19 @@ class BuildResponse:
 
     def _sms_to_mms(self):
         """ converts the sms carrier gateway to mms carrier gateway """
-        num, ext = self.to.split('@')
+        updated_to = []
+        # since self.to is a list of phone_numbers, we iterate through it
+        for num in self.to:
+            num, ext = self.to.split('@')
 
-        for i, carrier in enumerate(self.SMS_CARRIERS):
-            if ext == carrier:
-                ext = self.MMS_CARRIERS[i]
+            # check if the carrier is listed in our sms to mms availability
+            for i, carrier in enumerate(self.SMS_CARRIERS):
+                if ext == carrier:
+                    ext = self.MMS_CARRIERS[i]
 
-        return num + "@" + ext
+            updated_to.append(num + "@" + ext)
+
+        return updated_to
 
     def poke_list_to_str(self):
         """ creates a string from the list of pokemon wanted
