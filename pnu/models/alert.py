@@ -5,14 +5,25 @@ class Alert:
 
     BASE = 'https://pnu.space/map/?'
 
-    def __init__(self, pokemon_tuple, phone_numbers):
+    def __init__(self, pokemon_list, user_list):
         """ takes in a pokemon tuple and list of phone numbers to notify
         Args:
-            pokemon_tuple  (Tuple of pokemon objects)
-            phone_numbers (List of phone numbers to send the alert to)
+            pokemon_list  (List or tuple of pokemon objects)
+            user_list (List or tuple of user objects)
         """
-        self.pokemon = list(pokemon_tuple)
-        self.phone_numbers = phone_numbers
+        if isinstance(pokemon_list, tuple):
+            pokemon_list = list(pokemon_list)
+        if isinstance(user_list, tuple):
+            user_list = list(user_list)
+
+        self.pokemon = pokemon_list
+        self.user_list = user_list
+        self.phone_numbers = [
+            user.get_phone_number() for user in self.user_list
+        ]
+        self.pokemon_names = [
+            pokemon.get_name().capitalize() for pokemon in self.pokemon
+        ]
         self._gen_url()
 
     def _gen_url(self):
@@ -31,11 +42,17 @@ class Alert:
     def get_long_url(self):
         return self.link
 
+    def get_users(self):
+        return self.users
+
+    def get_pokemon(self):
+        return self.pokemon
+
     def get_phone_numbers(self):
         return self.phone_numbers
 
     def get_pokemon_names(self):
-        return [pokemon.get_name().capitalize() for pokemon in self.pokemon]
+        return self.pokemon_names
 
     def get_short_link(self):
         return self.short_link
