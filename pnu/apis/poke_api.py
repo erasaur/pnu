@@ -20,9 +20,12 @@ class PnuPokeApi ():
 
     def update_data (self):
         # TODO find the minimal set of locations to cover everybody
-        if PnuUserDataStore.changed_since(self._last_update):
-            self._users = [User(l) for l in PnuUserDataStore.list()]
-            self._last_update = time.time()
+        # if PnuUserDataStore.changed_since(self._last_update):
+        #     self._users = [User(l) for l in PnuUserDataStore.list()]
+        #     self._last_update = time.time()
+
+        self._users = [User(l) for l in PnuUserDataStore.list()]
+        self._last_update = time.time()
 
     async def get_pokemon_alerts (self):
         # XXX cache results and reuse if location is close enough?
@@ -44,6 +47,9 @@ class PnuPokeApi ():
 
         for user, fut in fut_list:
             pokes_nearby = await fut
+            # sort so we get expiration times in ascending order, hence
+            # check all copies of the newly appeared pokes
+            pokes_nearby = sorted(pokes_nearby, key=lambda poke: poke.get_id())
             curr = set() # don't want duplicates
 
             for poke in pokes_nearby:
@@ -54,6 +60,10 @@ class PnuPokeApi ():
                         poke.get_lon(),
                         poke.get_expiration_time()
                     ))
+                    # TODO only need to set this once per unique poke, ie if
+                    # have 100 same poke, only need to set to the last poke's
+                    # time because we've sorted the list
+                    user.set_last_notif_for_poke(poke)
 
             if len(curr) > 0:
                 # sort so that multiple tuples with the same elements (but
@@ -73,8 +83,11 @@ class PnuPokeApi ():
                     temp[poke_tuple] = [user]
 
         res = []
+        logging.info("\n\n\n\n-------START--------\n\n\n\n")
         for poke_tuple, user_list in temp.items():
+            logging.info("\n{}\n".format(poke_tuple))
             res.append(Alert(poke_tuple, user_list))
+        logging.info("\n\n\n\n-------END--------\n\n\n\n")
 
         return res
 

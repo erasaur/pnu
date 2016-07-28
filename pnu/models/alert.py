@@ -1,5 +1,7 @@
 from pnu.apis.google_url_api import PnuUrlShortener
 
+import logging
+logging = logging.getLogger(__name__)
 
 class Alert:
 
@@ -25,9 +27,14 @@ class Alert:
         self.phone_numbers = [
             user.get_phone_number() for user in self.users
         ]
-        self.pokemon_names = [
-            pokemon.get_name().capitalize().strip() for pokemon in self.pokemon
-        ]
+        
+        # TODO improve this (also pluralization for multiple copies)
+        # remove duplicates
+        temp = set()
+        for poke in self.pokemon:
+            temp.add(poke.get_name().capitalize().strip())
+        self.pokemon_names = list(temp)
+
         self._gen_url()
 
     def _gen_url(self):
@@ -63,5 +70,6 @@ class Alert:
 
     def __str__(self):
         return ("Link: {}\nNumbers: {}\nPokemon: {}".format(
-            self.get_short_link(), self.get_phone_numbers(), self.pokemon_names
+            self.get_short_link(), self.get_phone_numbers(),
+            self.get_pokemon_names()
         ))
