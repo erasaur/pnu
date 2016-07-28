@@ -106,10 +106,17 @@ class UserDataStore (RedisDataStore):
         )
 
     def update (self, key, val):
-        # reset last_notif if changing pokemon list
-        if "pokemon_wanted" in val:
-            val["last_notif"] = {}
-        super().update(key, val)
+        try:
+            if isinstance(val, Base):
+                val = val.get_json()
+
+            # reset last_notif if changing pokemon list
+            if "pokemon_wanted" in val:
+                val["last_notif"] = {}
+            super().update(key, val)
+        except Exception as e:
+            logging.info('user update failed, got exception: {}'.format(e))
+            logging.info('tried to update {} to {}'.format(key, val))
 
 PnuUserDataStore = UserDataStore()
 PnuPendingDataStore = RedisDataStore(
