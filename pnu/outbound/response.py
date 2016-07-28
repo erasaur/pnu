@@ -1,5 +1,5 @@
 from email.mime.text import MIMEText
-from pnu.config import private_config, constants
+from pnu.config import private_config
 from pnu.etc import constants
 from pnu.models.alert import Alert
 

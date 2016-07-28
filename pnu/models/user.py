@@ -108,8 +108,8 @@ class User (Base):
         expiration = poke.get_expiration_time()
         last_notif = self.get_last_notif_for_poke(poke_id)
 
-        return poke_id in self.get_pokemon_wanted() and
-            last_notif is None or expiration > last_notif
+        return (poke_id in self.get_pokemon_wanted() and
+            last_notif is None or expiration > last_notif)
 
     def empty (self):
         status = self.get_status()
