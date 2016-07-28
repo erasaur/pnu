@@ -1,5 +1,6 @@
 from pnu.apis.google_url_api import PnuUrlShortener
 
+
 class Alert:
 
     BASE = 'https://pnu.space/map/?'
@@ -15,7 +16,7 @@ class Alert:
         self._gen_url()
 
     def _gen_url(self):
-        """ generates the long url to pnu.space based on the pokemon objects """
+        """ creates the long url to pnu.space based on the pokemon objects """
         url = self.BASE
         for pokemon in self.pokemon:
             url += "{id}={lat},{lon},{exp_time}&".format(
