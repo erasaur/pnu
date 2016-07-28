@@ -12,17 +12,22 @@ class Alert:
         """
         self.pokemon = list(pokemon_tuple)
         self.phone_numbers = phone_numbers
-        self._gen_long_url()
+        self._gen_url()
 
-    def _gen_long_url(self):
+    def _gen_url(self):
         """ generates the long url to pnu.space based on the pokemon objects """
-        url = BASE
+        url = self.BASE
         for pokemon in self.pokemon:
-            url += (pokemon.get_id() + '=' + pokemon.get_lat() + ','
-                    + pokemon.get_lon() + ',' + pokemon.get_expiration_time() + '&')
+            url += "{}={},{},{}&".format(
+                pokemon.get_id(),
+                pokemon.get_lat(),
+                pokemon.get_lon(),
+                pokemon.get_expiration_time()
+            )
 
         # remove the very last '&' from the long url
         self.link = url[:-1]
+        self.short_link = PnuUrlShortener(self.link)
 
     def get_long_url(self):
         return self.link
@@ -34,5 +39,9 @@ class Alert:
         return [pokemon.get_name() for pokemon in self.pokemon]
 
     def get_short_link(self):
-        self.short_link = PnuUrlShortener(self.link)
         return self.short_link
+
+    def __str__ (self):
+        return ("Link: {}\nNumbers: {}\n".format(
+            self.get_short_link(), self.get_phone_numbers()
+        ))
