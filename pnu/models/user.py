@@ -20,7 +20,7 @@ class User (Base):
 
             # returns None if key doesn't exist
             self.pokemon_wanted = data.get("pokemon_wanted")
-            self.last_notif = data.get("last_notif", default={})
+            self.last_notif = data.get("last_notif", {})
 
             loc = data.get("location")
             if loc is not None:
