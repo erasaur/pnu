@@ -57,7 +57,7 @@ class Alert:
     def get_short_link(self):
         return self.short_link
 
-    def __str__ (self):
-        return ("Link: {}\nNumbers: {}\n".format(
-            self.get_short_link(), self.get_phone_numbers()
+    def __str__(self):
+        return ("Link: {}\nNumbers: {}\nPokemon: {}".format(
+            self.get_short_link(), self.get_phone_numbers(), self.pokemon_names
         ))
