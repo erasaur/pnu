@@ -5,21 +5,21 @@ class Alert:
 
     BASE = 'https://pnu.space/map/?'
 
-    def __init__(self, pokemon_list, user_list):
-        """ takes in a pokemon tuple and list of phone numbers to notify
+    def __init__(self, pokemon, users):
+        """ takes in a pokemon list/tuple and user list/tuple to notify
         Args:
-            pokemon_list  (List or tuple of pokemon objects)
-            user_list (List or tuple of user objects)
+            pokemon  (List or tuple of pokemon objects)
+            user (List or tuple of user objects)
         """
-        if isinstance(pokemon_list, tuple):
-            pokemon_list = list(pokemon_list)
-        if isinstance(user_list, tuple):
-            user_list = list(user_list)
+        if isinstance(pokemon, tuple):
+            pokemon = list(pokemon)
+        if isinstance(users, tuple):
+            users = list(users)
 
-        self.pokemon = pokemon_list
-        self.user_list = user_list
+        self.pokemon = pokemon
+        self.users = users
         self.phone_numbers = [
-            user.get_phone_number() for user in self.user_list
+            user.get_phone_number() for user in self.users
         ]
         self.pokemon_names = [
             pokemon.get_name().capitalize() for pokemon in self.pokemon

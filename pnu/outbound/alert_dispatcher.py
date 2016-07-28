@@ -1,5 +1,5 @@
 from pnu.core.runnable import PnuRunnable
-from pnu.core.data_store import PnuPendingDataStore
+from pnu.core.data_store import PnuUserDataStore, PnuPendingDataStore
 from pnu.etc import constants
 from pnu.outbound.alerter import smtp
 from pnu.models.user import User
@@ -31,7 +31,11 @@ class PnuAlertDispatcher(PnuRunnable):
                 for poke in alert.get_pokemon():
                     user.set_last_notif_for_poke(poke)
 
-                PnuUserDataStore.update(user.get_phone_number(), user)
+                PnuUserDataStore.update(
+                    user.get_phone_number(), 
+                    # only modify last_notif
+                    { "last_notif": user.get_last_notif() }
+                )
 
     def prompt_alerts(self):
         while True:

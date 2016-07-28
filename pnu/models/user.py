@@ -104,12 +104,11 @@ class User (Base):
         # user should be alerted of pokemon if:
         # - the pokemon is one that the user wants
         # - it's a new appearance of the pokemon
-        poke_id = poke.get_id()
         expiration = poke.get_expiration_time()
-        last_notif = self.get_last_notif_for_poke(poke_id)
+        last_notif = self.get_last_notif_for_poke(poke)
 
-        return (poke_id in self.get_pokemon_wanted() and
-            last_notif is None or expiration > last_notif)
+        return (poke.get_id() in self.get_pokemon_wanted() and 
+            (last_notif is None or expiration > last_notif))
 
     def empty (self):
         status = self.get_status()
