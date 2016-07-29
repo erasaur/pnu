@@ -113,7 +113,7 @@ class BuildResponse:
         """ converts the sms carrier gateway to mms carrier gateway """
         updated_to = []
         # since self.to is a list of phone_numbers, we iterate through it
-        for number in list(self.to):
+        for number in [self.to]:
             num, ext = number.split('@')
 
             # check if the carrier is listed in our sms to mms availability
