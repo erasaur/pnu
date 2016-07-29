@@ -33,7 +33,6 @@ class PnuAlertDispatcher:
                 self.smtp.starttls()
                 self.smtp.login(private_config['gmail']['username'],
                                 private_config['gmail']['password'])
-                raise SMTPHeloError("TEST", "MSG")
                 break
             except SMTPHeloError:
                 logging.error("Error the email server didn't properly reply " +
