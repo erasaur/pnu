@@ -103,7 +103,7 @@ class BuildResponse:
 
     def _check_len_of_msg(self, msg):
         """ checks if the message length is longer than 159 chars """
-        if (len(msg) > (159)):
+        if (len(msg) > constants.MAX_SMS_MESSAGE_LEN):
             logging.info("Message too long: {}. Sending MMS".format(len(msg)))
             return self._sms_to_mms()
 
@@ -113,7 +113,7 @@ class BuildResponse:
         """ converts the sms carrier gateway to mms carrier gateway """
         updated_to = []
         # since self.to is a list of phone_numbers, we iterate through it
-        for number in self.to:
+        for number in list(self.to):
             num, ext = number.split('@')
 
             # check if the carrier is listed in our sms to mms availability
