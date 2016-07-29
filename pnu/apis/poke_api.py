@@ -20,11 +20,9 @@ class PnuPokeApi ():
 
     def update_data (self):
         # TODO find the minimal set of locations to cover everybody
-        # if PnuUserDataStore.changed_since(self._last_update):
-        #     self._users = [User(l) for l in PnuUserDataStore.list()]
-        #     self._last_update = time.time()
-        self._users = [User(l) for l in PnuUserDataStore.list()]
-        self._last_update = time.time()
+        if PnuUserDataStore.changed_since(self._last_update):
+            self._users = [User(l) for l in PnuUserDataStore.list()]
+            self._last_update = time.time()
 
     async def get_pokemon_alerts (self):
         # XXX cache results and reuse if location is close enough?
@@ -62,6 +60,10 @@ class PnuPokeApi ():
                         poke.get_lon(),
                         poke.get_expiration_time()
                     ))
+                    # TODO only need to set this once per unique poke, ie if
+                    # have 100 same poke, only need to set to the last poke's
+                    # time because we've sorted the list
+                    user.set_last_notif_for_poke(poke)
 
             if len(curr) > 0:
                 # sort so that multiple tuples with the same elements (but
