@@ -83,14 +83,15 @@ class PnuPokeApi ():
                     temp[poke_tuple] = [user]
 
         res = []
-        logging.info("\n\n\n\n-------START--------\n\n\n\n")
-        for poke_tuple, user_list in temp.items():
-            logging.info("\n\nsending to users: {}".format(user_list))
-            for t in poke_tuple:
-                logging.info("{} ".format(t))
-            logging.info("\n\n")
-            res.append(Alert(poke_tuple, user_list))
-        logging.info("\n\n\n\n-------END--------\n\n\n\n")
+        if len(temp) > 0:
+            logging.info("\n\n-------START--------\n\n")
+            for poke_tuple, user_list in temp.items():
+                logging.info("\n\nsending to users: {}".format(user_list))
+                for t in poke_tuple:
+                    logging.info("{} ".format(t))
+                logging.info("\n\n")
+                res.append(Alert(poke_tuple, user_list))
+            logging.info("\n\n-------END--------\n\n")
 
         return res
 

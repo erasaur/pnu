@@ -18,7 +18,7 @@ class PnuAlertDispatcher(PnuRunnable):
         # followed by a list of users who need to be notified
         # for the said pokemon
         for alert in alerts:
-            log_msg = "Dispatching message for {} to {}".format(
+            log_msg = "Dispatching message for {} to {}\n\n".format(
                 alert.get_pokemon_names(),
                 alert.get_phone_numbers())
             logging.info(log_msg)
