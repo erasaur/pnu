@@ -23,7 +23,6 @@ class PnuPokeApi ():
         # if PnuUserDataStore.changed_since(self._last_update):
         #     self._users = [User(l) for l in PnuUserDataStore.list()]
         #     self._last_update = time.time()
-
         self._users = [User(l) for l in PnuUserDataStore.list()]
         self._last_update = time.time()
 
@@ -49,21 +48,20 @@ class PnuPokeApi ():
             pokes_nearby = await fut
             # sort so we get expiration times in ascending order, hence
             # check all copies of the newly appeared pokes
-            pokes_nearby = sorted(pokes_nearby, key=lambda poke: poke.get_id())
+            pokes_nearby = sorted(
+                pokes_nearby, 
+                key=lambda poke: poke.get_expiration_time()
+            )
             curr = set() # don't want duplicates
 
             for poke in pokes_nearby:
                 if user.should_be_alerted(poke):
-                    curr.add(( # order matters here
+                    curr.add(( # tuple order matters here
                         poke.get_id(), 
                         poke.get_lat(), 
                         poke.get_lon(),
                         poke.get_expiration_time()
                     ))
-                    # TODO only need to set this once per unique poke, ie if
-                    # have 100 same poke, only need to set to the last poke's
-                    # time because we've sorted the list
-                    user.set_last_notif_for_poke(poke)
 
             if len(curr) > 0:
                 # sort so that multiple tuples with the same elements (but
@@ -85,7 +83,10 @@ class PnuPokeApi ():
         res = []
         logging.info("\n\n\n\n-------START--------\n\n\n\n")
         for poke_tuple, user_list in temp.items():
-            logging.info("\n{}\n".format(poke_tuple))
+            logging.info("\n\nsending to users: {}".format(user_list))
+            for t in poke_tuple:
+                logging.info("{} ".format(t))
+            logging.info("\n\n")
             res.append(Alert(poke_tuple, user_list))
         logging.info("\n\n\n\n-------END--------\n\n\n\n")
 

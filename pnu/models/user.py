@@ -83,6 +83,15 @@ class User (Base):
     def get_last_notif (self):
         return self.last_notif
 
+    # returns the latest expiration time (i.e newest copy) of
+    # the poke that the user has seen so far
+    def get_last_notif_for_poke (self, poke):
+        # convert to string because dict keys are strings
+        poke_id_str = str(poke.get_id())
+        if not isinstance(self.last_notif, dict):
+            return None
+        return self.last_notif.get(poke_id_str)
+
     def set_last_notif_for_poke (self, poke):
         if not isinstance(self.last_notif, dict):
             self.last_notif = {}
@@ -93,13 +102,6 @@ class User (Base):
 
         if last_notif is None or expiration_time > last_notif:
             self.last_notif[poke_id_str] = expiration_time
-
-    # returns the latest expiration time (i.e newest copy) of
-    # the poke that the user has seen so far
-    def get_last_notif_for_poke (self, poke):
-        if not isinstance(self.last_notif, dict):
-            return None
-        return self.last_notif.get(poke.get_id())
 
     def should_be_alerted (self, poke):
         # user should be alerted of pokemon if:
