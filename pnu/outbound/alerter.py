@@ -1,11 +1,16 @@
 #! /usr/bin/env python3.5
 
-from smtplib import SMTP
+import time
+from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
+                     SMTPNotSupportedError, SMTPException)
+
 from pnu.config import pub_config, private_config
+from pnu.etc import constants
 from pnu.outbound.response import BuildResponse
 from pnu.models.user import User
 from pnu.models.alert import Alert
 from pnu.models.pokemon import Pokemon
+
 
 import logging
 logging = logging.getLogger(__name__)
@@ -17,27 +22,38 @@ class PnuAlertDispatcher:
         """ perform preliminary actions for sending email via SMTP """
 
         logging.info("Starting up Alert")
-        try:
-            self.smtp = SMTP(pub_config['smtp']['host'],
-                             pub_config['smtp']['port'])
-            self.smtp.ehlo()
-            self.smtp.starttls()
-            self.smtp.login(private_config['gmail']['username'],
-                            private_config['gmail']['password'])
-        except smtplib.SMTPHeloError:
-            logging.error("Error the email server didn't properly reply " +
-                          "to the ehlo/helo request")
+        auth_attempts = 0
 
-        except smtplib.SMTPAuthenticationError:
-            logging.error("The username or password was not accepted by the " +
-                          "email server")
+        while auth_attempts < 5:
+            auth_attempts += 1
+            try:
+                self.smtp = SMTP(pub_config['smtp']['host'],
+                                pub_config['smtp']['port'])
+                self.smtp.ehlo()
+                self.smtp.starttls()
+                self.smtp.login(private_config['gmail']['username'],
+                                private_config['gmail']['password'])
+                raise SMTPHeloError("TEST", "MSG")
+                break
+            except SMTPHeloError:
+                logging.error("Error the email server didn't properly reply " +
+                            "to the ehlo/helo request")
 
-        except smtplib.SMTPNotSupportedError:
-            logging.error("The AUTH command is not supported by the email " +
-                          "server")
+            except SMTPAuthenticationError:
+                logging.error("The username or password was not accepted by the " +
+                            "email server")
 
-        except smtplib.SMTPException:
-            logging.error("Could not connect with the email server!!")
+            except SMTPNotSupportedError:
+                logging.error("The AUTH command is not supported by the email " +
+                            "server")
+
+            except SMTPException:
+                logging.error("Could not connect with the email server!!")
+
+            time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
+
+        if auth_attempts >= 5:
+            raise SMTPException("Failed connecting with the SMTP server. :(")
 
     def __exit__(self):
         self.smtp.quit()
