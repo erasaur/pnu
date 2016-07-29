@@ -27,7 +27,7 @@ class Alert:
         self.phone_numbers = [
             user.get_phone_number() for user in self.users
         ]
-        
+
         # TODO improve this (also pluralization for multiple copies)
         # remove duplicates
         temp = set()
