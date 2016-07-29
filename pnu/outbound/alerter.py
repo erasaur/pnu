@@ -28,7 +28,7 @@ class PnuAlertDispatcher:
             auth_attempts += 1
             try:
                 self.smtp = SMTP(pub_config['smtp']['host'],
-                                pub_config['smtp']['port'])
+                                 pub_config['smtp']['port'])
                 self.smtp.ehlo()
                 self.smtp.starttls()
                 self.smtp.login(private_config['gmail']['username'],
@@ -37,15 +37,15 @@ class PnuAlertDispatcher:
                 break
             except SMTPHeloError:
                 logging.error("Error the email server didn't properly reply " +
-                            "to the ehlo/helo request")
+                              "to the ehlo/helo request")
 
             except SMTPAuthenticationError:
-                logging.error("The username or password was not accepted by the " +
-                            "email server")
+                logging.error("The username or password was not accepted by " +
+                              "the email server")
 
             except SMTPNotSupportedError:
-                logging.error("The AUTH command is not supported by the email " +
-                            "server")
+                logging.error("The AUTH command is not supported by the " +
+                              "email server")
 
             except SMTPException:
                 logging.error("Could not connect with the email server!!")
