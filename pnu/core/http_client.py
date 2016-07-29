@@ -11,11 +11,18 @@ class PnuHTTPClient ():
         if timeout is None:
             timeout = pub_config["http"]["timeout_seconds"]
 
-        with aiohttp.Timeout(timeout):
-            async with self._session.get(url) as resp:
-                try:
-                    res = await resp.json()
-                except Exception as e:
-                    logging.info("failed decoding response, got exception: {}".format(e))
-                    res = {}
-                return { "status": resp.status, "res": res }
+        result = {}
+        try:
+            with aiohttp.Timeout(timeout):
+                async with self._session.get(url) as resp:
+                    try:
+                        res = await resp.json()
+                    except Exception as e:
+                        logging.info("failed decoding response, got exception: {}".format(e))
+                        res = {}
+                    result["res"] = res
+                    result["status"] = resp.status
+        except TimeoutError as e:
+            logging.info("HTTP timeout ({}) with error: {}".format(url, e)) 
+
+        return result

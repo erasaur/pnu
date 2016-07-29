@@ -29,25 +29,30 @@ class PnuAlertDispatcher:
             try:
                 self.smtp = SMTP(pub_config['smtp']['host'],
                                  pub_config['smtp']['port'])
-                self.smtp.ehlo()
                 self.smtp.starttls()
+                self.smtp.ehlo()
                 self.smtp.login(private_config['gmail']['username'],
                                 private_config['gmail']['password'])
                 break
-            except SMTPHeloError:
+            except SMTPHeloError as e:
                 logging.error("Error the email server didn't properly reply " +
-                              "to the ehlo/helo request")
+                              "to the ehlo/helo request:\n{}".format(e))
 
-            except SMTPAuthenticationError:
+            except SMTPAuthenticationError as e:
                 logging.error("The username or password was not accepted by " +
-                              "the email server")
+                              "the email server:\n{}".format(e))
 
-            except SMTPNotSupportedError:
+            except SMTPNotSupportedError as e:
                 logging.error("The AUTH command is not supported by the " +
-                              "email server")
+                              "email server:\n{}".format(e))
 
-            except SMTPException:
-                logging.error("Could not connect with the email server!!")
+            except SMTPException as e:
+                logging.error("Could not connect with the email " +
+                              "server:\n{}".format(e))
+
+            except Exception as e:
+                logging.error("An error occurred while initializing " +
+                              "SMTP:\n{}".format(e))
 
             time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
 
