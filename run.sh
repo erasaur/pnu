@@ -5,20 +5,20 @@ RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
 
-get_pid_redis () {
+get_redis_pid () {
   # returns the process id of the redis process
   echo `
     ps -f | # display processes with their pids
     grep $REDIS_PROCESS | # get lines with redis-server
     grep -v grep | # ignore lines with grep
     tr -s " " | # collapse spaces
-    cut -d " " -f2 | # cut by spaces and grab pid column
+    cut -d " " -f3 | # cut by spaces and grab pid column
     head -n 1 # get first line
   `
 }
 
 # check if redis server is running or not
-pid=$(get_pid_redis)
+pid=$(get_redis_pid)
 if [ -n "$pid" ]; then 
    echo -e "${GREEN}Redis is running with pid: $pid${NC}"
   ./main.py
