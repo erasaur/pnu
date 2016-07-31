@@ -1,0 +1,1 @@
+scripts/prod/setup.sh
