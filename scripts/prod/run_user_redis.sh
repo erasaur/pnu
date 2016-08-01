@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-REDIS_PROCESS=redis-pnu-user-server
+REDIS_PROCESS='redis-pnu-user-server'
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
@@ -9,7 +9,7 @@ get_pid_redis () {
   # returns the process id of the redis process
   echo `
     ps -ef | # display processes with their pids
-    grep $REDIS_PROCESS | # get desired lines
+    grep 'user/redis-server' | # get desired lines
     grep -v grep | # ignore lines with grep
     tr -s " " | # collapse spaces
     cut -d " " -f2 | # cut by spaces and grab pid column

@@ -8,7 +8,7 @@ NC='\033[0m' # No Color
 ENV=dev
 
 # # require running as sudo
-# if (( $EUID != 0 )); then
+# if [ $EUID != 0 ]; then
 #   echo -e "${RED}Please re-run as sudo.${NC}"
 #   exit
 # fi
