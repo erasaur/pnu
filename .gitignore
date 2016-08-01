@@ -5,7 +5,6 @@ Current Location.loc.vcf
 __pycache__/
 private/
 **/etc/logs/
-redis/
 db/
 
 # virtualenv
