@@ -1,5 +1,16 @@
 #! /usr/bin/env python3.5
 
+import os
+import sys
+
+# add vendor directory to module search path
+# parent_dir = os.path.abspath(os.path.dirname(__file__))
+# vendor_dir = os.path.join(parent_dir, 'vendor')
+# sys.path.append(vendor_dir)
+
+# parent_dir = os.path.abspath(os.path.dirname(__file__))
+# sys.path.append(parent_dir)
+
 import asyncio, aiohttp
 from contextlib import suppress
 

@@ -1,6 +1,7 @@
 import asyncio, aiohttp, time
 from pnu.core.data_store import PnuUserDataStore
-from pnu.apis.pokevision_api import PokevisionAPI
+# from pnu.apis.pokevision_api import PokevisionAPI
+from pnu.apis.pgo_api import PgoAPI
 from pnu.config import pub_config
 from pnu.models.user import User
 from pnu.models.pokemon import Pokemon
@@ -11,8 +12,8 @@ logging = logging.getLogger(__name__)
 
 class PnuPokeApi ():
     def __init__ (self, session=None):
-        # TODO add other apis for backup
-        self._pokevision_api = PokevisionAPI(session=session)
+        self._pgo_api = PgoAPI()
+        # self._pokevision_api = PokevisionAPI(session=session)
         # self._scan_lat_dist = pub_config["poke_api"]["scan_lat_dist"]
         # self._scan_lon_dist = pub_config["poke_api"]["scan_lon_dist"]
         self._last_update = 0
@@ -32,13 +33,15 @@ class PnuPokeApi ():
         # update list of locations we need to query for nearby pokes
         self.update_data()
 
+        await self._pgo_api.get_nearby(42.277556681, -83.740878574)
+
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
         fut_list = []
         logging.info("Processing {} users...".format(len(self._users)))
         for user in self._users:
             fut = asyncio.ensure_future(
-                self._pokevision_api.get_nearby(user.get_lat(), user.get_lon())
+                self._pgo_api.get_nearby(user.get_lat(), user.get_lon())
             )
             fut_list.append((user, fut,))
 
