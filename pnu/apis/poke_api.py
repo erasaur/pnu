@@ -126,8 +126,8 @@ class PnuPokeApi ():
                 logging.info("Something's wrong with the grouping code!")
                 continue
 
-            lat, lon, offset = self.get_cover(group)
-            pokes_nearby = self._pgo_api.get_nearby(lat, lon, offset)
+            lat, lon, step_radius = self.get_cover(group)
+            pokes_nearby = self._pgo_api.get_nearby(lat, lon, step_radius)
 
             if len(pokes_nearby) < 1:
                 continue

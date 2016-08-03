@@ -6,6 +6,7 @@ from pgoapi import utilities as util
 from pnu.config import pub_config, private_config
 from pnu.models.pokemon import Pokemon
 from s2sphere import Cell, CellId, LatLng
+from google.protobuf.internal import encoder
 import math, time, random
 
 import threading
@@ -19,7 +20,6 @@ class PgoAPI ():
     def __init__ (self):
         self._api = None
         self._changed = False
-        self._last_changed = '\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000'
         self._queue = Queue()
         self._result = []
 
@@ -30,6 +30,27 @@ class PgoAPI ():
         self._accounts = []
         self._threads = []
 
+    def encode (self, cellid):
+        output = []
+        encoder._VarintEncoder()(output.append, cellid)
+        return ''.join(output)
+
+    def get_cell_ids (self, lat, lon, radius=10):
+        origin = CellId.from_lat_lng(LatLng.from_degrees(lat, lon)).parent(15)
+        walk = [origin.id()]
+        right = origin.next()
+        left = origin.prev()
+
+        # Search around provided radius
+        for i in range(radius):
+            walk.append(right.id())
+            walk.append(left.id())
+            right = right.next()
+            left = left.prev()
+
+        # Return everything
+        return sorted(walk)
+
     def start_threads (self, num):
         for i in range(num): 
             t = Thread(target=self.search_thread, name='search_thread-{}'.format(i))
@@ -39,15 +60,17 @@ class PgoAPI ():
 
     def send_map_request (self, position):
         try:
-            api_copy = self._api.copy()
-            api_copy.set_position(*position)
-            api_copy.get_map_objects(
+            api = self._api
+            api.set_position(*position)
+            cell_ids = self.get_cell_ids(position[0], position[1])
+            timestamps = [0,] * len(cell_ids)
+            res = api.get_map_objects(
                 latitude=util.f2i(position[0]),
                 longitude=util.f2i(position[1]),
-                since_timestamp_ms=self._last_changed,
-                cell_id=util.get_cellid(position[0], position[1])
+                since_timestamp_ms=timestamps,
+                cell_id=cell_ids
             )
-            return api_copy.call()
+            return res
         except Exception as e:
             logging.info("Uncaught exception when downloading map: {}".format(e))
             return False
@@ -56,23 +79,27 @@ class PgoAPI ():
         cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
 
         for cell in cells:
-            if config["parse_pokemon"]:
-                for p in cell.get("wild_pokemons", []):
-                    expiration_time = (p["last_modified_timestamp_ms"] + p["time_till_hidden_ms"]) / 1000.0
-                    pokemon_id = p["pokemon_data"]["pokemon_id"]
+            for p in cell.get("wild_pokemons", []):
+                expiration_time = (p["last_modified_timestamp_ms"] + p["time_till_hidden_ms"]) / 1000.0
+                pokemon_id = p["pokemon_data"]["pokemon_id"]
 
-                    self._result.append(Pokemon({
-                        "pokemonId": pokemon_id,
-                        "latitude": p["latitude"],
-                        "longitude": p["longitude"],
-                        "expiration_time": expiration_time
-                    }))
+                self._result.append(Pokemon({
+                    "pokemonId": pokemon_id,
+                    "latitude": p["latitude"],
+                    "longitude": p["longitude"],
+                    "expiration_time": expiration_time
+                }))
 
     def search_thread (self):
         queue = self._queue
         threadname = threading.currentThread().getName()
         logging.info("Search thread {}: started and waiting".format(threadname))
         while True:
+            if self._api is None:
+                logging.info("Not ready to search yet")
+                time.sleep(self._sleep_time)
+                continue
+
             # Get the next item off the queue (this blocks till there is something)
             step_location, step, lock = queue.get()
 
@@ -174,9 +201,9 @@ class PgoAPI ():
     def get_nearby (self, lat, lon, num_steps):
         try:
             if self._api is None:
-                self.start_threads(10)
                 self._api = pgoapi.PGoApi()
                 self.auth(lat, lon)
+                self.start_threads(10)
             elif self._api._auth_provider._ticket_expire:
                 remaining_time = self._api._auth_provider._ticket_expire/1000 - time.time()
 
