@@ -12,6 +12,9 @@ import threading
 from threading import Thread, Lock
 from queue import Queue
 
+import logging
+logging = logging.getLogger(__name__)
+
 class PgoAPI ():
     def __init__ (self):
         self._api = None
@@ -25,14 +28,14 @@ class PgoAPI ():
         self._recovery_time = pub_config["poke_api"]["sleep_after_max_tries"]
         self._sleep_time = pub_config["poke_api"]["sleep_per_request"]
         self._accounts = []
-        self.start_threads(10)
+        self._threads = []
 
     def start_threads (self, num):
         for i in range(num): 
             t = Thread(target=self.search_thread, name='search_thread-{}'.format(i))
             t.daemon = True
             t.start()
-            search_threads.append(t)
+            self._threads.append(t)
 
     def send_map_request (self, position):
         try:
@@ -49,7 +52,7 @@ class PgoAPI ():
             logging.info("Uncaught exception when downloading map: {}".format(e))
             return False
 
-    def parse_map (self, map_dict, iteration_num, step, step_location):
+    def parse_map (self, map_dict, step, step_location):
         cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
 
         for cell in cells:
@@ -71,7 +74,7 @@ class PgoAPI ():
         logging.info("Search thread {}: started and waiting".format(threadname))
         while True:
             # Get the next item off the queue (this blocks till there is something)
-            i, step_location, step, lock = queue.get()
+            step_location, step, lock = queue.get()
 
             response_dict = {}
             failed_consecutive = 0
@@ -80,12 +83,12 @@ class PgoAPI ():
                 if response_dict:
                     with lock:
                         try:
-                            self.parse_map(response_dict, i, step, step_location)
+                            self.parse_map(response_dict, step, step_location)
                             self._changed = True
                         except KeyError:
                             logging.info('Search thread failed. Response dictionary key error')
-                            logging.info('{}: iteration {} step {} failed. Response dictionary\
-                                key error.'.format(threadname, i, step))
+                            logging.info('{}: step {} failed. Response dictionary\
+                                key error.'.format(threadname, step))
                             failed_consecutive += 1
                             if (failed_consecutive >= self._max_tries):
                                 logging.info('Niantic servers under heavy load. Waiting before trying again')
@@ -171,6 +174,7 @@ class PgoAPI ():
     def get_nearby (self, lat, lon, num_steps):
         try:
             if self._api is None:
+                self.start_threads(10)
                 self._api = pgoapi.PGoApi()
                 self.auth(lat, lon)
             elif self._api._auth_provider._ticket_expire:
@@ -189,8 +193,8 @@ class PgoAPI ():
             lock = Lock()
             locations = self.generate_location_steps([lat, lon], num_steps)
             for step, step_location in enumerate(locations):
-                search_args = (i, step_location, step, lock)
-                search_queue.put(search_args)
+                search_args = (step_location, step, lock)
+                self._queue.put(search_args)
 
         if self._changed:
             res = self._result
