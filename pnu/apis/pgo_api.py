@@ -1,108 +1,105 @@
+from pgoapi import PGoApi
 from pgoapi import pgoapi
 from pgoapi import exceptions
 from pgoapi import utilities as util
+from pgoapi.utilities import f2i, get_cellid
+
 from pnu.config import private_config
 from pnu.models.pokemon import Pokemon
 from s2sphere import Cell, CellId, LatLng
 import time, random
 
+import threading
+from threading import Thread, Lock
+from queue import Queue
+
 class PgoAPI ():
     def __init__ (self):
         self._api = None
-        self._lat = self.
+        self._changed = False
+        self._last_changed = '\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000\000'
+        self._queue = Queue()
+        self._result = []
 
-    def get_cell_ids (self, lat, lon, radius=10):
-        origin = CellId.from_lat_lng(LatLng.from_degrees(lat, lon)).parent(15)
-        walk = [origin.id()]
-        right = origin.next()
-        left = origin.prev()
+        self._max_tries = pub_config["pgo_api"]["max_tries"]
+        self._recovery_time = pub_config["pgo_api"]["recovery_time"]
+        self._sleep_time = pub_config["pgo_api"]["sleep_time"]
+        self._accounts = []
+        self.start_threads(10)
 
-        # Search around provided radius
-        for i in range(radius):
-            # TODO: don't append if close_enough to something we've added
-            walk.append(right.id())
-            walk.append(left.id())
-            right = right.next()
-            left = left.prev()
+    def start_threads (self, num):
+        for i in range(num): t = Thread(target=self.search_thread, name='search_thread-{}'.format(i))
+            t.daemon = True
+            t.start()
+            search_threads.append(t)
 
-        # Return everything
-        return sorted(walk)
+    def send_map_request (self, position):
+        try:
+            api_copy = self._api.copy()
+            api_copy.set_position(*position)
+            api_copy.get_map_objects(
+                latitude=f2i(position[0]),
+                longitude=f2i(position[1]),
+                since_timestamp_ms=self._last_changed,
+                cell_id=get_cellid(position[0], position[1])
+            )
+            return api_copy.call()
+        except Exception as e:
+            logging.info("Uncaught exception when downloading map: {}".format(e))
+            return False
 
-    def find_poi (self, lat, lng, offset):
-        # TODO: increase search radius based on offset
-        api = self._api
-        res = []
-        step_size = 0.003
-        step_limit = 20
-        delay = 0.11 # seconds
-        add_delay = 0.01
-        # coords = self.generate_spiral(lat, lng, step_size, step_limit)
+    def parse_map (self, map_dict, iteration_num, step, step_location):
+        cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
 
-        for coord in coords:
-            lat = coord['lat']
-            lng = coord['lng']
-            api.set_position(lat, lng, 0)
+        for cell in cells:
+            if config["parse_pokemon"]:
+                for p in cell.get("wild_pokemons", []):
+                    expiration_time = (p["last_modified_timestamp_ms"] +
+                         p["time_till_hidden_ms"]) / 1000.0)
+                    pokemon_id = p["pokemon_data"]["pokemon_id"]
 
-            #get_cellid was buggy -> replaced through get_cell_ids from pokecli
-            #timestamp gets computed a different way:
-            cell_ids = self.get_cell_ids(lat, lng)
-            timestamps = [0,] * len(cell_ids)
+                    self._result.append(Pokemon({
+                        "pokemonId": pokemon_id,
+                        "latitude": p["latitude"],
+                        "longitude": p["longitude"],
+                        "expiration_time": expiration_time
+                    })
 
-            try:
-                response_dict = api.get_map_objects(latitude=util.f2i(lat), longitude=util.f2i(lng), since_timestamp_ms=timestamps, cell_id=cell_ids)
+    def search_thread (self):
+        queue = self._queue
+        threadname = threading.currentThread().getName()
+        logging.info("Search thread {}: started and waiting".format(threadname))
+        while True:
+            # Get the next item off the queue (this blocks till there is something)
+            i, step_location, step, lock = queue.get()
 
-                if (response_dict['responses']):
-                    if 'status' in response_dict['responses']['GET_MAP_OBJECTS']:
-                        if response_dict['responses']['GET_MAP_OBJECTS']['status'] == 1:
-                            for map_cell in response_dict['responses']['GET_MAP_OBJECTS']['map_cells']:
-                                if 'wild_pokemons' in map_cell:
-                                    for pokemon in map_cell['wild_pokemons']:
-                                        res.append(Pokemon({
-                                            "pokemonId": pokemon["pokemon_data"]["pokemon_id"],
-                                            "latitude": pokemon["latitude"],
-                                            "longitude": pokemon["longitude"],
-                                            "expiration_time": time.time() +
-                                            pokemon["time_till_hidden_ms"]/1000
-                                        }))
-                                        print(pokemon)
-            except exceptions.ServerSideRequestThrottlingException:
-                delay += add_delay
-                print(delay)
+            response_dict = {}
+            failed_consecutive = 0
+            while not response_dict:
+                response_dict = self.send_map_request(step_location)
+                if response_dict:
+                    with lock:
+                        try:
+                            self.parse_map(response_dict, i, step, step_location)
+                            self._changed = True
+                        except KeyError:
+                            logging.info('Search thread failed. Response dictionary key error')
+                            logging.info('{}: iteration {} step {} failed. Response dictionary\
+                                key error.'.format(threadname, i, step))
+                            failed_consecutive += 1
+                            if (failed_consecutive >= self._max_tries):
+                                logging.info('Niantic servers under heavy load. Waiting before trying again')
+                                time.sleep(self._recovery_time)
+                                failed_consecutive = 0
+                            response_dict = {}
+                else:
+                    logging.info('Map download failed, waiting and retrying')
+                    time.sleep(self._sleep_time)
 
-            time.sleep(delay)
-        return res
+            time.sleep(self._sleep_time)
+            queue.task_done()
 
-    def get_coords (self, lat, lon, offset):
-        pass 
-
-    def generate_spiral (self, starting_lat, starting_lng, step_size, step_limit):
-        coords = [{'lat': starting_lat, 'lng': starting_lng}]
-        steps,x,y,d,m = 1, 0, 0, 1, 1
-        rlow = 0.0
-        rhigh = 0.0005
-
-        # TODO: don't append if coor is close_enough to one of the ones we've
-        # already appended
-
-        while steps < step_limit:
-            while 2 * x * d < m and steps < step_limit:
-                x = x + d
-                steps += 1
-                lat = x * step_size + starting_lat + random.uniform(rlow, rhigh)
-                lng = y * step_size + starting_lng + random.uniform(rlow, rhigh)
-                coords.append({'lat': lat, 'lng': lng})
-            while 2 * y * d < m and steps < step_limit:
-                y = y + d
-                steps += 1
-                lat = x * step_size + starting_lat + random.uniform(rlow, rhigh)
-                lng = y * step_size + starting_lng + random.uniform(rlow, rhigh)
-                coords.append({'lat': lat, 'lng': lng})
-
-            d = -1 * d
-            m = m + 1
-        return coords
-
-    def auth (self):
+    def auth (self, lat, lon):
         auth_service = private_config["pgoapi"]["auth_service"]
         username = private_config["pgoapi"]["username"]
         password = private_config["pgoapi"]["password"]
@@ -114,24 +111,24 @@ class PgoAPI ():
         if not self._api.login(auth_service, username, password, app_simulation=True):
             raise ValueError("invalid or missing pgoapi config")
 
-    async def get_nearby (self, lat, lon, offset):
-        print("STARTING")
-
+    def get_nearby (self, lat, lon, offset):
         try:
             if self._api is None:
                 self._api = pgoapi.PGoApi()
-                self.auth()
+                self.auth(lat, lon)
             elif self._api._auth_provider._ticket_expire:
                 remaining_time = self._api._auth_provider._ticket_expire/1000 - time.time()
 
                 if remaining_time > 60:
                     logging.info("Already logged in for another {:.2f} seconds".format(remaining_time))
                 else:
-                    self.auth()
-
-            res = self.query_locations(lat, lon, offset)
+                    self.auth(lat, lon)
         except Exception as e:
             logging.info("Got exception when trying to get nearby pokes: {}".format(e))
 
-        print("ENDING")
-        return res
+        if self._changed:
+            res = self._result
+            self._result = []
+            self._changed = False
+            return res
+        return []

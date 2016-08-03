@@ -91,8 +91,8 @@ class PnuPokeApi ():
         # TODO: increase offset based on number of members in group
         return total_lat / len_group, total_lon / len_group, 0
 
-    async def get_pokemon_alerts (self):
-        await self._pgo_api.get_nearby(42.277556681, -83.740878574, 0.02)
+    def get_pokemon_alerts (self):
+        self._pgo_api.get_nearby(42.277556681, -83.740878574, 0.02)
 
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
@@ -105,13 +105,11 @@ class PnuPokeApi ():
                 continue
 
             lat, lon, offset = self.get_cover(group)
-            fut = asyncio.ensure_future(
-                self._pgo_api.get_nearby(lat, lon, offset)
-            )
-            fut_list.append((group, fut,))
+            pokes_nearby = self._pgo_api.get_nearby(lat, lon, offset)
 
-        for group, fut in fut_list:
-            pokes_nearby = await fut
+            if len(pokes_nearby) < 1:
+                continue
+
             # sort so we get expiration times in ascending order, hence
             # check all copies of the newly appeared pokes
             pokes_nearby = sorted(
