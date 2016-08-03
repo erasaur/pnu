@@ -1,4 +1,6 @@
-import asyncio, aiohttp, time, math
+import asyncio, aiohttp, time
+from math import cos, sin, atan2, sqrt, radians
+
 from pnu.core.data_store import PnuUserDataStore
 # from pnu.apis.pokevision_api import PokevisionAPI
 from pnu.apis.pgo_api import PgoAPI
@@ -14,22 +16,31 @@ class PnuPokeApi ():
     def __init__ (self, session=None):
         self._pgo_api = PgoAPI()
         # self._pokevision_api = PokevisionAPI(session=session)
-        self._group_dist = pub_config["poke_api"]["group_dist"]
+        self._earth_radius = pub_config["poke_api"]["earth_radius"]
+        self._group_member_step_dist = pub_config["poke_api"]["group_member_step_dist"]
+        self._group_step_radius = pub_config["poke_api"]["group_step_radius"]
         self._last_update = 0
         self._groups = []
 
-    def distance (self, lat_a, lon_a, lat_b, lon_b):
-        return math.sqrt(pow(lat_a - lat_b, 2) + pow(lon_a - lon_b, 2))
+    def distance (self, user_a, user_b):
+        lat1 = radians(user_a.get_lat())
+        lon1 = radians(user_a.get_lon())
+        lat2 = radians(user_b.get_lat())
+        lon2 = radians(user_b.get_lon())
+
+        dlon = lon2 - lon1
+        dlat = lat2 - lat1
+
+        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return self._earth_radius * c
 
     def close_enough (self, user, group):
         for member in group:
-            if distance(user.get_lat(), user.get_lon(), member.get_lat(),
-                    member.get_lon()) >= self._group_dist:
+            if distance(user, member) >= self._group_member_dist:
                 return False
         return True
-
-    def pos_changed (self, lat_a, lon_a, lat_b, lon_b):
-        return (lat_a != lat_b or lon_a != lon_b)
 
     def remove_user (self, user):
         for group in self._groups:
@@ -81,15 +92,26 @@ class PnuPokeApi ():
         self._last_update = time.time()
 
     def get_cover (self, group):
-        # offset from center depends on size of group
-        total_lat = total_lon = 0
-        len_group = len(group)
-        for member in group:
-            total_lat += member.get_lat()
-            total_lon += member.get_lon()
+        x = 0
+        y = 0
+        z = 0
 
-        # TODO: increase offset based on number of members in group
-        return total_lat / len_group, total_lon / len_group, 0
+        for member in group:
+            lat = radians(member.get_lat())
+            lon = radians(member.get_lon())
+            x += cos(lat) * cos(lon)
+            y += cos(lat) * sin(lon)
+            z += sin(lat)
+
+        x = float(x / len(group))
+        y = float(y / len(group))
+        z = float(z / len(group))
+
+        center_lat = atan2(z, sqrt(x * x + y * y))
+        center_lon = atan2(y, x)
+
+        # TODO: increase radius based on number of members in group
+        return center_lat, center_lon, self._group_step_radius
 
     def get_pokemon_alerts (self):
         self._pgo_api.get_nearby(42.277556681, -83.740878574, 0.02)
