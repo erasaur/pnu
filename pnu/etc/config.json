@@ -33,5 +33,9 @@
 
     "logging": {
         "location": "./pnu/etc/logging.ini"
+    },
+
+    "poke_api": {
+        "group_dist": 0.0008
     }
 }

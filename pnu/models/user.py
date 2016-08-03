@@ -70,6 +70,9 @@ class User (Base):
     def get_status (self):
         return self.status
 
+    def set_status (self, status):
+        self.status = status
+
     def is_location_set(self):
         return self.get_lat() is not None and self.get_lon() is not None
 

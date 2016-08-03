@@ -35,7 +35,7 @@ class Pnu (PnuRunnable):
         self._session = session
 
         self._poke_api = PnuPokeApi(session=session)
-        self._handler = PnuRequestHandler()
+        self._handler = PnuRequestHandler(poke_api=self._poke_api)
         self._dispatcher = PnuAlertDispatcher()
 
     # def __exit__ (self):
