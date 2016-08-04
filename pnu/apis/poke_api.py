@@ -17,8 +17,7 @@ class PnuPokeApi ():
         self._pgo_api = PgoAPI()
         # self._pokevision_api = PokevisionAPI(session=session)
         self._earth_radius = pub_config["poke_api"]["earth_radius"]
-        self._group_member_step_dist = pub_config["poke_api"]["group_member_step_dist"]
-        self._group_step_radius = pub_config["poke_api"]["group_step_radius"]
+        self._group_step_count = pub_config["poke_api"]["group_scan_step_count"]
         self._last_update = 0
         self._groups = []
 
@@ -111,10 +110,12 @@ class PnuPokeApi ():
         center_lon = atan2(y, x)
 
         # TODO: increase radius based on number of members in group
-        return center_lat, center_lon, self._group_step_radius
+        return center_lat, center_lon, self._group_step_count
 
     def get_pokemon_alerts (self):
-        self._pgo_api.get_nearby(42.277556681, -83.740878574, 0.02)
+        pokes_nearby = self._pgo_api.get_nearby(42.277556681, -83.740878574,
+                self._group_step_count)
+        print(pokes_nearby)
 
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return

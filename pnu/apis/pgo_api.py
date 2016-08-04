@@ -76,8 +76,10 @@ class PgoAPI ():
             return False
 
     def parse_map (self, map_dict, step, step_location):
-        cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
+        if map_dict["responses"]["GET_MAP_OBJECTS"]["status"] != 1:
+            return
 
+        cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
         for cell in cells:
             for p in cell.get("wild_pokemons", []):
                 expiration_time = (p["last_modified_timestamp_ms"] + p["time_till_hidden_ms"]) / 1000.0
@@ -101,7 +103,8 @@ class PgoAPI ():
                 continue
 
             # Get the next item off the queue (this blocks till there is something)
-            step_location, step, lock = queue.get()
+            step, step_location, lock = queue.get()
+            print("getting:", step, step_location)
 
             response_dict = {}
             failed_consecutive = 0
@@ -175,8 +178,8 @@ class PgoAPI ():
         loc = initial_loc
         while ring < step_count:
             # set loc to start at top left
-            loc = get_new_coords(loc, ydist, NORTH)
-            loc = get_new_coords(loc, xdist/2, WEST)
+            loc = self.get_new_coords(loc, ydist, NORTH)
+            loc = self.get_new_coords(loc, xdist/2, WEST)
             for direction in range(6):
                 for i in range(ring):
                     if direction == 0: # RIGHT
@@ -219,8 +222,10 @@ class PgoAPI ():
             logging.info("Starting new search...")
             lock = Lock()
             locations = self.generate_location_steps([lat, lon], num_steps)
-            for step, step_location in enumerate(locations):
-                search_args = (step_location, step, lock)
+
+            for step, step_location in enumerate(locations, 1):
+                print("putting:", step, step_location)
+                search_args = (step, step_location, lock)
                 self._queue.put(search_args)
 
         if self._changed:

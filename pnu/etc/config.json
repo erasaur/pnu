@@ -37,8 +37,8 @@
 
     "poke_api": {
         "earth_radius": 6378.1,
-        "group_step_radius": 0.02,
-        "group_member_step_dist": 0.001,
+        "group_scan_step_count": 25,
+        "group_member_dist": 0.002,
         "max_tries_per_request": 10,
         "sleep_after_max_tries": 30,
         "sleep_per_request": 5
