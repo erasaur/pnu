@@ -18,17 +18,28 @@ logging = logging.getLogger(__name__)
 
 class PgoAPI ():
     def __init__ (self):
-        self._api = None
         self._changed = False
         self._queue = Queue()
+        self._user_queue = Queue()
         self._result = []
 
+        self._request_throttle = pub_config["poke_api"]["request_throttle"]
         self._earth_radius = pub_config["poke_api"]["earth_radius"]
         self._max_tries = pub_config["poke_api"]["max_tries_per_request"]
         self._recovery_time = pub_config["poke_api"]["sleep_after_max_tries"]
         self._sleep_time = pub_config["poke_api"]["sleep_per_request"]
-        self._accounts = []
+        self._users = []
         self._threads = []
+
+        user_data = private_config["poke_api"]["accounts"]
+        for index, user_data in enumerate(users):
+            user = pgoapi.PGoApi()
+            user._index = index
+            user._last_call = 0
+            self.auth(user)
+            self._users.append(user)
+
+        self.start_threads(10)
 
     def encode (self, cellid):
         output = []
@@ -58,13 +69,13 @@ class PgoAPI ():
             t.start()
             self._threads.append(t)
 
-    def send_map_request (self, position):
+    def send_map_request (self, user, position):
         try:
-            api = self._api
-            api.set_position(*position)
+            user.set_position(*position)
+            user._last_call = time.time()
             cell_ids = self.get_cell_ids(position[0], position[1])
             timestamps = [0,] * len(cell_ids)
-            res = api.get_map_objects(
+            res = user.get_map_objects(
                 latitude=util.f2i(position[0]),
                 longitude=util.f2i(position[1]),
                 since_timestamp_ms=timestamps,
@@ -94,22 +105,33 @@ class PgoAPI ():
 
     def search_thread (self):
         queue = self._queue
+        user_queue = self._user_queue
         threadname = threading.currentThread().getName()
         logging.info("Search thread {}: started and waiting".format(threadname))
         while True:
-            if self._api is None:
+            # get next available user (this blocks till there is one)
+            user = user_queue.get()
+            now = time.time()
+
+            if user._auth_provider._ticket_expire:
+                remaining_time = user._auth_provider._ticket_expire/1000 - time.time()
+                if remaining_time < 30:
+                    self.auth(user)
+
+            if now - user._last_call < self._request_throttle:
                 logging.info("Not ready to search yet")
+                user_queue.put(user)
                 time.sleep(self._sleep_time)
                 continue
 
-            # Get the next item off the queue (this blocks till there is something)
+            # get next task (this blocks till there is one)
             step, step_location, lock = queue.get()
             print("getting:", step, step_location)
 
             response_dict = {}
             failed_consecutive = 0
             while not response_dict:
-                response_dict = self.send_map_request(step_location)
+                response_dict = self.send_map_request(user, step_location)
                 if response_dict:
                     with lock:
                         try:
@@ -132,14 +154,18 @@ class PgoAPI ():
             time.sleep(self._sleep_time)
             queue.task_done()
 
-    def auth (self, lat, lon):
-        auth_service = private_config["pgoapi"]["auth_service"]
-        username = private_config["pgoapi"]["username"]
-        password = private_config["pgoapi"]["password"]
+    def auth (self, user):
+        if '_index' not in user:
+            raise ValueError("invalid user")
+
+        user_data = self._accounts[user._index]
+        auth_service = user_data["auth_service"]
+        username = user_data["username"]
+        password = user_data["password"]
 
         # for some reason, need to set position before we can login
         if None in self._api.get_position():
-            self._api.set_position(lat, lon, 0.0)
+            self._api.set_position(user_data["latitude"], user_data["longitude"], 0.0)
 
         if not self._api.login(auth_service, username, password, app_simulation=True):
             raise ValueError("invalid or missing pgoapi config")
@@ -202,21 +228,6 @@ class PgoAPI ():
             ring += 1
 
     def get_nearby (self, lat, lon, num_steps):
-        try:
-            if self._api is None:
-                self._api = pgoapi.PGoApi()
-                self.auth(lat, lon)
-                self.start_threads(10)
-            elif self._api._auth_provider._ticket_expire:
-                remaining_time = self._api._auth_provider._ticket_expire/1000 - time.time()
-
-                if remaining_time > 60:
-                    logging.info("Already logged in for another {:.2f} seconds".format(remaining_time))
-                else:
-                    self.auth(lat, lon)
-        except Exception as e:
-            logging.info("Got exception when trying to get nearby pokes: {}".format(e))
-
         if self._queue.empty():
             # finished previous load, time for more
             logging.info("Starting new search...")
@@ -229,6 +240,7 @@ class PgoAPI ():
                 self._queue.put(search_args)
 
         if self._changed:
+            # flush the result buffer
             res = self._result
             self._result = []
             self._changed = False

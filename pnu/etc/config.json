@@ -36,11 +36,12 @@
     },
 
     "poke_api": {
+        "request_throttle": 5,
         "earth_radius": 6378.1,
         "group_scan_step_count": 25,
         "group_member_dist": 0.002,
         "max_tries_per_request": 10,
         "sleep_after_max_tries": 30,
-        "sleep_per_request": 5
+        "sleep_per_request": 2
     }
 }
