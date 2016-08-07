@@ -28,16 +28,17 @@ class PgoAPI ():
         self._max_tries = pub_config["poke_api"]["max_tries_per_request"]
         self._recovery_time = pub_config["poke_api"]["sleep_after_max_tries"]
         self._sleep_time = pub_config["poke_api"]["sleep_per_request"]
-        self._users = []
         self._threads = []
+        self._users = private_config["poke_api"]["accounts"]
 
-        user_data = private_config["poke_api"]["accounts"]
-        for index, user_data in enumerate(users):
+        for index, user_data in enumerate(self._users):
             user = pgoapi.PGoApi()
             user._index = index
             user._last_call = 0
             self.auth(user)
-            self._users.append(user)
+            self._users[index] = user
+
+        print(self._users)
 
         self.start_threads(10)
 
@@ -155,19 +156,18 @@ class PgoAPI ():
             queue.task_done()
 
     def auth (self, user):
-        if '_index' not in user:
-            raise ValueError("invalid user")
-
-        user_data = self._accounts[user._index]
+        user_data = self._users[user._index]
         auth_service = user_data["auth_service"]
         username = user_data["username"]
         password = user_data["password"]
 
         # for some reason, need to set position before we can login
-        if None in self._api.get_position():
-            self._api.set_position(user_data["latitude"], user_data["longitude"], 0.0)
+        if None in user.get_position():
+            lat = float(user_data["latitude"])
+            lon = float(user_data["longitude"])
+            user.set_position(lat, lon, 0.0)
 
-        if not self._api.login(auth_service, username, password, app_simulation=True):
+        if not user.login(auth_service, username, password, app_simulation=True):
             raise ValueError("invalid or missing pgoapi config")
 
     def get_new_coords (self, init_loc, distance, bearing):
@@ -235,7 +235,6 @@ class PgoAPI ():
             locations = self.generate_location_steps([lat, lon], num_steps)
 
             for step, step_location in enumerate(locations, 1):
-                print("putting:", step, step_location)
                 search_args = (step, step_location, lock)
                 self._queue.put(search_args)
 
