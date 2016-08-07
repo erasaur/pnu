@@ -21,8 +21,14 @@ class PnuPokeApi ():
         self._last_update = 0
         self._groups = []
 
+        init_users = PnuUserDataStore.list()
+        for user in init_users:
+            self.update_data(User(user), True)
+
     def pos_changed (self, user_a, user_b):
-        return self.distance(user_a, user_b) > 0
+        if user_a is None or user_b is None:
+            raise ValueError("invalid users")
+        return (user_a.is_active() != user_b.is_active()) or (self.distance(user_a, user_b) > 0)
 
     def distance (self, user_a, user_b):
         lat1 = radians(float(user_a.get_lat()))
@@ -53,8 +59,13 @@ class PnuPokeApi ():
 
     def update_data (self, user, already_active):
         group_index = 0
-        added_new = False
-        deleted_old = not already_active # if not active, no old to delete
+
+        # tracks whether or not we updated with our new value yet
+        added_new = False 
+
+        # tracks whether or not we removed old value yet. if the user wasn't 
+        # active before this function, no old one to delete, so default to true
+        deleted_old = not already_active 
 
         for group in self._groups:
             index = 0
@@ -99,8 +110,8 @@ class PnuPokeApi ():
         z = 0
 
         for member in group:
-            lat = radians(member.get_lat())
-            lon = radians(member.get_lon())
+            lat = radians(float(member.get_lat()))
+            lon = radians(float(member.get_lon()))
             x += cos(lat) * cos(lon)
             y += cos(lat) * sin(lon)
             z += sin(lat)
@@ -123,7 +134,6 @@ class PnuPokeApi ():
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
         fut_list = []
-        print("Processing {} users...".format(len(self._groups)))
         logging.info("Processing {} users...".format(len(self._groups)))
         for group in self._groups:
             if len(group) < 1:

@@ -7,7 +7,7 @@ from pnu.config import pub_config, private_config
 from pnu.models.pokemon import Pokemon
 from s2sphere import Cell, CellId, LatLng
 from google.protobuf.internal import encoder
-import math, time, random
+import math, time, random, sys
 
 import threading
 from threading import Thread, Lock
@@ -23,6 +23,14 @@ class PgoAPI ():
         self._user_queue = Queue()
         self._result = []
 
+        self._signature_lib_path = ""
+        if sys.platform.startswith("linux"):
+            self._signature_lib_path = "pnu/etc/pgoapi/libencrypt.so"
+        elif sys.platform.startswith("darwin"):
+            self._signature_lib_path = "pnu/etc/pgoapi/encrypt.dylib"
+        else:
+            raise ValueError("un-supported system")
+
         self._request_throttle = pub_config["poke_api"]["request_throttle"]
         self._earth_radius = pub_config["poke_api"]["earth_radius"]
         self._max_tries = pub_config["poke_api"]["max_tries_per_request"]
@@ -37,8 +45,7 @@ class PgoAPI ():
             user._last_call = 0
             self.auth(user)
             self._users[index] = user
-
-        print(self._users)
+            self._user_queue.put(user)
 
         self.start_threads(10)
 
@@ -46,22 +53,6 @@ class PgoAPI ():
         output = []
         encoder._VarintEncoder()(output.append, cellid)
         return ''.join(output)
-
-    def get_cell_ids (self, lat, lon, radius=10):
-        origin = CellId.from_lat_lng(LatLng.from_degrees(lat, lon)).parent(15)
-        walk = [origin.id()]
-        right = origin.next()
-        left = origin.prev()
-
-        # Search around provided radius
-        for i in range(radius):
-            walk.append(right.id())
-            walk.append(left.id())
-            right = right.next()
-            left = left.prev()
-
-        # Return everything
-        return sorted(walk)
 
     def start_threads (self, num):
         for i in range(num): 
@@ -71,23 +62,24 @@ class PgoAPI ():
             self._threads.append(t)
 
     def send_map_request (self, user, position):
-        try:
+        # try:
             user.set_position(*position)
             user._last_call = time.time()
-            cell_ids = self.get_cell_ids(position[0], position[1])
+            cell_ids = util.get_cell_ids(position[0], position[1])
             timestamps = [0,] * len(cell_ids)
             res = user.get_map_objects(
-                latitude=util.f2i(position[0]),
-                longitude=util.f2i(position[1]),
+                latitude=position[0],
+                longitude=position[1],
                 since_timestamp_ms=timestamps,
                 cell_id=cell_ids
             )
             return res
-        except Exception as e:
-            logging.info("Uncaught exception when downloading map: {}".format(e))
-            return False
+        # except Exception as e:
+        #     logging.info("Uncaught exception when downloading map: {}".format(e))
+        #     return False
 
     def parse_map (self, map_dict, step, step_location):
+        logging.info("{}".format(map_dict))
         if map_dict["responses"]["GET_MAP_OBJECTS"]["status"] != 1:
             return
 
@@ -127,7 +119,7 @@ class PgoAPI ():
 
             # get next task (this blocks till there is one)
             step, step_location, lock = queue.get()
-            print("getting:", step, step_location)
+            logging.info("getting: {} {}".format(step, step_location))
 
             response_dict = {}
             failed_consecutive = 0
@@ -154,6 +146,7 @@ class PgoAPI ():
 
             time.sleep(self._sleep_time)
             queue.task_done()
+            user_queue.put(user)
 
     def auth (self, user):
         user_data = self._users[user._index]
@@ -165,10 +158,10 @@ class PgoAPI ():
         if None in user.get_position():
             lat = float(user_data["latitude"])
             lon = float(user_data["longitude"])
-            user.set_position(lat, lon, 0.0)
+            user.set_position(lat, lon, 4.6)
 
-        if not user.login(auth_service, username, password, app_simulation=True):
-            raise ValueError("invalid or missing pgoapi config")
+        user.set_authentication(provider=auth_service, username=username, password=password)
+        user.activate_signature(self._signature_lib_path)
 
     def get_new_coords (self, init_loc, distance, bearing):
         """ Given an initial lat/lng, a distance(in kms), and a bearing (degrees),
