@@ -12,4 +12,6 @@ update-rc.d redis-pnu-user-server defaults
 update-rc.d redis-pnu-pending-server defaults
 
 # install requirements
+# sudo apt-get install python3-dev
+# export C_INCLUDE_PATH=/usr/include/python3.4
 # pip3.5 install -r requirements.txt
