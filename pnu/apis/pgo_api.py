@@ -1,5 +1,4 @@
 from pgoapi import PGoApi
-from pgoapi import pgoapi
 from pgoapi import exceptions
 from pgoapi import utilities as util
 
@@ -27,7 +26,7 @@ class PgoAPI ():
         if sys.platform.startswith("linux"):
             self._signature_lib_path = "pnu/etc/pgoapi/libencrypt.so"
         elif sys.platform.startswith("darwin"):
-            self._signature_lib_path = "pnu/etc/pgoapi/encrypt.dylib"
+            self._signature_lib_path = "pnu/etc/pgoapi/libencrypt-osx-64.so"
         else:
             raise ValueError("un-supported system")
 
@@ -40,7 +39,7 @@ class PgoAPI ():
         self._users = private_config["poke_api"]["accounts"]
 
         for index, user_data in enumerate(self._users):
-            user = pgoapi.PGoApi()
+            user = PGoApi()
             user._index = index
             user._last_call = 0
             self.auth(user)
@@ -62,21 +61,19 @@ class PgoAPI ():
             self._threads.append(t)
 
     def send_map_request (self, user, position):
-        # try:
-            user.set_position(*position)
-            user._last_call = time.time()
+        try:
             cell_ids = util.get_cell_ids(position[0], position[1])
+            user._last_call = time.time()
             timestamps = [0,] * len(cell_ids)
-            res = user.get_map_objects(
-                latitude=position[0],
-                longitude=position[1],
+            return user.get_map_objects(
+                latitude=util.f2i(position[0]),
+                longitude=util.f2i(position[1]),
                 since_timestamp_ms=timestamps,
                 cell_id=cell_ids
             )
-            return res
-        # except Exception as e:
-        #     logging.info("Uncaught exception when downloading map: {}".format(e))
-        #     return False
+        except Exception as e:
+            logging.info("Uncaught exception when downloading map: {}".format(e))
+            return False
 
     def parse_map (self, map_dict, step, step_location):
         logging.info("{}".format(map_dict))
@@ -123,8 +120,12 @@ class PgoAPI ():
 
             response_dict = {}
             failed_consecutive = 0
+            user.set_position(*step_location)
+
             while not response_dict:
+                user.activate_signature(self._signature_lib_path)
                 response_dict = self.send_map_request(user, step_location)
+
                 if response_dict:
                     with lock:
                         try:
@@ -161,7 +162,6 @@ class PgoAPI ():
             user.set_position(lat, lon, 4.6)
 
         user.set_authentication(provider=auth_service, username=username, password=password)
-        user.activate_signature(self._signature_lib_path)
 
     def get_new_coords (self, init_loc, distance, bearing):
         """ Given an initial lat/lng, a distance(in kms), and a bearing (degrees),
@@ -181,22 +181,22 @@ class PgoAPI ():
         return [math.degrees(new_lat), math.degrees(new_lon)]
 
     def generate_location_steps (self, initial_loc, step_count):
-        # bearing (degrees)
+        #Bearing (degrees)
         NORTH = 0
         EAST = 90
         SOUTH = 180
         WEST = 270
 
-        pulse_radius = 0.1                  # km - radius of players heartbeat is 100m
+        pulse_radius = 0.07                 # km - radius of players heartbeat is 70m
         xdist = math.sqrt(3)*pulse_radius   # dist between column centers
         ydist = 3*(pulse_radius/2)          # dist between row centers
 
-        yield (initial_loc[0], initial_loc[1], 0) # insert initial location
+        yield (initial_loc[0], initial_loc[1], 0) #insert initial location
 
-        ring = 1            
+        ring = 1
         loc = initial_loc
         while ring < step_count:
-            # set loc to start at top left
+            #Set loc to start at top left
             loc = self.get_new_coords(loc, ydist, NORTH)
             loc = self.get_new_coords(loc, xdist/2, WEST)
             for direction in range(6):
