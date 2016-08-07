@@ -21,11 +21,14 @@ class PnuPokeApi ():
         self._last_update = 0
         self._groups = []
 
+    def pos_changed (self, user_a, user_b):
+        return self.distance(user_a, user_b) > 0
+
     def distance (self, user_a, user_b):
-        lat1 = radians(user_a.get_lat())
-        lon1 = radians(user_a.get_lon())
-        lat2 = radians(user_b.get_lat())
-        lon2 = radians(user_b.get_lon())
+        lat1 = radians(float(user_a.get_lat()))
+        lon1 = radians(float(user_a.get_lon()))
+        lat2 = radians(float(user_b.get_lat()))
+        lon2 = radians(float(user_b.get_lon()))
 
         dlon = lon2 - lon1
         dlat = lat2 - lat1

@@ -56,7 +56,7 @@ class PnuRequestHandler (PnuRunnable):
                 continue
 
             # check if current user is already active
-            old_user = PnuUserDataStore.get(phone_number)
+            old_user = User(PnuUserDataStore.get(phone_number))
             already_active = (old_user is not None and old_user.is_active())
 
             # we don't have BOTH the location and pokemon wanted, so they still
