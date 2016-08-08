@@ -52,7 +52,7 @@ fi
 pid_main=$(get_pid_main)
 
 if [ ! -n "$pid_main" ]; then
-  nohup ./main.py >./pnu/etc/logs/main.out 2>./pnu/etc/logs/main.err &
+  # nohup ./main.py >./pnu/etc/logs/main.out 2>./pnu/etc/logs/main.err &
   echo -e "${GREEN}App started.${NC}"
 else
   echo -e "${RED}App is already running. Try [kill -9 $pid_main] first, then re-run.${NC}"
