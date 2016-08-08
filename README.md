@@ -1,4 +1,4 @@
-Pokemon Near You (pnu, pronounced "new") pnu.space
+Pokemon Near You (pnu, pronounced "new") http://pnu.space
 =======================
 
 # How to become a Champion for your location #
