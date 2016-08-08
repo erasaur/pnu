@@ -17,6 +17,7 @@ class PnuPokeApi ():
         self._pgo_api = PgoAPI()
         # self._pokevision_api = PokevisionAPI(session=session)
         self._earth_radius = pub_config["poke_api"]["earth_radius"]
+        self._group_member_dist = pub_config["poke_api"]["group_member_dist"]
         self._group_step_count = pub_config["poke_api"]["group_scan_step_count"]
         self._last_update = 0
         self._groups = []
@@ -45,7 +46,7 @@ class PnuPokeApi ():
         return self._earth_radius * c
 
     def close_enough (self, user_a, user_b):
-        return self.distance(user, member) < self._group_member_dist:
+        return self.distance(user_a, user_b) < self._group_member_dist
 
     def remove_user (self, user):
         for group in self._groups:
