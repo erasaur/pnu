@@ -80,6 +80,5 @@ if __name__ == "__main__":
     logging.config.fileConfig(pub_config["logging"]["location"],
             disable_existing_loggers=False)
     logging.getLogger('apscheduler').setLevel(logging.ERROR)
-    # logging.getLogger('pgoapi').setLevel(logging.ERROR)
-    # logging.getLogger('apscheduler').propagate = False
+    logging.getLogger('pgoapi').setLevel(logging.ERROR)
     main()
