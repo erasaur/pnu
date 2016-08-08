@@ -5,7 +5,7 @@ logging = logging.getLogger(__name__)
 
 class Alert:
 
-    BASE = 'https://pnu.space/map/?'
+    BASE = 'https://pnu.space/map?'
 
     def __init__(self, pokemon, users):
         """ takes in a pokemon list/tuple and user list/tuple to notify
