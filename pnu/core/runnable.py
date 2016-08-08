@@ -7,7 +7,8 @@ class PnuRunnable ():
         self._update_interval = update_interval
 
     def update (self):
-        print('num threads: ', threading.active_count())
+        # print('num threads: ', threading.active_count())
+        pass
 
     # by default, just run update method in loop
     def run (self):
