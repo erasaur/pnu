@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export PNU_ENV=dev
+
 # TODO set project root
 # TODO automatically setup python env
 # TODO automatically install requirements

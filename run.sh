@@ -5,13 +5,17 @@ MAIN_PROCESS=main.py
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 NC='\033[0m' # No Color
-ENV=dev
 
 # # require running as sudo
 # if [ $EUID != 0 ]; then
 #   echo -e "${RED}Please re-run as sudo.${NC}"
 #   exit
 # fi
+
+if [ -z "$PNU_ENV" ]; then
+    echo "Please source one of setup_dev.sh or setup_prod.sh."
+    exit
+fi 
 
 get_pid_redis () {
   # returns the process id of the redis process
@@ -43,9 +47,9 @@ if [ -n "$pid_redis" ]; then
   echo -e "${GREEN}Redis is running with pid: $pid_redis${NC}"
 else 
   echo -e "Starting redis-pending..."
-  ./scripts/$ENV/run_pending_redis.sh
+  ./scripts/$PNU_ENV/run_pending_redis.sh
   echo -e "Starting redis-user..."
-  ./scripts/$ENV/run_user_redis.sh
+  ./scripts/$PNU_ENV/run_user_redis.sh
 fi
 
 # start main app

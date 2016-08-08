@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+export PNU_ENV=prod
+
 # setup app logs
 mkdir -p pnu/etc/logs
 touch pnu/etc/logs/logging.out
