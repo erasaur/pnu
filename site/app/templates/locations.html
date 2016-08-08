@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <title>pnu Locations</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/locations.css') }}">
+{% endblock %}
+
+
+{% block content %}
+    <h1>Locations Available</h1>
+
+    <form method="POST">
+        <input type="text" placeholder="ex. Ann Arbor" name="city"/>
+        <input type="Submit" value="Submit"/>
+    </form>
+
+    <br>
+
+    <table id="cities">
+        <tr>
+            <th>City</th>
+            <th>Email</th>
+        </tr>
+        <tr class="border_bottom">
+            <td>Ann Arbor</td>
+            <td>pnuAnnArbor@gmail.com</td>
+        </tr>
+        <tr>
+            <td>San Francisco</td>
+            <td>pnuSanFrancisco@gmail.com</td>
+        </tr>
+    </table>
+
+{% endblock %}
+
+
+{% block footer %}
+
+{% endblock %}

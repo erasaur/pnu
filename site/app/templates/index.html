@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block head %}
+    <title>Pokémon Near You</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/index.css') }}"/>
+{% endblock %}
+
+{% block content %}
+    <h1>Pokémon Near You<h1>
+    <h2>How to Enroll</h2>
+
+    <div id="enroll_main">
+        <div id="find_loc">
+            <p><span class="numbered_step">1. </span><a href="{{url_for('locations') }}">Find your location</a> to see if it's supported! </p>
+            <p>If it's not, and you would like to become a city champion, send a request to pnuchamps@gmail.com</p>
+        </div>
+
+        <hr>
+
+        <div>
+            <p><span class="numbered_step" id="second_step">2. </span></p>
+        </div>
+        <div id="enroll_buttons">
+            <div class="button button-lg" id="enroll_android">Android</div>
+            <div class="button button-lg" id="enroll_ios">&nbsp;iOS&nbsp;</div>
+        </div>
+        <div id="enroll_pane">
+            <div id="android_gif">
+                <img class="info_pic" src="{{ url_for('static', filename='images/android_loc.png') }}"/>
+            </div>
+            <div id="ios_gif">
+                <img class="info_pic" src="{{ url_for('static', filename='images/ios_loc.png') }}"/>
+            </div>
+        </div>
+
+        <div>
+            <p><span class="numbered_step">3. </span>You know your locations' server will be enabled if you receive a message with the final prompts to enroll your user!</p>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='scripts/index.js') }}"></script>
+{% endblock %}

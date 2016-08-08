@@ -1,0 +1,21 @@
+h1 {
+    text-align: center;
+}
+
+form {
+    text-align: center;
+}
+
+table {
+    margin: 0 auto;
+    text-align: center;
+    border: 1px solid black;
+}
+
+tr td:nth-child(1) {
+    padding-right: 10px;
+}
+
+tr.border_bottom td{
+    border-bottom: 1pt solid black;
+}
