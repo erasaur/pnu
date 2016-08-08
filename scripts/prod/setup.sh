@@ -6,6 +6,10 @@ export PNU_ENV=prod
 mkdir -p pnu/etc/logs
 touch pnu/etc/logs/logging.out
 
+# setup virtualenv
+virtualenv .venv -p python3.5
+pip install -r requirements.txt
+
 # setup redis
 mkdir -p db/user db/pending
 cp pnu/etc/redis/prod/user/redis-pnu-user-server /etc/init.d/
