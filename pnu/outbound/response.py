@@ -37,13 +37,18 @@ class BuildResponse:
 
     def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
-        msg = ("\nTo activate your user, respond in the form of \"Pokemon " +
+        msg = MIMEText("\nTo activate your user, respond in the form of \"Pokemon " +
                "wanted: poke1, poke2, poke3...\" with up to five Pokemon" +
                "A list of commands are:\nPAUSE - temporarily suspend alerts" +
                "\nRESUME - resume previous alerts\nSTOP - quit receiving " +
                "alerts")
-        self.to = self._check_len_of_msg(msg)
-        return msg
+        self.to = self._check_len_of_msg(msg.get_payload())
+
+        msg['To'] = self.to[0]
+        msg['From'] = private_config['gmail']['username']
+        msg['Subject'] = self.SUBJECT
+
+        return msg.as_string()
 
     def _make_stop_msg(self):
         logging.info("Sending STOP message")
