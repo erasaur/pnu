@@ -44,11 +44,8 @@ class PnuPokeApi ():
 
         return self._earth_radius * c
 
-    def close_enough (self, user, group):
-        for member in group:
-            if distance(user, member) >= self._group_member_dist:
-                return False
-        return True
+    def close_enough (self, user_a, user_b):
+        return self.distance(user, member) < self._group_member_dist:
 
     def remove_user (self, user):
         for group in self._groups:
