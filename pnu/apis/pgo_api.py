@@ -27,6 +27,8 @@ class PgoAPI ():
             self._signature_lib_path = "pnu/etc/pgoapi/libencrypt.so"
         elif sys.platform.startswith("darwin"):
             self._signature_lib_path = "pnu/etc/pgoapi/libencrypt-osx-64.so"
+        elif sys.platform.startswith("win"):
+            self._signature_lib_path = "pnu/etc/pgoapi/encrypt.dll"
         else:
             raise ValueError("un-supported system")
 
