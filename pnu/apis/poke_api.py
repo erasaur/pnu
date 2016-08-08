@@ -1,5 +1,5 @@
 import asyncio, aiohttp, time
-from math import cos, sin, atan2, sqrt, radians
+from math import cos, sin, atan2, sqrt, radians, pi
 
 from pnu.core.data_store import PnuUserDataStore
 # from pnu.apis.pokevision_api import PokevisionAPI
@@ -120,17 +120,13 @@ class PnuPokeApi ():
         y = float(y / len(group))
         z = float(z / len(group))
 
-        center_lat = atan2(z, sqrt(x * x + y * y))
-        center_lon = atan2(y, x)
+        center_lat = 180 * atan2(z, sqrt(x * x + y * y)) / pi
+        center_lon = 180 * atan2(y, x) / pi
 
         # TODO: increase radius based on number of members in group
         return center_lat, center_lon, self._group_step_count
 
     def get_pokemon_alerts (self):
-        pokes_nearby = self._pgo_api.get_nearby(42.277556681, -83.740878574,
-                self._group_step_count)
-        print(pokes_nearby)
-
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
         fut_list = []

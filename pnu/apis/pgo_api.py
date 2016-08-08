@@ -161,7 +161,7 @@ class PgoAPI ():
         if None in user.get_position():
             lat = float(user_data["latitude"])
             lon = float(user_data["longitude"])
-            user.set_position(lat, lon, 4.6)
+            user.set_position(lat, lon, 8)
 
         user.set_authentication(provider=auth_service, username=username, password=password)
 
