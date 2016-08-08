@@ -90,8 +90,8 @@ if __name__ == "__main__":
     # test sending ALERTS
     poke_json = {
         "pokemonId": 16,
-        "latitude": 12,
-        "longitude": 10,
+        "latitude": 42.27883786872156,
+        "longitude": -83.74502208351473,
         "expiration_time": 123456789
     }
     user_json = {
