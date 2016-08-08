@@ -1,0 +1,98 @@
+body {
+    background-color: #002B36;
+    color: #93A1A1;
+    text-align: center;
+}
+
+h1 {
+    color: #DC322F;
+}
+
+a {
+    color: #B58900;
+}
+
+hr {
+    color: #DC322F;
+    border-color: #DC322F;
+    max-width: 700px;
+}
+
+.numbered_step {
+    font-weight: bold;
+    font-size: 24px;
+}
+
+#second_step {
+    float: left;
+}
+
+#enroll_buttons {
+    margin: 0 auto;
+    width: 90%;
+    height: 50px;
+}
+
+#enroll_android {
+    float: left;
+}
+
+#enroll_ios {
+    float: right;
+    display: inline;
+}
+
+#enroll_main {
+    text-align: center;
+}
+
+.button {
+    cursor: pointer;
+    background-color: #E29506;
+    color: #EEE8D5;
+    font-weight: bold;
+    padding: 10px 15px;
+    border-radius: 4px;
+}
+.button-lg {
+    font-size: 18px;
+    background-color: #E29506;
+    color: #EEE8D5;
+    padding: 10px 20px;
+    border-radius: 4px;
+}
+
+.button:active {
+    background-color: #EEE8D5;
+    color: #E29506;
+    box-shadow: 0 0 5px -1px rgba(0,0,0,0.6);
+}
+
+@media only screen and (min-width: 768px) {
+    .button-lg {
+        font-size: 20px;
+        background-color: #E29506;
+        color: #EEE8D5;
+        padding: 15px 35px;
+        border-radius: 4px;
+    }
+
+    #enroll_buttons {
+        margin: 0 auto;
+        width: 33%;
+    }
+}
+
+#enroll_pane {
+    padding-top: 20px;
+    text-align: center;
+}
+
+#ios_gif {
+    display: none;
+}
+
+.info_pic {
+    max-width: 281px;
+    height: 500px;
+}

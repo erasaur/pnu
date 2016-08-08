@@ -161,9 +161,16 @@ class PgoAPI ():
         if None in user.get_position():
             lat = float(user_data["latitude"])
             lon = float(user_data["longitude"])
+<<<<<<< 9b34c308d6faa6e4544fd0407fa62b2a20c2da40
             user.set_position(lat, lon, 8)
 
         user.set_authentication(provider=auth_service, username=username, password=password)
+=======
+            user.set_position(lat, lon, 4.6)
+
+        user.set_authentication(provider=auth_service, username=username, password=password)
+        user.activate_signature(self._signature_lib_path)
+>>>>>>> Runs but still doesn't grab nearby pokes yet
 
     def get_new_coords (self, init_loc, distance, bearing):
         """ Given an initial lat/lng, a distance(in kms), and a bearing (degrees),

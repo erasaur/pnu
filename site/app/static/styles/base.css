@@ -1,0 +1,10 @@
+html, body {
+    font-family: arial;
+    color: #096a82;
+}
+
+#adsense {
+    height: 5%;
+    display: inline-block;
+    width: 100%;
+}
