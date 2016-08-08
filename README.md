@@ -33,7 +33,7 @@ import logging
 logging = logging.getLogger(__name__)
 ```
 
-If the file has an `if __name__ == "__main__":` line, add:
+If the file has an `if __name__ == "__main__":` line, add the following below the "if main" line:
 ```python
 import logging
 
