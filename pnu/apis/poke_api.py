@@ -153,6 +153,7 @@ class PnuPokeApi ():
                 pokes_nearby, 
                 key=lambda poke: poke.get_expiration_time()
             )
+            logging.info("Found {} pokemon nearby".format(len(pokes_nearby)))
 
             for user in group:
                 curr = set() # don't want duplicates

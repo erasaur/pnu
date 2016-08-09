@@ -32,6 +32,7 @@ class PgoAPI ():
         else:
             raise ValueError("un-supported system")
 
+        self._min_queue_size = pub_config["poke_api"]["min_queue_size"]
         self._request_throttle = pub_config["poke_api"]["request_throttle"]
         self._earth_radius = pub_config["poke_api"]["earth_radius_km"]
         self._max_tries = pub_config["poke_api"]["max_tries_per_request"]
@@ -221,7 +222,11 @@ class PgoAPI ():
             ring += 1
 
     def get_nearby (self, lat, lon, num_steps):
-        if self._queue.empty():
+        queue_size = self._queue.qsize()
+        user_queue_size = self._user_queue.qsize()
+        logging.info("Task queue size: {}".format(queue_size))
+        logging.info("User queue size: {}".format(user_queue_size))
+        if queue_size < self._min_queue_size:
             # finished previous load, time for more
             logging.info("Starting new search...")
             lock = Lock()
