@@ -12,7 +12,7 @@ read -p "Are you running from root of project dir? [y/n]" -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   echo "$EXITING_MSG"
-  exit
+  return
 fi
 
 # need pip to be installed
@@ -20,7 +20,7 @@ if [ -x "$(command -v pip)" ]; then
   echo -e "${GREEN}pip is installed${NC}"
 else
   echo -e "${RED}$MISSING_MSG: pip${NC}"
-  exit
+  return
 fi
 
 # need protobuf to be installed
@@ -29,11 +29,11 @@ if [ -x "$(command -v protoc)" ]; then
     echo -e "${GREEN}protobuf3 is installed${NC}"
   else
     echo -e "${RED}$MISSING_MSG: protobuf needs to be >= 3.0.0${NC}"
-    exit
+    return
   fi
 else
   echo -e "${RED}$MISSING_MSG: protobuf3${NC}"
-  exit
+  return
 fi
 
 # need redis to be installed
@@ -52,11 +52,11 @@ else
         brew install redis
       else
         echo $EXITING
-        exit
+        return
       fi
     else
       echo $EXITING
-      exit
+      return
     fi
 
   # linux
@@ -68,11 +68,11 @@ else
       sudo apt-get install redis-server
     else
       echo $EXITING
-      exit
+      return
     fi
   else
     echo $EXITING
-    exit
+    return
   fi
 fi
 
@@ -87,7 +87,7 @@ else
     pip install virtualenv
   else
     echo "$EXITING_MSG"
-    exit
+    return
   fi
 fi
 
@@ -96,7 +96,7 @@ if [ -x "$(command -v python3.5)" ]; then
   echo -e "${GREEN}python3.5 is installed${NC}"
 else
   echo -e "${RED}$MISSING_MSG: python3.5${NC}"
-  exit
+  return
 fi
 
 # setup virtualenv

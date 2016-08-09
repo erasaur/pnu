@@ -2,7 +2,7 @@
 
 if [ "$(expr substr $(uname -s) 1 5)" != "Linux" ]; then
   echo -e "${RED}Sorry, only linux supported at this time.${NC}"
-  exit
+  return
 fi
 
 export PNU_ENV=prod
@@ -10,7 +10,7 @@ export PNU_ENV=prod
 # require running as sudo
 if [ $EUID != 0 ]; then
   echo -e "${RED}Please re-run as sudo.${NC}"
-  exit
+  return
 fi
 
 # need to run in root of project directory!

@@ -4,12 +4,12 @@
 
 if [ -z "$PNU_ENV" ]; then
     echo "Please run 'source setup_dev.sh' or 'source setup_prod.sh' first."
-    exit
+    return
 fi
 
 if [[ $VIRTUAL_ENV != *"pnu"* ]]; then
     echo "Please start virtualenv with 'source $VIRTUALENV_DIR/bin/activate'."
-    exit
+    return
 fi
 
 # start redis if not already running
