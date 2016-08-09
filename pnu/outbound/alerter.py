@@ -81,6 +81,7 @@ class PnuAlertDispatcher:
         except:
             logging.error("An error occurred while sending a message!!")
             logging.error("Phone number: {}\nMessage: {}".format(phone_number, msg))
+            logging.error("Error is: {}".format(e))
 
 
 smtp = PnuAlertDispatcher()
