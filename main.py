@@ -12,16 +12,15 @@ from pnu.outbound.alert_dispatcher import PnuAlertDispatcher
 class Pnu (PnuRunnable):
     def __init__ (self):
         # initialize event loop
-        loop = asyncio.get_event_loop()
+        # loop = asyncio.get_event_loop()
 
         super().__init__(update_interval=pub_config["pnu"]["update_interval"])
 
         # initialize api clients
-        self._loop = loop
-        self._curr_task = None
+        # self._loop = loop
 
-        session = aiohttp.ClientSession(loop=loop)
-        self._session = session
+        # session = aiohttp.ClientSession(loop=loop)
+        # self._session = session
 
         self._poke_api = PnuPokeApi()
         self._handler = PnuRequestHandler(poke_api=self._poke_api)
@@ -35,21 +34,21 @@ class Pnu (PnuRunnable):
         super().run()
         self._handler.run()
         self._dispatcher.run()
-        self._loop.run_forever()
+        # self._loop.run_forever()
 
     def send_alerts (self):
         alerts = self._poke_api.get_pokemon_alerts()
         # send alerts with dispatcher
         self._dispatcher.dispatch(alerts)
 
-    def clear_tasks (self):
-        # TODO only clear tasks for aiohttp loop used for poke api requests
-        # currently, aiohttp is only used for that purpose so this is fine
-        tasks = asyncio.Task.all_tasks(loop=self._loop)
-        for task in tasks:
-            task.cancel()
-            with suppress(asyncio.CancelledError):
-                self._loop.run_until_complete(task)
+    # def clear_tasks (self):
+    #     # TODO only clear tasks for aiohttp loop used for poke api requests
+    #     # currently, aiohttp is only used for that purpose so this is fine
+    #     tasks = asyncio.Task.all_tasks(loop=self._loop)
+    #     for task in tasks:
+    #         task.cancel()
+    #         with suppress(asyncio.CancelledError):
+    #             self._loop.run_until_complete(task)
 
     def update (self):
         super().update()
