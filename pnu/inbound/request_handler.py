@@ -75,8 +75,8 @@ class PnuRequestHandler (PnuRunnable):
 
             # user is fully enrolled. depending on whether they just enrolled,
             # or were already enrolled and simply updating their info, we want
-            # to update the minimal location set differently (if they just
-            # enrolled, we want to add a new entry; if not, we want to update an
-            # existing entry)
-            elif self._poke_api.pos_changed(old_user, user):
+            # to update our data set differently (if they just enrolled, we want 
+            # to add a new entry; if not, we want to update an existing entry),
+            # hence we pass in the `already_active` flag.
+            else:
                 self._poke_api.update_data(user, already_active)
