@@ -12,12 +12,12 @@ from pnu.outbound.alert_dispatcher import PnuAlertDispatcher
 class Pnu (PnuRunnable):
     def __init__ (self):
         # initialize event loop
-        # loop = asyncio.get_event_loop()
+        loop = asyncio.get_event_loop()
 
         super().__init__(update_interval=pub_config["pnu"]["update_interval"])
 
         # initialize api clients
-        # self._loop = loop
+        self._loop = loop
 
         # session = aiohttp.ClientSession(loop=loop)
         # self._session = session
@@ -34,7 +34,7 @@ class Pnu (PnuRunnable):
         super().run()
         self._handler.run()
         self._dispatcher.run()
-        # self._loop.run_forever()
+        self._loop.run_forever()
 
     def send_alerts (self):
         alerts = self._poke_api.get_pokemon_alerts()
