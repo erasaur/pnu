@@ -17,6 +17,11 @@ fi
 source scripts/config.sh
 source scripts/install_deps.sh
 
+# if install deps failed, returns 1
+if [[ $? -eq 1 ]]; then
+  return
+fi
+
 # setup app logs
 mkdir -p $APP_LOG_DIR
 touch $APP_LOG_FILE

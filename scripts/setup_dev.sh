@@ -6,6 +6,11 @@ export PNU_ENV=dev
 source scripts/config.sh
 source install_deps.sh
 
+# if install deps failed, returns 1
+if [[ $? -eq 1 ]]; then
+  return
+fi
+
 echo "Setting up logs..."
 mkdir -p $APP_LOG_DIR
 touch $APP_LOG_FILE
