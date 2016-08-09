@@ -2,7 +2,6 @@ import asyncio, aiohttp, time
 from math import cos, sin, atan2, sqrt, radians, pi
 
 from pnu.core.data_store import PnuUserDataStore
-# from pnu.apis.pokevision_api import PokevisionAPI
 from pnu.apis.pgo_api import PgoAPI
 from pnu.config import pub_config
 from pnu.models.user import User
@@ -13,9 +12,8 @@ import logging
 logging = logging.getLogger(__name__)
 
 class PnuPokeApi ():
-    def __init__ (self, session=None):
+    def __init__ (self):
         self._pgo_api = PgoAPI()
-        # self._pokevision_api = PokevisionAPI(session=session)
         self._earth_radius = pub_config["poke_api"]["earth_radius_km"]
         self._group_member_dist = pub_config["poke_api"]["group_member_dist_km"]
         self._group_scan_dist = pub_config["poke_api"]["group_scan_dist_km"]
