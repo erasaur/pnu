@@ -78,7 +78,6 @@ class PgoAPI ():
             return False
 
     def parse_map (self, map_dict, step, step_location):
-        logging.info("{}".format(map_dict))
         if map_dict["responses"]["GET_MAP_OBJECTS"]["status"] != 1:
             return
 
@@ -118,7 +117,6 @@ class PgoAPI ():
 
             # get next task (this blocks till there is one)
             step, step_location, lock = queue.get()
-            logging.info("getting: {} {}".format(step, step_location))
 
             response_dict = {}
             failed_consecutive = 0
