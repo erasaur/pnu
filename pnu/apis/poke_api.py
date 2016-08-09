@@ -80,9 +80,10 @@ class PnuPokeApi ():
             found_self = (old_index != -1)
 
             if close_enough_to_group:
-                if found_self: # update with our new position
+                if found_self: # update with our new data
                     group[old_index] = user
-                else: # add our new position
+                    deleted_old = True
+                else: # add our new user
                     group.append(user)
                 added_new = True
             else:
@@ -92,7 +93,7 @@ class PnuPokeApi ():
 
                     if len(group) < 1:
                         del self._groups[group_index]
-                # else: keep on looking
+                # else: keep on looking for our old self if need be
 
             if added_new and deleted_old:
                 break
