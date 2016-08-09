@@ -10,8 +10,9 @@ from pnu.inbound.request_handler import PnuRequestHandler
 from pnu.outbound.alert_dispatcher import PnuAlertDispatcher
 from pnu.etc.logging import ConfigureLogging
 
+
 class Pnu (PnuRunnable):
-    def __init__ (self):
+    def __init__(self):
         # initialize event loop
         loop = asyncio.get_event_loop()
 
@@ -31,13 +32,13 @@ class Pnu (PnuRunnable):
     #     self._session.close()
     #     self._loop.close()
 
-    def run (self):
+    def run(self):
         super().run()
         self._handler.run()
         self._dispatcher.run()
         self._loop.run_forever()
 
-    def send_alerts (self):
+    def send_alerts(self):
         alerts = self._poke_api.get_pokemon_alerts()
         # send alerts with dispatcher
         self._dispatcher.dispatch(alerts)
@@ -51,7 +52,7 @@ class Pnu (PnuRunnable):
     #         with suppress(asyncio.CancelledError):
     #             self._loop.run_until_complete(task)
 
-    def update (self):
+    def update(self):
         super().update()
 
         # cancel all tasks that are still pending
@@ -61,7 +62,8 @@ class Pnu (PnuRunnable):
         self.send_alerts()
         # asyncio.ensure_future(self.send_alerts(), loop=self._loop)
 
-def main ():
+
+def main():
     Pnu().run()
 
 if __name__ == "__main__":

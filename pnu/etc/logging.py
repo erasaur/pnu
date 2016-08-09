@@ -2,11 +2,12 @@ import logging.config
 import sys
 from pnu.config import pub_config
 
+
 class ConfigureLogging:
 
     def __init__(self):
         logging.config.fileConfig(pub_config["logging"]["location"],
-                disable_existing_loggers=False)
+                                  disable_existing_loggers=False)
         logging.getLogger('apscheduler').setLevel(logging.ERROR)
         logging.getLogger('pgoapi').setLevel(logging.ERROR)
         log = logging.getLogger('pnu')
@@ -15,6 +16,7 @@ class ConfigureLogging:
 
 
 class LoggerWriter:
+
     def __init__(self, level):
         self.level = level
 
