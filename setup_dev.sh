@@ -1,1 +1,1 @@
-scripts/dev/setup.sh
+scripts/setup_dev.sh
