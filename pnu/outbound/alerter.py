@@ -70,18 +70,28 @@ class PnuAlertDispatcher:
         msg, phone_number = BuildResponse(user).build_message()
         logging.info("MESSAGE IS: {}\nSending to: {}".format(
                      msg, phone_number))
-        try:
-            self.smtp.sendmail(private_config['gmail']['username'],
-                               phone_number, msg)
-        except SMTPSenderRefused as e:
-            logging.error("Sender refused error. Phone #: {}".format(phone_number))
-            logging.error("Error is: {}".format(e))
-            logging.error("Message: {}".format(msg))
 
-        except:
-            logging.error("An error occurred while sending a message!!")
-            logging.error("Phone number: {}\nMessage: {}".format(phone_number, msg))
-            logging.error("Error is: {}".format(e))
+        send_attempts = 0
+        while send_attempts < 10:
+            try:
+                send_attempts += 1
+                self.smtp.sendmail(private_config['gmail']['username'],
+                                   phone_number, msg)
+                send_attempts = 10
+            except SMTPSenderRefused as e:
+                time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
+                logging.error("Sender refused error. Phone #: {}"
+                              .format(phone_number))
+                logging.error("Sender refused address is: {}".format(sender))
+                logging.error("Error is: {}".format(e))
+                logging.error("Message: {}".format(msg))
+
+            except:
+                time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
+                logging.error("An error occurred while sending a message!!")
+                logging.error("Phone number: {}\nMessage: {}"
+                              .format(phone_number, msg))
+                logging.error("Error is: {}".format(e))
 
 
 smtp = PnuAlertDispatcher()

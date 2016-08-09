@@ -173,7 +173,7 @@ class PnuRequest:
         for pokemon in pokemon_wanted:
             try:
                 valid_pokemon.append(
-                        constants.POKEMON_NAME_TO_ID[pokemon.lower()])
+                        constants.POKEMON_NAME_TO_ID[pokemon.strip().lower()])
 
             except KeyError:
                 logging.info("User submitted fake pokemon: {}".format(pokemon))
