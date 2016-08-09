@@ -50,9 +50,9 @@ else
     read -p "$DOWNLOAD_MSG" -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
+      sudo apt-get install autoconf automake libtool curl make g++ unzip
       git clone git://github.com/google/protobuf.git
       cd protobuf
-      sudo apt-get install autoconf automake libtool curl make g++ unzip
       ./autogen.sh
       ./configure
       make
