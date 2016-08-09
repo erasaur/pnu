@@ -15,7 +15,12 @@ NC='\033[0m' # No Color
 if [ -z "$PNU_ENV" ]; then
     echo "Please source one of setup_dev.sh or setup_prod.sh."
     exit
-fi 
+fi
+
+if [[ $VIRTUAL_ENV != *"pnu"* ]]; then
+    echo "Please start virtualenv"
+    exit
+fi
 
 get_pid_redis () {
   # returns the process id of the redis process
@@ -56,7 +61,7 @@ fi
 pid_main=$(get_pid_main)
 
 if [ ! -n "$pid_main" ]; then
-  # nohup ./main.py >./pnu/etc/logs/main.out 2>./pnu/etc/logs/main.err &
+  nohup ./main.py >./pnu/etc/logs/main.out 2>./pnu/etc/logs/main.err &
   echo -e "${GREEN}App started.${NC}"
 else
   echo -e "${RED}App is already running. Try [kill -9 $pid_main] first, then re-run.${NC}"
