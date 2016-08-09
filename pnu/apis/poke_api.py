@@ -23,7 +23,9 @@ class PnuPokeApi ():
 
         init_users = PnuUserDataStore.list()
         for user in init_users:
-            self.update_data(User(user), True)
+            user = User(user)
+            if user.is_active():
+                self.update_data(user, True)
 
     def pos_changed (self, user_a, user_b):
         if user_a is None or user_b is None:
@@ -132,7 +134,8 @@ class PnuPokeApi ():
         # for each such location, get the nearby pokes, and filter out the
         temp = {} # result to return
         fut_list = []
-        logging.info("Processing {} users...".format(len(self._groups)))
+        logging.info("Have {} users...".format(len(PnuUserDataStore.list())))
+        logging.info("Processing {} groups...".format(len(self._groups)))
         for group in self._groups:
             if len(group) < 1:
                 logging.info("Something's wrong with the grouping code!")
