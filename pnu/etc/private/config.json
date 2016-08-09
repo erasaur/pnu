@@ -1,0 +1,30 @@
+{
+  "gmail": {
+    "username": "INSERT_YOUR_GMAIL_ADDRESS_HERE",
+    "password": "INSERT_YOUR_PASSWORD_HERE"
+  },
+  "goo.gl": {
+    "API_KEY": "INSERT_YOUR_GOOGLE_URL_API_HERE"
+  },
+  "poke_api": {
+    "accounts": [{
+      "auth_service": "google",
+      "username": "INSERT_JUNK_GMAIL_ACCOUNT_HERE",
+      "password": "INSERT_JUNK_PASSWORD_HERE",
+      "latitude": "INSERT_YOUR_LOCATIONS_LATITUDE",
+      "longitude": "INSERT_YOUR_LOCATIONS_LONGITUDE"
+    }
+IF ONLY USING ONE GOOGLE ACCOUNT TO SCAN, DELETE THESE LINES AND THE LINES BETWEEN
+THE THREE ASTERISKS, including the ASTERISKS.
+***
+    ,{
+      "auth_service": "google",
+      "username": "INSERT_SECOND_JUNK_ACCOUNT_HERE",
+      "password": "INSERT_SECOND_JUNK_PASSWORD_HERE",
+      "latitude": "INSERT_YOUR_SAME_LOCATIONS_LATITUDE",
+      "longitude": "INSERT_YOUR_SAME_LOCATIONS_LONGITUDE"
+    }
+***
+    ]
+  }
+}
