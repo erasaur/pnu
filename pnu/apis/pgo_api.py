@@ -33,7 +33,7 @@ class PgoAPI ():
             raise ValueError("un-supported system")
 
         self._request_throttle = pub_config["poke_api"]["request_throttle"]
-        self._earth_radius = pub_config["poke_api"]["earth_radius"]
+        self._earth_radius = pub_config["poke_api"]["earth_radius_km"]
         self._max_tries = pub_config["poke_api"]["max_tries_per_request"]
         self._recovery_time = pub_config["poke_api"]["sleep_after_max_tries"]
         self._sleep_time = pub_config["poke_api"]["sleep_per_request"]
