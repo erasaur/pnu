@@ -22,6 +22,12 @@ class PnuAlertDispatcher:
         """ perform preliminary actions for sending email via SMTP """
 
         logging.info("Starting up Alert")
+        self.reconnect()
+
+    def __exit__(self):
+        self.smtp.quit()
+
+    def reconnect(self):
         auth_attempts = 0
 
         while auth_attempts < 5:
@@ -59,9 +65,6 @@ class PnuAlertDispatcher:
         if auth_attempts >= 5:
             raise SMTPException("Failed connecting with the SMTP server. :(")
 
-    def __exit__(self):
-        self.smtp.quit()
-
     def send_message(self, user):
         """ sends a text message alert to the specified user
         Args:
@@ -86,12 +89,13 @@ class PnuAlertDispatcher:
                 logging.error("Error is: {}".format(e))
                 logging.error("Message: {}".format(msg))
 
-            except:
+            except Exception as e:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("An error occurred while sending a message!!")
                 logging.error("Phone number: {}\nMessage: {}"
                               .format(phone_number, msg))
                 logging.error("Error is: {}".format(e))
+                self.reconnect()
 
 
 smtp = PnuAlertDispatcher()
