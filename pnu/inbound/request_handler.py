@@ -53,7 +53,8 @@ class PnuRequestHandler (PnuRunnable):
                     PnuUserDataStore.update(phone_number, inbound_user)
 
                 logging.info("Setting user to be notified")
-                PnuPendingDataStore.append(constants.ENROLL, inbound_user)
+                full_inbound_user = PnuUserDataStore.get(phone_number)
+                PnuPendingDataStore.append(constants.ENROLL, full_inbound_user)
                 continue
 
             # check if current user is already active

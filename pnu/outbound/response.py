@@ -20,6 +20,7 @@ class BuildResponse:
     def __init__(self, user):
         self.link = None
         if isinstance(user, Alert):
+            logging.info("Sending an alert to {}".format(user))
             alert = user
             self.status = constants.ACTIVE
             # user in this case is a list of users' phone numbers
@@ -30,6 +31,7 @@ class BuildResponse:
             # already valid
             self.location = True
         else:
+            logging.info("Sending a message to user {}".format(user))
             self.status = user.get_status()
             self.to = user.get_phone_number()
             self.pokemon_wanted = user.get_pokemon_wanted()
@@ -173,12 +175,7 @@ class BuildResponse:
                 return self._make_resume_msg(), self.to
 
         elif self.status == constants.PAUSE:
-            if not self.location:
-                return self._make_no_location_msg(), self.to
-            elif not self.pokemon_wanted:
-                return self._make_no_pokemon_listed_msg(), self.to
-            else:
-                return self._make_pause_msg(), self.to
+            return self._make_pause_msg(), self.to
 
         elif self.status == constants.STOP:
             return self._make_stop_msg(), self.to
