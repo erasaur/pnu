@@ -2,7 +2,7 @@
 
 import time
 from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
-                     SMTPNotSupportedError, SMTPException)
+                     SMTPNotSupportedError, SMTPException, SMTPSenderRefused)
 
 from pnu.config import pub_config, private_config
 from pnu.etc import constants
@@ -70,8 +70,18 @@ class PnuAlertDispatcher:
         msg, phone_number = BuildResponse(user).build_message()
         logging.info("MESSAGE IS: {}\nSending to: {}".format(
                      msg, phone_number))
-        self.smtp.sendmail(private_config['gmail']['username'],
-                           phone_number, msg)
+        try:
+            self.smtp.sendmail(private_config['gmail']['username'],
+                               phone_number, msg)
+        except SMTPSenderRefused as e:
+            logging.error("Sender refused error. Phone #: {}".format(phone_number))
+            logging.error("Error is: {}".format(e))
+            logging.error("Message: {}".format(msg))
+
+        except:
+            logging.error("An error occurred while sending a message!!")
+            logging.error("Phone number: {}\nMessage: {}".format(phone_number, msg))
+
 
 smtp = PnuAlertDispatcher()
 
