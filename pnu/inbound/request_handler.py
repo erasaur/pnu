@@ -46,6 +46,7 @@ class PnuRequestHandler (PnuRunnable):
                 logging.info("Status update!")
                 # sends correct status message based on status field
                 if status == constants.STOP:
+                    self._poke_api.delete_user(phone_number)
                     PnuUserDataStore.delete_user(phone_number)
                 # resume or pause status
                 else:

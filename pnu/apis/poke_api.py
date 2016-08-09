@@ -49,11 +49,13 @@ class PnuPokeApi ():
     def close_enough (self, user_a, user_b):
         return self.distance(user_a, user_b) < self._group_member_dist
 
-    def remove_user (self, user):
-        for group in self._groups:
+    def delete_user (self, phone_number):
+        for group_index, group in enumerate(self._groups):
             for index, member in enumerate(group):
-                if (member.get_phone_number() == user.get_phone_number()):
+                if (member.get_phone_number() == phone_number):
                     del group[index]
+                    if len(group) < 1:
+                        del self._groups[group_index]
                     return
 
     def update_data (self, user, already_active):
