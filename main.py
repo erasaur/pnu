@@ -8,6 +8,7 @@ from pnu.config import pub_config
 from pnu.apis.poke_api import PnuPokeApi
 from pnu.inbound.request_handler import PnuRequestHandler
 from pnu.outbound.alert_dispatcher import PnuAlertDispatcher
+from pnu.etc.logging import ConfigureLogging
 
 class Pnu (PnuRunnable):
     def __init__ (self):
@@ -64,9 +65,5 @@ def main ():
     Pnu().run()
 
 if __name__ == "__main__":
-    import logging.config
-    logging.config.fileConfig(pub_config["logging"]["location"],
-            disable_existing_loggers=False)
-    logging.getLogger('apscheduler').setLevel(logging.ERROR)
-    logging.getLogger('pgoapi').setLevel(logging.ERROR)
+    ConfigureLogging()
     main()
