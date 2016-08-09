@@ -36,6 +36,7 @@
     },
 
     "poke_api": {
+        "min_queue_size": 20,
         "request_throttle": 20,
         "earth_radius_km": 6378.1,
         "step_size_km": 0.25,
