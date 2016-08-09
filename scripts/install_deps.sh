@@ -24,24 +24,10 @@ else
 fi
 
 # need protobuf to be installed
-if [ -x "$(command -v protoc)" ]; then
-  if [[ $(protoc --version) == *3* ]]; then
-    echo -e "${GREEN}protobuf3 is installed${NC}"
-  else
-    echo -e "${RED}$MISSING_MSG: protobuf needs to be >= 3.0.0${NC}"
-    return 1
-  fi
+if [ -x "$(command -v protoc)" ] && [[ $(protoc --version) == *3* ]]; then
+  echo -e "${GREEN}protobuf3 is installed${NC}"
 else
   echo -e "${RED}$MISSING_MSG: protobuf3${NC}"
-  return 1
-fi
-
-# need redis to be installed
-if [ -x "$(command -v redis-server)" ]; then
-  echo -e "${GREEN}redis is installed${NC}"
-else
-  echo -e "${RED}$MISSING_MSG: redis${NC}"
-
   # mac os
   if [ "$(uname)" == "Darwin" ]; then
     # only attempt to download for them if brew is installed
@@ -49,7 +35,53 @@ else
       read -p "$DOWNLOAD_MSG" -n 1 -r
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        brew install redis
+        brew update && brew install --devel protobuf
+      else
+        echo $EXITING
+        return
+      fi
+    else
+      echo $EXITING
+      return 1
+    fi
+
+  # linux
+  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+    read -p "$DOWNLOAD_MSG" -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      git clone git://github.com/google/protobuf.git
+      cd protobuf
+      sudo apt-get install autoconf automake libtool curl make g++ unzip
+      ./autogen.sh
+      ./configure
+      make
+      make check
+      sudo make install
+      sudo ldconfig
+    else
+      echo $EXITING
+      return 1
+    fi
+  else
+    echo $EXITING
+    return 1
+  fi
+fi
+
+# need redis to be installed
+if [ -x "$(command -v redis-server)" ]; then
+  echo -e "${GREEN}redis is installed${NC}"
+else
+  echo -e "${RED}$MISSING_MSG: redis${NC}"
+  # mac os
+  if [ "$(uname)" == "Darwin" ]; then
+    # only attempt to download for them if brew is installed
+    if [ -x "$(command -v brew)" ]; then
+      read -p "$DOWNLOAD_MSG" -n 1 -r
+      echo
+      if [[ $REPLY =~ ^[Yy]$ ]]; then
+        brew update && brew install redis
       else
         echo $EXITING
         return
@@ -88,7 +120,7 @@ else
       read -p "$DOWNLOAD_MSG" -n 1 -r
       echo
       if [[ $REPLY =~ ^[Yy]$ ]]; then
-        brew install python3
+        brew update && brew install python3
       else
         echo $EXITING
         return
