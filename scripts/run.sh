@@ -26,7 +26,7 @@ fi
 # start main app
 pid_main=$(get_pid $MAIN_PROCESS)
 if [ ! -n "$pid_main" ]; then
-  nohup ./main.py &
+  nohup ./main.py >$MAIN_LOG_FILE 2>$MAIN_ERR_FILE &
   echo -e "${GREEN}App started.${NC}"
 else
   echo -e "${RED}App is already running. Try [kill -9 $pid_main] first, then re-run.${NC}"

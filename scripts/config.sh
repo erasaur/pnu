@@ -26,6 +26,9 @@ APP_LOG_DIR=pnu/etc/logs
 APP_LOG_FILE="$APP_LOG_DIR/logging.out"
 VIRTUALENV_DIR=.venv
 
+MAIN_LOG_FILE="$APP_LOG_DIR/main.out"
+MAIN_ERR_FILE="$APP_LOG_DIR/main.err"
+
 # redis config
 # run dir is where dumpfiles will go
 # conf dir is where config files are read from
