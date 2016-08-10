@@ -112,10 +112,10 @@ else
 fi
 
 # need pip to be installed
-if [ -x "$(command -v pip)" ]; then
-  echo -e "${GREEN}pip is installed${NC}"
+if [ -x "$(command -v pip3.5)" ]; then
+  echo -e "${GREEN}pip3.5 is installed${NC}"
 else
-  echo -e "${RED}$MISSING_MSG: pip${NC}"
+  echo -e "${RED}$MISSING_MSG: pip3.5${NC}"
   # mac os
   if [ "$(uname)" == "Darwin" ]; then
     # only attempt to download for them if brew is installed
@@ -139,7 +139,7 @@ else
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       sudo apt-get update
-      sudo apt-get install python-pip
+      sudo apt-get install python3-pip
     else
       echo $EXITING
       return 1
