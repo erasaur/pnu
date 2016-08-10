@@ -2,6 +2,8 @@
 
 # needs to be run from project root!
 
+source scripts/config.sh
+
 if [ -z "$PNU_ENV" ]; then
   echo "Please run 'source setup_dev.sh' or 'source setup_prod.sh' first."
   exit
@@ -11,8 +13,6 @@ if [[ $VIRTUAL_ENV != *"pnu"* ]]; then
   echo "Please start virtualenv with 'source $VIRTUALENV_DIR/bin/activate'."
   exit
 fi
-
-source scripts/config.sh
 
 # start redis if not already running
 pid_redis=$(get_pid $REDIS_PROCESS)
