@@ -144,6 +144,7 @@ class PnuPokeApi ():
             lat, lon, step_radius = self.get_cover(group)
             pokes_nearby = self._pgo_api.get_nearby(lat, lon, step_radius)
 
+            logging.info("Found {} pokemon nearby".format(len(pokes_nearby)))
             if len(pokes_nearby) < 1:
                 continue
 
@@ -153,7 +154,6 @@ class PnuPokeApi ():
                 pokes_nearby, 
                 key=lambda poke: poke.get_expiration_time()
             )
-            logging.info("Found {} pokemon nearby".format(len(pokes_nearby)))
 
             for user in group:
                 curr = set() # don't want duplicates

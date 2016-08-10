@@ -45,6 +45,7 @@ class PgoAPI ():
             user = PGoApi()
             user._index = index
             user._last_call = 0
+            user._data = user_data
             self.auth(user)
             self._users[index] = user
             self._user_queue.put(user)
@@ -134,8 +135,7 @@ class PgoAPI ():
                             self._changed = True
                         except KeyError:
                             logging.info('Search thread failed. Response dictionary key error')
-                            logging.info('{}: step {} failed. Response dictionary\
-                                key error.'.format(threadname, step))
+                            logging.info('{}: step {} failed. Response dictionary key error.'.format(threadname, step))
                             failed_consecutive += 1
                             if (failed_consecutive >= self._max_tries):
                                 logging.info('Niantic servers under heavy load. Waiting before trying again')
@@ -151,7 +151,8 @@ class PgoAPI ():
             user_queue.put(user)
 
     def auth (self, user):
-        user_data = self._users[user._index]
+        user = self._users[user._index]
+        user_data = user._data
         auth_service = user_data["auth_service"]
         username = user_data["username"]
         password = user_data["password"]
@@ -226,7 +227,7 @@ class PgoAPI ():
         user_queue_size = self._user_queue.qsize()
         logging.info("Task queue size: {}".format(queue_size))
         logging.info("User queue size: {}".format(user_queue_size))
-        if queue_size < self._min_queue_size:
+        if queue_size <= self._min_queue_size:
             # finished previous load, time for more
             logging.info("Starting new search...")
             lock = Lock()
