@@ -32,6 +32,7 @@ class PgoAPI ():
         else:
             raise ValueError("un-supported system")
 
+        self._min_time_need_reauth = pub_config["poke_api"]["min_time_need_reauth_sec"]
         self._min_queue_size = pub_config["poke_api"]["min_queue_size"]
         self._request_throttle = pub_config["poke_api"]["request_throttle"]
         self._earth_radius = pub_config["poke_api"]["earth_radius_km"]
@@ -43,7 +44,6 @@ class PgoAPI ():
 
         for index, user_data in enumerate(self._users):
             user = PGoApi()
-            user._index = index
             user._last_call = 0
             user._data = user_data
             self.auth(user)
@@ -107,8 +107,8 @@ class PgoAPI ():
             now = time.time()
 
             if user._auth_provider._ticket_expire:
-                remaining_time = user._auth_provider._ticket_expire/1000 - time.time()
-                if remaining_time < 30:
+                remaining_time = user._auth_provider._ticket_expire/1000 - now
+                if remaining_time < self._min_time_need_reauth:
                     self.auth(user)
 
             if now - user._last_call < self._request_throttle:
@@ -151,7 +151,6 @@ class PgoAPI ():
             user_queue.put(user)
 
     def auth (self, user):
-        user = self._users[user._index]
         user_data = user._data
         auth_service = user_data["auth_service"]
         username = user_data["username"]
