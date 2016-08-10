@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-if [[ `uname -s` == *"Linux"* ]]; then
+if [[ `uname -s` != *"Linux"* ]]; then
   echo -e "${RED}Sorry, only linux supported at this time.${NC}"
-  return
+  exit
 fi
 
 export PNU_ENV=prod
