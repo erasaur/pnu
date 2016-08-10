@@ -7,8 +7,8 @@ if (( $? == 1 )); then
   return 1
 fi
 
-if [ -f pnu/etc/private_config.json ]; then
-  mkdir -p pnu/etc/private
+mkdir -p pnu/etc/private
+if [ -f pnu/etc/private_config.json ] && [ ! -f pnu/etc/private/config.json ]; then
   cp pnu/etc/private_config.json pnu/etc/private/config.json
 else
   echo -e "${RED}Missing private_config.json file!${NC}"
