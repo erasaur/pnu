@@ -28,13 +28,13 @@ touch $APP_LOG_FILE
 
 # setup redis and redis logs
 mkdir -p $REDIS_RUN_PENDING_DIR $REDIS_RUN_USER_DIR
-sudo chmod +w $REDIS_RUN_DIR
+sudo chmod +w $REDIS_RUN_DIR $REDIS_RUN_PENDING_DIR $REDIS_RUN_USER_DIR
 touch $REDIS_PENDING_LOG_FILE
 touch $REDIS_USER_LOG_FILE
 sudo chmod +w $REDIS_PENDING_LOG_FILE
 sudo chmod +w $REDIS_USER_LOG_FILE
-cp $REDIS_PENDING_SERVICE_CONF /etc/init.d/
-cp $REDIS_USER_SERVICE_CONF /etc/init.d/
+cp $REDIS_PENDING_SERVICE_FILE /etc/init.d/
+cp $REDIS_USER_SERVICE_FILE /etc/init.d/
 update-rc.d $REDIS_PENDING_SERVICE defaults
 update-rc.d $REDIS_USER_SERVICE defaults
 

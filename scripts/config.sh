@@ -32,20 +32,22 @@ VIRTUALENV_DIR=.venv
 REDIS_PENDING_SERVICE=redis-pnu-pending-server
 REDIS_USER_SERVICE=redis-pnu-user-server
 
+# run dir should match with the run dir specified in redis service files
 if [ $PNU_ENV = "prod" ]; then
   REDIS_RUN_DIR=/var/run/redis
-  REDIS_CONF_DIR=pnu/etc/redis/prod
+  REDIS_SERVICE_DIR=pnu/etc/redis/prod
 else
   REDIS_RUN_DIR=db
-  REDIS_CONF_DIR=pnu/etc/redis/dev
+  REDIS_SERVICE_DIR=pnu/etc/redis/dev
 fi
 
 REDIS_RUN_PENDING_DIR="$REDIS_RUN_DIR/pending"
 REDIS_RUN_USER_DIR="$REDIS_RUN_DIR/user"
 
+# these should match up with the paths specified in redis config files
 REDIS_PENDING_LOG_FILE="$REDIS_RUN_PENDING_DIR/redis-server.log"
 REDIS_USER_LOG_FILE="$REDIS_RUN_USER_DIR/redis-server.log"
 
-# conf files for init.d
-REDIS_PENDING_SERVICE_CONF="$REDIS_CONF_DIR/pending/$REDIS_PENDING_SERVICE"
-REDIS_USER_SERVICE_CONF="$REDIS_CONF_DIR/user/$REDIS_USER_SERVICE"
+# redis service file paths
+REDIS_PENDING_SERVICE_FILE="$REDIS_SERVICE_DIR/pending/$REDIS_PENDING_SERVICE"
+REDIS_USER_SERVICE_FILE="$REDIS_SERVICE_DIR/user/$REDIS_USER_SERVICE"
