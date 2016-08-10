@@ -158,7 +158,7 @@ else
   read -p "$DOWNLOAD_MSG" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    pip install virtualenv
+    pip3 install virtualenv
   else
     echo "$EXITING_MSG"
     return 1
@@ -169,11 +169,11 @@ fi
 if [ -d "$VIRTUALENV_DIR" ]; then
   echo -e "${GREEN}virtualenv is set up${NC}"
 else
-  echo "Setting up virtualenv..."
+  echo -e "${GREEN}Setting up virtualenv...${NC}"
   virtualenv -p python3.5 $VIRTUALENV_DIR
 fi
 
-echo "Activating virtualenv..."
+echo -e "${GREEN}Activating virtualenv...${NC}"
 source $VIRTUALENV_DIR/bin/activate
 
 # need to add python headers to path for xxhash
