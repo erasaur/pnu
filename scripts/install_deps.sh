@@ -6,12 +6,12 @@ source scripts/config.sh
 
 MISSING_MSG="Missing dependency"
 DOWNLOAD_MSG="Download now? [y/n]"
-EXITING_MSG="Exiting"
+EXITING_MSG="${RED}Exiting${NC}"
 
 read -p "Are you running from root of project dir? [y/n]" -n 1 -r
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-  echo "$EXITING_MSG"
+  echo -e $EXITING_MSG
   return 1
 fi
 
@@ -37,11 +37,11 @@ else
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         brew update && brew install --devel protobuf
       else
-        echo $EXITING
+        echo -e $EXITING_MSG
         return
       fi
     else
-      echo $EXITING
+      echo -e $EXITING_MSG
       return 1
     fi
 
@@ -63,11 +63,11 @@ else
       sudo ldconfig
       cd .. && rm -rf protobuf
     else
-      echo $EXITING
+      echo -e $EXITING_MSG
       return 1
     fi
   else
-    echo $EXITING
+    echo -e $EXITING_MSG
     return 1
   fi
 fi
@@ -86,11 +86,11 @@ else
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         brew update && brew install redis
       else
-        echo $EXITING
+        echo -e $EXITING_MSG
         return
       fi
     else
-      echo $EXITING
+      echo -e $EXITING_MSG
       return 1
     fi
 
@@ -102,11 +102,11 @@ else
       sudo apt-get update
       sudo apt-get install redis-server
     else
-      echo $EXITING
+      echo -e $EXITING_MSG
       return 1
     fi
   else
-    echo $EXITING
+    echo -e $EXITING_MSG
     return 1
   fi
 fi
@@ -125,11 +125,11 @@ else
       if [[ $REPLY =~ ^[Yy]$ ]]; then
         brew update && brew install python3
       else
-        echo $EXITING
+        echo -e $EXITING_MSG
         return
       fi
     else
-      echo $EXITING
+      echo -e $EXITING_MSG
       return 1
     fi
 
@@ -141,11 +141,11 @@ else
       sudo apt-get update
       sudo apt-get install python3-pip
     else
-      echo $EXITING
+      echo -e $EXITING_MSG
       return 1
     fi
   else
-    echo $EXITING
+    echo -e $EXITING_MSG
     return 1
   fi
 fi
@@ -160,7 +160,7 @@ else
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     pip3 install virtualenv
   else
-    echo "$EXITING_MSG"
+    echo -e $EXITING_MSG
     return 1
   fi
 fi
