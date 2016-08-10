@@ -11,15 +11,6 @@ from pnu.inbound.requester import PnuRequest
 import logging
 logging = logging.getLogger(__name__)
 
-# TODO
-# handler should be responsible for parsing incoming requests and updating the
-# data store appropriately
-
-# behind the scenes, the handler class might rely on the gmail api, some form of
-# sms api, etc. but should expose an interface that is agnostic to the method by
-# which we are obtaining data (gmail, sms, and so on)
-
-
 class PnuRequestHandler (PnuRunnable):
 
     def __init__ (self, poke_api=None):
@@ -41,9 +32,20 @@ class PnuRequestHandler (PnuRunnable):
             status = inbound_user.get_status()
             phone_number = inbound_user.get_phone_number()
 
+            # check if current user is already active
+            old_user = User(PnuUserDataStore.get(phone_number))
+            old_user_exists = not old_user.empty()
+            old_user_active = old_user_exists and old_user.is_active()
+
             # check for status update on the inbound_user
             if status in constants.RESPONSE_STATUS_LIST:
+                # makes no sense to update status of non-existent user
+                if not old_user_exists:
+                    continue
+
                 logging.info("Status update!")
+                user_to_notify = old_user
+
                 # sends correct status message based on status field
                 if status == constants.STOP:
                     self._poke_api.delete_user(phone_number)
@@ -51,18 +53,14 @@ class PnuRequestHandler (PnuRunnable):
                 # resume or pause status
                 else:
                     PnuUserDataStore.update(phone_number, inbound_user)
+                    user_to_notify = PnuUserDataStore.get(phone_number)
 
                 logging.info("Setting user to be notified")
-                full_inbound_user = PnuUserDataStore.get(phone_number)
-                PnuPendingDataStore.append(constants.ENROLL, full_inbound_user)
+                PnuPendingDataStore.append(constants.ENROLL, user_to_notify)
                 continue
 
-            # check if current user is already active
-            old_user = User(PnuUserDataStore.get(phone_number))
-            already_active = (old_user is not None and old_user.is_active())
-
-            # we don't have BOTH the location and pokemon wanted, so they still
-            # need to fully enroll
+            # at this point, we know the user is either updating their location
+            # or their list of pokemon wanted (potentially for the first time)
             PnuUserDataStore.update(phone_number, inbound_user)
             json_user = PnuUserDataStore.get(phone_number)
             json_user['status'] = constants.ENROLL
@@ -77,6 +75,6 @@ class PnuRequestHandler (PnuRunnable):
             # or were already enrolled and simply updating their info, we want
             # to update our data set differently (if they just enrolled, we want 
             # to add a new entry; if not, we want to update an existing entry),
-            # hence we pass in the `already_active` flag.
+            # hence we pass in the `old_user_active` flag.
             else:
-                self._poke_api.update_data(user, already_active)
+                self._poke_api.update_data(user, old_user_active)
