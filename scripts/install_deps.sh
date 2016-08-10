@@ -112,7 +112,7 @@ else
 fi
 
 # need pip to be installed
-if [ -x "$(command -v pip3.5)" ]; then
+if [ -x "$(command -v pip3)" ]; then
   echo -e "${GREEN}pip3.5 is installed${NC}"
 else
   echo -e "${RED}$MISSING_MSG: pip3.5${NC}"
