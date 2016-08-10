@@ -38,17 +38,17 @@ REDIS_PENDING_DUMP_DIR=db/pending
 if [ $PNU_ENV = "prod" ]; then
   REDIS_RUN_DIR=/var/run/redis
   REDIS_SERVICE_DIR=pnu/etc/redis/prod
-  REDIS_PENDING_SERVICE=redis-pnu-pending-server
-  REDIS_USER_SERVICE=redis-pnu-user-server
+  REDIS_RUN_PENDING_DIR=$REDIS_RUN_DIR
+  REDIS_RUN_USER_DIR=$REDIS_RUN_DIR
 else
   REDIS_RUN_DIR=db
   REDIS_SERVICE_DIR=pnu/etc/redis/dev
-  REDIS_PENDING_SERVICE=redis-server
-  REDIS_USER_SERVICE=redis-server
+  REDIS_RUN_PENDING_DIR="$REDIS_RUN_DIR/pending"
+  REDIS_RUN_USER_DIR="$REDIS_RUN_DIR/user"
 fi
 
-REDIS_RUN_PENDING_DIR=$REDIS_RUN_DIR
-REDIS_RUN_USER_DIR=$REDIS_RUN_DIR
+REDIS_PENDING_SERVICE=redis-pnu-pending-server
+REDIS_USER_SERVICE=redis-pnu-user-server
 
 # these should match up with the paths specified in redis config files
 REDIS_PENDING_LOG_FILE="$REDIS_RUN_PENDING_DIR/$REDIS_PENDING_SERVICE.log"

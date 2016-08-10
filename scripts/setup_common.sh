@@ -1,11 +1,5 @@
 #!/usr/bin/env bash
 
-# require running as sudo
-if (( $EUID != 0 )); then
-  echo -e "${RED}Please re-run as sudo.${NC}"
-  return 1
-fi
-
 source scripts/install_deps.sh
 
 # if install deps failed, returns 1
@@ -33,6 +27,7 @@ touch $REDIS_PENDING_LOG_FILE
 touch $REDIS_USER_LOG_FILE
 
 if [ $(grep -q -E "^redis:" /etc/group) ]; then
+  echo "Setting permissions for redis..."
   sudo chown -R redis:redis $REDIS_USER_DUMP_DIR $REDIS_PENDING_DUMP_DIR
   sudo chown -R redis:redis $REDIS_RUN_DIR $REDIS_RUN_PENDING_DIR $REDIS_RUN_USER_DIR
   sudo chown redis:redis $REDIS_PENDING_LOG_FILE

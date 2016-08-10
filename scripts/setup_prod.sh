@@ -12,15 +12,13 @@ source scripts/config.sh
 source scripts/setup_common.sh
 
 # check if initial setup failed
-if (( $? == 1 )); then
-  exit
+if (( $? != 1 )); then
+  # setup redis and redis logs
+  echo "Setting up redis services..."
+  cp $REDIS_PENDING_SERVICE_FILE /etc/init.d/
+  cp $REDIS_USER_SERVICE_FILE /etc/init.d/
+  update-rc.d $REDIS_PENDING_SERVICE defaults
+  update-rc.d $REDIS_USER_SERVICE defaults
+
+  echo -e "${GREEN}Prod environment set up.${NC}"
 fi
-
-# setup redis and redis logs
-echo "Setting up redis services..."
-cp $REDIS_PENDING_SERVICE_FILE /etc/init.d/
-cp $REDIS_USER_SERVICE_FILE /etc/init.d/
-update-rc.d $REDIS_PENDING_SERVICE defaults
-update-rc.d $REDIS_USER_SERVICE defaults
-
-echo -e "${GREEN}Prod environment set up.${NC}"

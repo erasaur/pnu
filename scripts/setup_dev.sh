@@ -7,8 +7,6 @@ source scripts/config.sh
 source scripts/setup_common.sh
 
 # check if initial setup failed
-if (( $? == 1 )); then
-  exit
+if (( $? != 1 )); then
+  echo -e "${GREEN}Dev environment set up.${NC}"
 fi
-
-echo -e "${GREEN}Dev environment set up.${NC}"
