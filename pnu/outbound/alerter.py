@@ -6,6 +6,7 @@ from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
+from email.utils import COMMASPACE
 from os.path import basename
 
 from pnu.config import pub_config, private_config
@@ -80,7 +81,8 @@ class PnuAlertDispatcher:
         logFilename = logger.handlers[0].baseFilename
 
         msg = MIMEMultipart()
-        msg['To'] = private_config['notify']['email']
+        recipients = [email for email in private_config['notify']['email']]
+        msg['To'] = COMMASPACE.join(recipients)
         msg['From'] = private_config['gmail']['username']
         msg['Subject'] = constants.ERROR_SUBJECT
 
