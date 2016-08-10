@@ -86,7 +86,7 @@ class PgoAPI ():
         cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
         for cell in cells:
             for p in cell.get("wild_pokemons", []):
-                expiration_time = (p["last_modified_timestamp_ms"] + p["time_till_hidden_ms"]) / 1000.0
+                expiration_time = (p["last_modified_timestamp_ms"] + p["time_till_hidden_ms"])/1000.0
                 pokemon_id = p["pokemon_data"]["pokemon_id"]
 
                 self._result.append(Pokemon({
@@ -107,7 +107,7 @@ class PgoAPI ():
             now = time.time()
 
             if user._auth_provider._ticket_expire:
-                remaining_time = user._auth_provider._ticket_expire/1000 - now
+                remaining_time = user._auth_provider._ticket_expire/1000.0 - now
                 if remaining_time < self._min_time_need_reauth:
                     self.auth(user)
 

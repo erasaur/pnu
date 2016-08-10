@@ -14,3 +14,5 @@ else
   echo -e "${RED}Missing config.json file!${NC}"
   return 1
 fi
+
+mkdir -p $REDIS_USER_DUMP_DIR $REDIS_PENDING_DUMP_DIR

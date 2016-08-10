@@ -29,6 +29,9 @@ VIRTUALENV_DIR=.venv
 MAIN_LOG_FILE="$APP_LOG_DIR/main.out"
 MAIN_ERR_FILE="$APP_LOG_DIR/main.err"
 
+REDIS_USER_DUMP_DIR=db/user
+REDIS_PENDING_DUMP_DIR=db/pending
+
 # redis config
 # run dir is where dumpfiles will go
 # conf dir is where config files are read from
