@@ -27,12 +27,14 @@ touch $APP_LOG_FILE
 
 echo "Creating redis dump directories..."
 mkdir -p $REDIS_USER_DUMP_DIR $REDIS_PENDING_DUMP_DIR
-sudo chown -R redis:redis $REDIS_USER_DUMP_DIR $REDIS_PENDING_DUMP_DIR
-
 echo "Setting up redis logs..."
 mkdir -p $REDIS_RUN_PENDING_DIR $REDIS_RUN_USER_DIR
-sudo chown -R redis:redis $REDIS_RUN_DIR $REDIS_RUN_PENDING_DIR $REDIS_RUN_USER_DIR
 touch $REDIS_PENDING_LOG_FILE
 touch $REDIS_USER_LOG_FILE
-sudo chown redis:redis $REDIS_PENDING_LOG_FILE
-sudo chown redis:redis $REDIS_USER_LOG_FILE
+
+if [ $(grep -q -E "^redis:" /etc/group) ]; then
+  sudo chown -R redis:redis $REDIS_USER_DUMP_DIR $REDIS_PENDING_DUMP_DIR
+  sudo chown -R redis:redis $REDIS_RUN_DIR $REDIS_RUN_PENDING_DIR $REDIS_RUN_USER_DIR
+  sudo chown redis:redis $REDIS_PENDING_LOG_FILE
+  sudo chown redis:redis $REDIS_USER_LOG_FILE
+fi
