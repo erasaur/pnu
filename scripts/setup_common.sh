@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source install_deps.sh
+source scripts/install_deps.sh
 
 # if install deps failed, returns 1
 if [[ $? -eq 1 ]]; then
