@@ -15,7 +15,7 @@ SERVICE=redis-pnu-user-server
 
 PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 DAEMON=/usr/bin/redis-server
-DAEMON_ARGS=/opt/pnu/pnu/etc/redis/prod/user/redis-server.conf
+DAEMON_ARGS=/opt/pnu/pnu/etc/redis/prod/$SERVICE.conf
 NAME=redis-server
 DESC=redis-server
 
