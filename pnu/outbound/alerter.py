@@ -85,15 +85,16 @@ class PnuAlertDispatcher:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("Sender refused error. Phone #: {}"
                               .format(phone_number))
-                logging.error("Sender refused address is: {}".format(sender))
+                logging.error("Sender refused address is: {}"
+                              .format(SMTPResponseException.sender))
                 logging.error("Error is: {}".format(e))
                 logging.error("Message: {}".format(msg))
 
             except Exception as e:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("An error occurred while sending a message!!")
-                logging.error("Phone number: {}\nMessage: {}"
-                              .format(phone_number, msg))
+                logging.error("Phone number: {}".format(phone_number))
+                logging.error("Message: {}".format(msg))
                 logging.error("Error is: {}".format(e))
                 self.reconnect()
 
