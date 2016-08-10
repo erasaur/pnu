@@ -1,7 +1,7 @@
 # bash script config variables
 # including script needs to be run in root of project dir!
 
-get_pid () {
+function get_pid {
   # returns the process id of the redis process
   echo `
     ps -ef | # display processes with their pids
