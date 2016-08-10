@@ -1,9 +1,14 @@
 class Base ():
     def __init__ (self, *args, **kwargs):
-        if len(args) > 0:
+        num_args = len(args)
+
+        if num_args > 0:
             # loading by json as first arg
             if isinstance(args[0], dict):
                 self.load_json(args[0])
+            # handle specific case of passing None as only argument
+            elif num_args == 1 and args[0] is None:
+                self.load_json({})
             # loading by positional args
             else:
                 self.load_args(*args, **kwargs)
