@@ -35,7 +35,7 @@ REDIS_USER_DUMP_DIR=db/user
 # run dir is where dumpfiles will go
 # service dir is where config files are read from
 # run dir should match with the run dir specified in redis service files
-if [ $PNU_ENV = "prod" ]; then
+if [[ $PNU_ENV == "prod" ]]; then
   REDIS_RUN_DIR=/var/run/redis
   REDIS_SERVICE_DIR=pnu/etc/redis/prod
   REDIS_RUN_PENDING_DIR=$REDIS_RUN_DIR
