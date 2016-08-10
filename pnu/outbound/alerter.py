@@ -77,8 +77,8 @@ class PnuAlertDispatcher:
             message: string of text to be sent in the body of the message
         """
 
-        logger = logging.getLogger('')
-        logFilename = logger.handlers[0].baseFilename
+        # get the currently logged to file
+        logFilename = logging.root.handlers[0].baseFilename
 
         msg = MIMEMultipart()
         recipients = [email for email in private_config['notify']['email']]
