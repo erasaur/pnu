@@ -15,9 +15,9 @@ fi
 
 # need to run in root of project directory!
 source scripts/config.sh
-source scripts/install_deps.sh
+source scripts/setup_common.sh
 
-# if install deps failed, returns 1
+# check if initial setup failed
 if [[ $? -eq 1 ]]; then
   return
 fi
