@@ -23,12 +23,6 @@ class PnuRequest:
     pause_regex = re.compile('pause', re.IGNORECASE)
     resume_regex = re.compile('resume', re.IGNORECASE)
 
-    STOP = "STOP"
-    PAUSE = "PAUSE"
-    RESUME = "RESUME"
-    ACTIVE = "ACTIVE"
-    ENROLL = "ENROLL"
-
     def __init__(self):
         self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
         try:
@@ -85,6 +79,7 @@ class PnuRequest:
             User object
         """
         for msg in msgs:
+            logging.info("Parsing message from: {}".format(msg['From']))
             lat = lon = body = None
             pokemon_wanted = None
             status = None
@@ -127,9 +122,10 @@ class PnuRequest:
             # pokemon wanted msg
             if not (lat or lon or pokemon_wanted):
                 # JUNK MESSAGEEEE
+                logging.info("Didn't find lat/lon or any pokemon")
                 continue
 
-            logging.info("Returning user: {}".format(user))
+            logging.info("Parsed message to find: {}".format(user))
 
             yield User(user)
 
@@ -235,17 +231,18 @@ class PnuRequest:
 
     def check_for_command(self, body, msg):
         status = None
+        logging.info("Checking body: {} for status commands".format(body))
         if self.find_stop_command(body):
             logging.info("STOP command received for: {}".format(msg['From']))
-            status = self.STOP
+            status = constants.STOP
 
         elif self.find_pause_command(body):
             logging.info("PAUSE command received for: {}".format(msg['From']))
-            status = self.PAUSE
+            status = constants.PAUSE
 
         elif self.find_resume_command(body):
             logging.info("RESUME command received for: {}".format(msg['From']))
-            status = self.RESUME
+            status = constants.RESUME
 
         return status
 
