@@ -5,6 +5,9 @@ STOP = "STOP"
 PAUSE = "PAUSE"
 RESPONSE_STATUS_LIST = [PAUSE, RESUME, STOP]
 
+# for alerts
+ERROR_SUBJECT = "[PNU Alert] Things are on fire!!"
+
 # Alerter.py
 MAX_SMS_MESSAGE_LEN = 159
 SMTP_RECONNECT_SLEEP_TIME = 3

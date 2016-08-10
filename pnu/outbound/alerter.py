@@ -3,6 +3,10 @@
 import time
 from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
                      SMTPNotSupportedError, SMTPException, SMTPSenderRefused)
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from os.path import basename
 
 from pnu.config import pub_config, private_config
 from pnu.etc import constants
@@ -65,13 +69,47 @@ class PnuAlertDispatcher:
         if auth_attempts >= 5:
             raise SMTPException("Failed connecting with the SMTP server. :(")
 
+    def send_error(self, message):
+        """ create an email with the most recent log file attached and send it
+
+        Args:
+            message: string of text to be sent in the body of the message
+        """
+
+        logger = logging.getLogger('')
+        logFilename = logger.handlers[0].baseFilename
+
+        msg = MIMEMultipart()
+        msg['To'] = private_config['notify']['email']
+        msg['From'] = private_config['gmail']['username']
+        msg['Subject'] = constants.ERROR_SUBJECT
+
+        msg.attach(MIMEText(message))
+
+        with open(logFilename, 'rb') as attach:
+            part = MIMEApplication(
+                    attach.read(),
+                    Name=basename(logFilename)
+            )
+            part['Content-Disposition'] = ('attachment; filename="{}"'
+                                           .format(basename(logFilename)))
+            msg.attach(part)
+
+        try:
+            self.smtp.sendmail(private_config['gmail']['username'],
+                               private_config['notify']['email'],
+                               msg.as_string())
+        except:
+            logging.error("COULD NOT SEND ERROR EMAIL :(" +
+                          "THINGS WILL NOW PROCEED TO BURN DOWN")
+
     def send_message(self, user):
         """ sends a text message alert to the specified user
         Args:
             info (dictionary)
         """
         msg, phone_number = BuildResponse(user).build_message()
-        logging.info("MESSAGE IS: {}\nSending to: {}".format(
+        logging.info("\nMESSAGE IS: {}\nSending to: {}".format(
                      msg, phone_number))
 
         send_attempts = 0
@@ -80,7 +118,7 @@ class PnuAlertDispatcher:
                 send_attempts += 1
                 self.smtp.sendmail(private_config['gmail']['username'],
                                    phone_number, msg)
-                send_attempts = 10
+                send_attempts = 200
             except SMTPSenderRefused as e:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("Sender refused error. Phone #: {}"
@@ -97,6 +135,15 @@ class PnuAlertDispatcher:
                 logging.error("Message: {}".format(msg))
                 logging.error("Error is: {}".format(e))
                 self.reconnect()
+
+        if send_attempts != 200:
+            # OH SHOOT, SOMETHING'S ON FIRE
+            # although this is funny since we're trying to send a message
+            # about not being able to send a message xD
+            message = ("Attempted to send a message more than 10 times, a " +
+                       "connection issue or refusal to send is likely the " +
+                       "case.\nAttached are the most recent logs to help.")
+            self.send_error(message)
 
 
 smtp = PnuAlertDispatcher()
@@ -130,13 +177,13 @@ if __name__ == "__main__":
             }
     }
 
+    """
     poke_tuple = Pokemon(poke_json)
     user1 = User(user_json)
     user2 = User(user_json)
     phone_numbers = [user1, user2]
     alert = Alert((poke_tuple,), phone_numbers)
     smtp.send_message(alert)
-
     info = {
             "phone_number": "2694913303@vtext.com",
             "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
@@ -192,3 +239,5 @@ if __name__ == "__main__":
             }
     }
     smtp.send_message(User(info))
+    """
+    smtp.send_error("FUUUUUU")
