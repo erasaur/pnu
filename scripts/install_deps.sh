@@ -29,7 +29,7 @@ if [ -x "$(command -v protoc)" ] && [[ $(protoc --version) == *3* ]]; then
 else
   echo -e "${RED}$MISSING_MSG: protobuf3${NC}"
   # mac os
-  if [ "$(uname)" == "Darwin" ]; then
+  if [[ `uname -s` == *"Darwin"* ]]; then
     # only attempt to download for them if brew is installed
     if [ -x "$(command -v brew)" ]; then
       read -p "$DOWNLOAD_MSG" -n 1 -r
@@ -46,7 +46,7 @@ else
     fi
 
   # linux
-  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  elif [[ `uname -s` == *"Linux"* ]]; then
     read -p "$DOWNLOAD_MSG" -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -78,7 +78,7 @@ if [ -x "$(command -v redis-server)" ]; then
 else
   echo -e "${RED}$MISSING_MSG: redis${NC}"
   # mac os
-  if [ "$(uname)" == "Darwin" ]; then
+  if [[ `uname -s` == *"Darwin"* ]]; then
     # only attempt to download for them if brew is installed
     if [ -x "$(command -v brew)" ]; then
       read -p "$DOWNLOAD_MSG" -n 1 -r
@@ -95,7 +95,7 @@ else
     fi
 
   # linux
-  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  elif [[ `uname -s` == *"Linux"* ]]; then
     read -p "$DOWNLOAD_MSG" -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -117,7 +117,7 @@ if [ -x "$(command -v pip3)" ]; then
 else
   echo -e "${RED}$MISSING_MSG: pip3.5${NC}"
   # mac os
-  if [ "$(uname)" == "Darwin" ]; then
+  if [[ `uname -s` == *"Darwin"* ]]; then
     # only attempt to download for them if brew is installed
     if [ -x "$(command -v brew)" ]; then
       read -p "$DOWNLOAD_MSG" -n 1 -r
@@ -134,7 +134,7 @@ else
     fi
 
   # linux
-  elif [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+  elif [[ `uname -s` == *"Linux"* ]]; then
     read -p "$DOWNLOAD_MSG" -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
@@ -177,7 +177,7 @@ echo -e "${GREEN}Activating virtualenv...${NC}"
 source $VIRTUALENV_DIR/bin/activate
 
 # need to add python headers to path for xxhash
-if [ "$(expr substr $(uname -s) 1 5)" == "Linux" ]; then
+if [[ `uname -s` == *"Linux"* ]]; then
   echo "Including python headers to path..."
   sudo apt-get install python3-dev
   export C_INCLUDE_PATH=/usr/include/python3.4

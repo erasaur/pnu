@@ -1,15 +1,15 @@
 #!/usr/bin/env bash
 
 # require running as sudo
-if [ $EUID != 0 ]; then
+if (( $EUID != 0 )); then
   echo -e "${RED}Please re-run as sudo.${NC}"
-  return
+  return 1
 fi
 
 source scripts/install_deps.sh
 
 # if install deps failed, returns 1
-if [[ $? -eq 1 ]]; then
+if (( $? == 1 )); then
   return 1
 fi
 

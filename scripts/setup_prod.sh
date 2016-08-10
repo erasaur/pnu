@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-if [ "$(expr substr $(uname -s) 1 5)" != "Linux" ]; then
+if [[ `uname -s` == *"Linux"* ]]; then
   echo -e "${RED}Sorry, only linux supported at this time.${NC}"
   return
 fi
@@ -12,8 +12,8 @@ source scripts/config.sh
 source scripts/setup_common.sh
 
 # check if initial setup failed
-if [[ $? -eq 1 ]]; then
-  return
+if (( $? == 1 )); then
+  exit
 fi
 
 # setup redis and redis logs
