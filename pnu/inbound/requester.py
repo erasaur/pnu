@@ -87,7 +87,8 @@ class PnuRequest:
                 'phone_number': msg['From'],
                 'pokemon_wanted': pokemon_wanted,
                 'location': None,
-                'status': status
+                'status': status,
+                'error_data': [],
             }
 
             # need to check if multipart message, walk or don't walk
@@ -114,13 +115,14 @@ class PnuRequest:
                 }
 
             if body:
-                pokemon_wanted = self.parse_pokemon_wanted(body)
+                pokemon_wanted, errors = self.parse_pokemon_wanted(body)
 
             user['pokemon_wanted'] = pokemon_wanted
+            user['error_data'] = errors
 
             # probably didn't find a location msg, instead is junk or
             # pokemon wanted msg
-            if not (lat or lon or pokemon_wanted):
+            if not (lat or lon or pokemon_wanted or errors):
                 # JUNK MESSAGEEEE
                 logging.info("Didn't find lat/lon or any pokemon")
                 continue
@@ -151,11 +153,11 @@ class PnuRequest:
             pokemon_wanted = re.split(self.split_regex, results.group(1))
         except AttributeError:
             logging.info("No pokemon found in message!")
-            return None
+            return None, None
 
-        validated_pokemon_wanted = self.filter_pokemon_wanted(pokemon_wanted)
-        return validated_pokemon_wanted
-
+        validated_pokemon_wanted, errors = self.filter_pokemon_wanted(
+                pokemon_wanted)
+        return validated_pokemon_wanted, errors
 
     def filter_pokemon_wanted(self, pokemon_wanted):
         """ returns a list of pokemon ids the user wants
@@ -166,6 +168,7 @@ class PnuRequest:
         """
         logging.info("Filtering pokemon...")
         valid_pokemon = []
+        errors = []
         for pokemon in pokemon_wanted:
             try:
                 valid_pokemon.append(
@@ -173,9 +176,10 @@ class PnuRequest:
 
             except KeyError:
                 logging.info("User submitted fake pokemon: {}".format(pokemon))
+                errors.append(pokemon)
                 continue
 
-        return valid_pokemon
+        return valid_pokemon, errors
 
     def get_attachment(self, msg):
         """ returns the text from the attachment of an iOS message """
