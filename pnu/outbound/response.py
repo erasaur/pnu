@@ -33,6 +33,7 @@ class BuildResponse:
         else:
             logging.info("Sending a message to user {}".format(user))
             self.status = user.get_status()
+            self.errors = user.get_errors()
             self.to = user.get_phone_number()
             self.pokemon_wanted = user.get_pokemon_wanted()
             self.location = (user.get_lat() or user.get_lon())
@@ -108,6 +109,20 @@ class BuildResponse:
 
         return msg.as_string()
 
+    def _make_error_msg(self):
+        logging.info("Error message being sent")
+        incorrect_pokemon = (', ').join(self.errors)
+        msg = ("We didn't recognize these pokemon: {}."
+                .format(incorrect_pokemon) + "Double check the spelling and " +
+                "try again.")
+
+        return msg
+
+    def _make_received_msg(self):
+        msg = ("We are currently tracking these Pokémon for you: {}"
+              .format(self.poke_list_to_str()))
+        return msg
+
     def _check_len_of_msg(self, msg):
         """ checks if the message length is longer than 159 chars """
         if (len(msg) > constants.MAX_SMS_MESSAGE_LEN):
@@ -164,6 +179,11 @@ class BuildResponse:
             return self._make_active_msg(), self.to
 
         elif self.status == constants.ENROLL:
+            if self.errors:
+                return self._make_error_msg(), self.to
+            elif self.pokemon_wanted:
+                return self._make_received_msg(), self.to
+
             return self._make_enroll_msg(), self.to
 
         elif self.status == constants.RESUME:
