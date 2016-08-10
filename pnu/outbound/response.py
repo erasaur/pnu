@@ -113,14 +113,14 @@ class BuildResponse:
         logging.info("Error message being sent")
         incorrect_pokemon = (', ').join(self.errors)
         msg = ("We didn't recognize these pokemon: {}."
-                .format(incorrect_pokemon) + "Double check the spelling and " +
-                "try again.")
+               .format(incorrect_pokemon) + "Double check the spelling and " +
+               "try again.")
 
         return msg
 
     def _make_received_msg(self):
         msg = ("We are currently tracking these Pokémon for you: {}"
-              .format(self.poke_list_to_str()))
+               .format(self.poke_list_to_str()))
         return msg
 
     def _check_len_of_msg(self, msg):
