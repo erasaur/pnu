@@ -50,6 +50,8 @@ else
     read -p "$DOWNLOAD_MSG" -n 1 -r
     echo
     if [[ $REPLY =~ ^[Yy]$ ]]; then
+      sudo apt-get update
+      sudo apt-get upgrade
       sudo apt-get install autoconf automake libtool curl make g++ unzip
       git clone git://github.com/google/protobuf.git
       cd protobuf
@@ -59,6 +61,7 @@ else
       make check
       sudo make install
       sudo ldconfig
+      cd .. && rm -rf protobuf
     else
       echo $EXITING
       return 1
