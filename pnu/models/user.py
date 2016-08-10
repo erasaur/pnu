@@ -2,8 +2,8 @@ from pnu.models.base import Base
 import logging
 logging = logging.getLogger(__name__)
 
-class User (Base):
 
+class User (Base):
 
     def load_args(self, phone_number, pokemon_wanted, lat, lon, status,
                   error_data=None):
@@ -130,7 +130,7 @@ class User (Base):
             wanted = []
 
         return (poke_id in wanted and
-               (last_notif is None or expiration > last_notif))
+                (last_notif is None or expiration > last_notif))
 
     def empty(self):
         status = self.get_status()
