@@ -1,1 +1,1 @@
-scripts/prod/setup.sh
+scripts/setup_prod.sh
