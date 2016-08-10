@@ -124,8 +124,9 @@ class User (Base):
     def empty (self):
         status = self.get_status()
         number = self.get_phone_number()
-        is_active = self.is_active()
-        return not (status or number or is_active)
+        location = self.is_location_set()
+        pokemon = self.is_pokemon_wanted_set()
+        return not (status or number or location or pokemon)
 
     def __str__ (self):
         template = ("Phone #: {}\n"
