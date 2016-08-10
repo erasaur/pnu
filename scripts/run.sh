@@ -20,9 +20,9 @@ if [ -n "$pid_redis" ]; then
   echo -e "${GREEN}Redis is running with pid: $pid_redis${NC}"
 else 
   echo -e "Starting redis-pending..."
-  source scripts/run_pending_redis.sh
+  ./scripts/run_pending_redis.sh
   echo -e "Starting redis-user..."
-  source scripts/run_user_redis.sh
+  ./scripts/run_user_redis.sh
 fi
 
 # start main app
