@@ -16,6 +16,7 @@ logging = logging.getLogger(__name__)
 
 class PnuRequest:
     location_regex = re.compile("[@|\(\=](?P<lat>[\d|.|-]*)?\\\*,(?P<lon>[\d|.|-]*)?[,|&|\)]", re.IGNORECASE)
+    location_regex2 = re.compile("=(?P<lat>[\d.-]*),(?P<lon>[\d.-]*)", re.IGNORECASE)
     pokemon_regex = re.compile("pokemon\s*[a-z]*:?\s*((([a-z]*-*[a-z]*)[,| ]*[a-z]*-*[a-z]*){0,10})", re.IGNORECASE)
 
     split_regex = re.compile(', |; | |,')
@@ -228,6 +229,11 @@ class PnuRequest:
             result = re.search(self.location_regex, body.decode('UTF-8'))
             lat = result.group('lat')
             lon = result.group('lon')
+        except AttributeError:
+            result = re.search(self.location_regex2, body.decode('UTF-8'))
+            lat = result.group('lat')
+            lon = result.group('lon')
+
         except AttributeError:
             return None, None
 
