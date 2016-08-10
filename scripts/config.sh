@@ -29,8 +29,8 @@ VIRTUALENV_DIR=.venv
 MAIN_LOG_FILE="$APP_LOG_DIR/main.out"
 MAIN_ERR_FILE="$APP_LOG_DIR/main.err"
 
-REDIS_USER_DUMP_DIR=db/user
 REDIS_PENDING_DUMP_DIR=db/pending
+REDIS_USER_DUMP_DIR=db/user
 
 # run dir is where dumpfiles will go
 # service dir is where config files are read from
@@ -43,8 +43,8 @@ if [ $PNU_ENV = "prod" ]; then
 else
   REDIS_RUN_DIR=db
   REDIS_SERVICE_DIR=pnu/etc/redis/dev
-  REDIS_RUN_PENDING_DIR="$REDIS_RUN_DIR/pending"
-  REDIS_RUN_USER_DIR="$REDIS_RUN_DIR/user"
+  REDIS_RUN_PENDING_DIR=db/pending
+  REDIS_RUN_USER_DIR=db/user
 fi
 
 REDIS_PENDING_SERVICE=redis-pnu-pending-server
