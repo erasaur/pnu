@@ -20,7 +20,9 @@ class PnuPokeApi ():
         self._step_size = pub_config["poke_api"]["step_size_km"]
         self._last_update = 0
         self._groups = []
+        self.update_data_from_store()
 
+    def update_data_from_store (self):
         init_users = PnuUserDataStore.list()
         for user in init_users:
             user = User(user)
