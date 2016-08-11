@@ -1,0 +1,1 @@
+scripts/kill_all.sh
