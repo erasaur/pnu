@@ -15,15 +15,15 @@ class LatLonRegexTests(unittest.TestCase):
     req = PnuRequest()
 
     android_test_strings = [
-            "202 South Division Street\n" +
-            "Ann Arbor MI, 48104\n" +
-            "USA\n" +
-            "http://maps.google.com/maps?f=q&q=(42.280317,-83.744026)\n"
+        "202 South Division Street\n" +
+        "Ann Arbor MI, 48104\n" +
+        "USA\n" +
+        "http://maps.google.com/maps?f=q&q=(42.280317,-83.744026)\n"
     ]
 
     generic_test_strings = [
-            "Shared location https://maps.google.com/?t=m&q=38.79717," +
-            "-77.30460+(Shared+location)&ll=38.79717,-77.30460&z=17",
+        "Shared location https://maps.google.com/?t=m&q=38.79717," +
+        "-77.30460+(Shared+location)&ll=38.79717,-77.30460&z=17",
     ]
 
     ios_test_strings = []
