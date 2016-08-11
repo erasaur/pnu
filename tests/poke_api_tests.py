@@ -1,15 +1,20 @@
+#!/usr/bin/env python3.5
+import unittest
+
 from pnu.apis.poke_api import PnuPokeApi
+from pnu.tests.mock import PnuPokeApiMock
 from pnu.models.user import User
 
-class PnuPokeApiTests ():
-    @classmethod
-    def run (self):
-        poke_api = PnuPokeApi()
 
-        sterling_loc = (42.280601,-83.743595)
-        firestone_loc = (42.280889,-83.743722)
-        varsity_loc = (42.280577,-83.742928)
-        arbor_loc = (42.280844,-83.744341)
+class PnuPokeApiTests(unittest.TestCase):
+
+    def test_all(self):
+        poke_api = PnuPokeApiMock()
+
+        sterling_loc = (42.280601, -83.743595)
+        firestone_loc = (42.280889, -83.743722)
+        varsity_loc = (42.280577, -83.742928)
+        arbor_loc = (42.280844, -83.744341)
 
         sterling = User({
             "latitude": sterling_loc[0],
@@ -61,4 +66,6 @@ class PnuPokeApiTests ():
         for member in group_0:
             assert poke_api.close_enough(group_0_proxy, member)
 
-        print("All tests passed!")
+
+if __name__ == "__main__":
+    unittest.main()
