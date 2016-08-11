@@ -6,6 +6,7 @@ from pnu.outbound.alerter import PnuAlertDispatcher
 from pnu.models import Alert
 from pnu.models import User
 from pnu.models import Pokemon
+from pnu.etc import constants
 
 
 class PnuAlerterTests(unittest.TestCase):
@@ -26,11 +27,12 @@ class PnuAlerterTests(unittest.TestCase):
         user_json = {
                 "phone_number": "test@example.com",
                 "pokemon_wanted": [],
-                "status": "PAUSE",
+                "status": constants.PAUSE,
                 "location": {
-                        "lat": 12,
-                        "lon": 10
-                }
+                    "lat": 12,
+                    "lon": 10
+                },
+                "errors": []
         }
 
         poke_tuple = Pokemon(poke_json)
@@ -44,11 +46,12 @@ class PnuAlerterTests(unittest.TestCase):
         info = {
                 "phone_number": "test@example.com",
                 "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
-                "status": "STOP",
+                "status": constants.STOP,
                 "location": {
                         "lat": 12,
                         "lon": 10
-                }
+                },
+                "errors": []
         }
         self.smtp.send_message(User(info))
 
@@ -56,11 +59,12 @@ class PnuAlerterTests(unittest.TestCase):
         info = {
                 "phone_number": "test@example.com",
                 "pokemon_wanted": [],
-                "status": "PAUSE",
+                "status": constants.PAUSE,
                 "location": {
                         "lat": 12,
                         "lon": 10
-                }
+                },
+                "errors": []
         }
         self.smtp.send_message(User(info))
 
@@ -68,11 +72,12 @@ class PnuAlerterTests(unittest.TestCase):
         info = {
                 "phone_number": "test@example.com",
                 "pokemon_wanted": [],
-                "status": "RESUME",
+                "status": constants.RESUME,
                 "location": {
                         "lat": 12,
                         "lon": 10
-                }
+                },
+                "errors": []
         }
         self.smtp.send_message(User(info))
 
@@ -80,11 +85,12 @@ class PnuAlerterTests(unittest.TestCase):
         info = {
                 "phone_number": "test@example.com",
                 "pokemon_wanted": [],
-                "status": "ENROLL",
+                "status": constants.ENROLL,
                 "location": {
                         "lat": 12,
                         "lon": 10
-                }
+                },
+                "errors": []
         }
         self.smtp.send_message(User(info))
 
