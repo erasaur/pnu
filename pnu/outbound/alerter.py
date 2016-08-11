@@ -1,13 +1,13 @@
 #! /usr/bin/env python3.5
 
 import time
-from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
-                     SMTPNotSupportedError, SMTPException, SMTPSenderRefused)
 from email.mime.application import MIMEApplication
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.utils import COMMASPACE
 from os.path import basename
+from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
+                     SMTPNotSupportedError, SMTPException, SMTPSenderRefused)
 
 from pnu.config import pub_config, private_config
 from pnu.etc import constants
@@ -130,6 +130,8 @@ class PnuAlertDispatcher:
                               .format(SMTPResponseException.sender))
                 logging.error("Error is: {}".format(e))
                 logging.error("Message: {}".format(msg))
+                # try reconnecting anyway :shrug:
+                self.reconnect()
 
             except Exception as e:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
@@ -161,86 +163,3 @@ if __name__ == "__main__":
                         level=logging.DEBUG)
 
     logging.info("Beginning " + __file__)
-    link = "https://pnu.space"
-
-    # test sending ALERTS
-    poke_json = {
-        "pokemonId": 16,
-        "latitude": 42.27883786872156,
-        "longitude": -83.74502208351473,
-        "expiration_time": 123456789
-    }
-    user_json = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": [],
-            "status": "PAUSE",
-            "location": {
-                    "lat": 12,
-                    "lon": 10
-            }
-    }
-
-    """
-    poke_tuple = Pokemon(poke_json)
-    user1 = User(user_json)
-    user2 = User(user_json)
-    phone_numbers = [user1, user2]
-    alert = Alert((poke_tuple,), phone_numbers)
-    smtp.send_message(alert)
-    info = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
-            "status": "STOP",
-            "location": {
-                    "lat": 12,
-                    "lon": 10
-            }
-    }
-
-    smtp.send_message(User(info))
-
-    info = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": [],
-            "status": "PAUSE",
-            "location": {
-                    "lat": 12,
-                    "lon": 10
-            }
-    }
-    smtp.send_message(User(info))
-
-    info = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": [],
-            "status": "RESUME",
-            "location": {
-                    "lat": 12,
-                    "lon": 10
-            }
-    }
-    smtp.send_message(User(info))
-
-    info = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": ['abra', 'snorlax'],
-            "status": "STOP",
-            "location": {
-                    "lat": 12,
-                    "lon": 10
-            }
-    }
-    smtp.send_message(User(info))
-
-    info = {
-            "phone_number": "2694913303@vtext.com",
-            "pokemon_wanted": [],
-            "status": "ENROLL",
-            "location": {
-                    "lat": 12,
-                    "lon": 10
-            }
-    }
-    smtp.send_message(User(info))
-    """
-    smtp.send_error("FUUUUUU")
