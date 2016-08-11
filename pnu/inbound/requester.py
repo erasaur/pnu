@@ -15,9 +15,16 @@ logging = logging.getLogger(__name__)
 
 
 class PnuRequest:
-    location_regex = re.compile("[@|\(\=](?P<lat>[\d|.|-]*)?\\\*,(?P<lon>[\d|.|-]*)?[,|&|\)]", re.IGNORECASE)
-    location_regex2 = re.compile("=(?P<lat>[\d.-]*),(?P<lon>[\d.-]*)", re.IGNORECASE)
-    pokemon_regex = re.compile("pokemon\s*[a-z]*:?\s*((([a-z]*-*[a-z]*)[,| ]*[a-z]*-*[a-z]*){0,10})", re.IGNORECASE)
+    location_regex = re.compile(r"""(?P<lat>[\d\.-]+) # matches 23.3 or -23.13
+                                \\*, # backslashes sometimes included in msgs
+                                (?P<lon>[\d\.-]+)""",
+                                re.IGNORECASE | re.VERBOSE)
+    pokemon_regex = re.compile("""pokemon\s*[a-z]*:?\s* # match pokemon wanted:
+                               (([a-z-]* # match any char or dash
+                               [,| ]* # match space or comma separation
+                               [a-z-]*) # match same as above
+                               {0,9}) # match up to 10 times""",
+                               re.IGNORECASE | re.VERBOSE)
 
     split_regex = re.compile(', |; | |,')
     stop_regex = re.compile('stop', re.IGNORECASE)
@@ -168,11 +175,11 @@ class PnuRequest:
             pokemon_validated (list of ints of pokemon ids)
         """
         logging.info("Filtering pokemon...")
-        valid_pokemon = []
+        valid_pokemon = set()
         errors = []
         for pokemon in pokemon_wanted:
             try:
-                valid_pokemon.append(
+                valid_pokemon.add(
                         constants.POKEMON_NAME_TO_ID[pokemon.strip().lower()])
 
             except KeyError:
@@ -180,7 +187,7 @@ class PnuRequest:
                 errors.append(pokemon)
                 continue
 
-        return valid_pokemon, errors
+        return list(valid_pokemon), errors
 
     def get_attachment(self, msg):
         """ returns the text from the attachment of an iOS message """
@@ -227,10 +234,6 @@ class PnuRequest:
         try:
             # if body is None, then it will also throw an AttributeError
             result = re.search(self.location_regex, body.decode('UTF-8'))
-            lat = result.group('lat')
-            lon = result.group('lon')
-        except AttributeError:
-            result = re.search(self.location_regex2, body.decode('UTF-8'))
             lat = result.group('lat')
             lon = result.group('lon')
 
