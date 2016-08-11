@@ -2,9 +2,12 @@ source scripts/config.sh
 
 echo "PIDS:"
 pids=`ps -afe | grep redis | grep -v grep`
-if [ ! -n "$pids" ]; then
+if [ -n "$pids" ]; then
+  echo $pids
+else
   echo "No pids found."
 fi
+echo
 
 redis_user="127.0.0.1:6379"
 pid_redis_user=$(get_pid $redis_user)
