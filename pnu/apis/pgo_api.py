@@ -64,7 +64,7 @@ class PgoAPI ():
         return ''.join(output)
 
     def start_threads(self, num):
-        for i in range(num): 
+        for i in range(num):
             t = Thread(target=self.search_thread, name='search_thread-{}'
                        .format(i))
             t.daemon = True
@@ -189,17 +189,17 @@ class PgoAPI ():
         bearing = math.radians(bearing)
 
         init_coords = [math.radians(init_loc[0]),
-                       math.radians(init_loc[1])] # convert lat/lng to radians
+                       math.radians(init_loc[1])]  # convert lat/lng to radians
 
         new_lat = math.asin(math.sin(init_coords[0]) * math.cos(distance/R) +
                             math.cos(init_coords[0]) * math.sin(distance/R) *
                             math.cos(bearing))
 
         new_lon = (init_coords[1] +
-                  math.atan2(math.sin(bearing) * math.sin(distance/R) *
-                             math.cos(init_coords[0]),
-                             math.cos(distance/R) - math.sin(init_coords[0]) *
-                             math.sin(new_lat)))
+                   math.atan2(math.sin(bearing) * math.sin(distance/R) *
+                              math.cos(init_coords[0]),
+                              math.cos(distance/R) - math.sin(init_coords[0]) *
+                              math.sin(new_lat)))
 
         return [math.degrees(new_lat), math.degrees(new_lon)]
 
@@ -214,7 +214,7 @@ class PgoAPI ():
         xdist = math.sqrt(3)*pulse_radius  # dist between column centers
         ydist = 3*(pulse_radius/2)  # dist between row centers
 
-        yield (initial_loc[0], initial_loc[1], 0) #insert initial location
+        yield (initial_loc[0], initial_loc[1], 0)  # insert initial location
 
         ring = 1
         loc = initial_loc

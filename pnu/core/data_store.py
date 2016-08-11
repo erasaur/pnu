@@ -9,7 +9,6 @@ import logging
 logging = logging.getLogger(__name__)
 
 
-
 class RedisDataStore ():
 
     def __init__(self, host=None, port=None):
@@ -106,7 +105,7 @@ class RedisDataStore ():
 
 class UserDataStore(RedisDataStore):
 
-    def __init__ (self):
+    def __init__(self):
         super().__init__(
             host=pub_config["user_data_store"]["host"],
             port=pub_config["user_data_store"]["port"]
