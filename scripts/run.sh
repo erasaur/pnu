@@ -15,14 +15,14 @@ if [[ $VIRTUAL_ENV != *"pnu"* ]]; then
 fi
 
 # start redis if not already running
-pid_redis_pending=$(get_pid $REDIS_PENDING_PROCESS)
+pid_redis_pending=$(get_pid $REDIS_PENDING_SERVICE)
 if [ -n "$pid_redis_pending" ]; then 
   echo -e "${GREEN}redis-pending already running.${NC}"
 else 
   ./scripts/run_pending_redis.sh
   echo -e "${GREEN}Started redis-pending.${NC}"
 fi
-pid_redis_user=$(get_pid $REDIS_USER_PROCESS)
+pid_redis_user=$(get_pid $REDIS_USER_SERVICE)
 if [ -n "$pid_redis_user" ]; then 
   echo -e "${GREEN}redis-user already running.${NC}"
 else 
