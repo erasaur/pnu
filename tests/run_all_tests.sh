@@ -1,4 +1,1 @@
-#!/bin/bash
-. ../.venv/bin/activate
-python -m unittest discover
-deactivate
+../scripts/run_all_tests.sh
