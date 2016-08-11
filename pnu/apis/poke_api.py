@@ -4,9 +4,9 @@ from math import cos, sin, atan2, sqrt, radians, pi
 from pnu.core.data_store import PnuUserDataStore
 from pnu.apis.pgo_api import PgoAPI
 from pnu.config import pub_config
-from pnu.models.user import User
-from pnu.models.pokemon import Pokemon
-from pnu.models.alert import Alert
+from pnu.models import User
+from pnu.models import Pokemon
+from pnu.models import Alert
 
 import logging
 logging = logging.getLogger(__name__)

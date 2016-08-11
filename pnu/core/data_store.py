@@ -3,7 +3,7 @@ import logging
 logging = logging.getLogger(__name__)
 
 from pnu.config import pub_config
-from pnu.models.base import Base
+from pnu.models import Base
 
 class RedisDataStore ():
     def __init__ (self, host=None, port=None):

@@ -3,7 +3,7 @@ import unittest
 
 from pnu.apis.poke_api import PnuPokeApi
 from tests.mock import PnuPokeApiMock
-from pnu.models.user import User
+from pnu.models import User
 
 
 class PnuPokeApiTests(unittest.TestCase):

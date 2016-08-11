@@ -3,7 +3,7 @@ from pgoapi import exceptions
 from pgoapi import utilities as util
 
 from pnu.config import pub_config, private_config
-from pnu.models.pokemon import Pokemon
+from pnu.models import Pokemon
 from s2sphere import Cell, CellId, LatLng
 from google.protobuf.internal import encoder
 import math, time, random, sys

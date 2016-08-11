@@ -6,7 +6,7 @@ import json
 import re
 import sys
 
-from pnu.models.user import User
+from pnu.models import User
 from pnu.config import pub_config, private_config
 from pnu.etc import constants
 

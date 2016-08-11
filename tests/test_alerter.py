@@ -3,9 +3,9 @@
 import unittest
 
 from pnu.outbound.alerter import PnuAlertDispatcher
-from pnu.models.alert import Alert
-from pnu.models.user import User
-from pnu.models.pokemon import Pokemon
+from pnu.models import Alert
+from pnu.models import User
+from pnu.models import Pokemon
 
 
 class PnuAlerterTests(unittest.TestCase):

@@ -12,9 +12,9 @@ from smtplib import (SMTP, SMTPHeloError, SMTPAuthenticationError,
 from pnu.config import pub_config, private_config
 from pnu.etc import constants
 from pnu.outbound.response import BuildResponse
-from pnu.models.user import User
-from pnu.models.alert import Alert
-from pnu.models.pokemon import Pokemon
+from pnu.models import User
+from pnu.models import Alert
+from pnu.models import Pokemon
 
 
 import logging

@@ -1,7 +1,7 @@
 from email.mime.text import MIMEText
 from pnu.config import private_config
 from pnu.etc import constants
-from pnu.models.alert import Alert
+from pnu.models import Alert
 
 import logging
 logging = logging.getLogger(__name__)

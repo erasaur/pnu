@@ -1,4 +1,4 @@
-from pnu.models.base import Base
+from pnu.models import Base
 import logging
 logging = logging.getLogger(__name__)
 

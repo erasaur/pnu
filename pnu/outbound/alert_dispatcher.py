@@ -1,8 +1,8 @@
 from pnu.core.runnable import PnuRunnable
 from pnu.core.data_store import PnuUserDataStore, PnuPendingDataStore
 from pnu.etc import constants
+from pnu.models import User
 from pnu.outbound.alerter import smtp
-from pnu.models.user import User
 
 import json
 import logging
