@@ -3,7 +3,7 @@ source scripts/config.sh
 echo "PIDS:"
 pids=`ps -afe | grep redis | grep -v grep`
 if [ -n "$pids" ]; then
-  echo $pids
+  echo "$pids"
 else
   echo "No pids found."
 fi
