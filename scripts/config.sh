@@ -4,11 +4,11 @@
 function get_pid {
   # returns the process id of the redis process
   echo `
-    ps -ef | # display processes with their pids
+    ps -afe | # display processes with their pids
     grep $1 | # get desired lines
     grep -v grep | # ignore lines with grep
-    tr -s " " | # collapse spaces
-    cut -d " " -f2 | # cut by spaces and grab pid column
+    awk '$1=$1' | # collapse spaces
+    cut -d " " -f 2 | # cut by spaces and grab pid column
     head -n 1 # get first line
   `
 }

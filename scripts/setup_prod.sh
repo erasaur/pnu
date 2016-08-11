@@ -20,5 +20,11 @@ if (( $? != 1 )); then
   update-rc.d $REDIS_PENDING_SERVICE defaults
   update-rc.d $REDIS_USER_SERVICE defaults
 
+  # stop redis-server
+  pid_redis=$(get_pid redis-server)
+  if [ -n "$pid_redis" ]; then
+    service redis-server stop
+  fi
+
   echo -e "${GREEN}Prod environment set up.${NC}"
 fi
