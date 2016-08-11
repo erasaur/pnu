@@ -38,13 +38,15 @@ class BuildResponse:
             self.pokemon_wanted = user.get_pokemon_wanted()
             self.location = (user.get_lat() or user.get_lon())
 
+        self._title_case_pokemon_wanted()
+
     def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
-        msg = MIMEText("\nTo activate your user, respond in the form of \"Pokemon " +
-               "wanted: poke1, poke2, poke3...\" with up to five Pokemon" +
-               "A list of commands are:\nPAUSE - temporarily suspend alerts" +
-               "\nRESUME - resume previous alerts\nSTOP - quit receiving " +
-               "alerts")
+        msg = MIMEText("\nTo activate your user, respond in the form of \"" +
+               "Pokemon wanted: poke1, poke2, poke3...\" with up to five " +
+               "Pokemon. A list of commands are:\nPAUSE - temporarily " +
+               "suspend alerts\nRESUME - resume previous alerts\nSTOP - " +
+               "quit receiving alerts")
         self.to = self._check_len_of_msg(msg.get_payload())
 
         msg['To'] = self.to[0]
@@ -145,7 +147,12 @@ class BuildResponse:
 
             updated_to.append(num + "@" + ext)
 
-        return updated_to
+        # check if sending to multiple users
+        if len(updated_to) > 1:
+            return updated_to
+
+        # if not multiple users, we only need the 1 'to' address
+        return updated_to[0]
 
     def poke_list_to_str(self):
         """ creates a string from the list of pokemon wanted
@@ -154,7 +161,7 @@ class BuildResponse:
         Returns:
             string A string of pokemon such as "poke1, poke2, and poke3"
         """
-        str_of_poke = self.pokemon_wanted[0]
+        str_of_poke = self.pokemon_wanted[0].title()
         logging.info("List of pokemon_wanted is: {}".format(
                 self.pokemon_wanted))
 
@@ -165,6 +172,10 @@ class BuildResponse:
                          .format(str_of_poke))
 
         return str_of_poke
+
+    def _title_case_pokemon_wanted(self):
+        """ rattata == Rattata, pidgey == Pidgey """
+        self.pokemon_wanted = [poke.title() for poke in self.pokemon_wanted]
 
     def build_message(self):
         """ returns the text message to be sent to the receiver
