@@ -18,7 +18,6 @@ class PnuPokeApi ():
         self._group_member_dist = pub_config["poke_api"]["group_member_dist_km"]
         self._group_scan_dist = pub_config["poke_api"]["group_scan_dist_km"]
         self._step_size = pub_config["poke_api"]["step_size_km"]
-        self._last_update = 0
         self._groups = []
         self.update_data_from_store()
 
@@ -106,7 +105,6 @@ class PnuPokeApi ():
         # create a new group just for this isolated user
         if group_index >= len(self._groups):
             self._groups.append([user])
-        self._last_update = time.time()
 
     def get_cover (self, group):
         x = 0
