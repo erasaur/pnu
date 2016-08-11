@@ -17,18 +17,22 @@ class PnuPokeApiTests(unittest.TestCase):
         arbor_loc = (42.280844, -83.744341)
 
         sterling = User({
+            "phone_number": "1",
             "latitude": sterling_loc[0],
             "longitude": sterling_loc[1],
         })
         firestone = User({
+            "phone_number": "2",
             "latitude": firestone_loc[0],
             "longitude": firestone_loc[1],
         })
         varsity = User({
+            "phone_number": "3",
             "latitude": varsity_loc[0],
             "longitude": varsity_loc[1],
         })
         arbor = User({
+            "phone_number": "4",
             "latitude": arbor_loc[0],
             "longitude": arbor_loc[1],
         })
