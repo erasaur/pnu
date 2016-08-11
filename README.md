@@ -3,6 +3,13 @@ Pokemon Near You (pnu, pronounced "new")
 
 [ [Website](https://pnu.space) | [Wiki](https://github.com/erasaur/pnu/wiki) ]
 
+## What
+Send us a location and a list of Pokémon through text, and we'll text back when one of those Pokémon appear near you (along with a link to their position on a map).
+
+This makes it dead simple to get alerts: no need to run your own service or app on your phone or computer.
+
+See [this post](https://www.reddit.com/r/pokemongodev/comments/4wvukl/distributed_smsbased_pok%C3%A9mon_alert_system/) for more details.
+
 ## How to enroll
 Detailed instructions [here](https://pnu.space).
 
