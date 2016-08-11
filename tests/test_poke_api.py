@@ -2,7 +2,7 @@
 import unittest
 
 from pnu.apis.poke_api import PnuPokeApi
-from pnu.tests.mock import PnuPokeApiMock
+from tests.mock import PnuPokeApiMock
 from pnu.models.user import User
 
 
@@ -38,23 +38,24 @@ class PnuPokeApiTests(unittest.TestCase):
         poke_api.update_data(varsity, False)
 
         # sterling, firestone, and varsity should form a clique
-        assert poke_api.close_enough(sterling, sterling)
-        assert poke_api.close_enough(sterling, firestone)
-        assert poke_api.close_enough(sterling, varsity)
-        assert poke_api.close_enough(firestone, varsity)
-        assert len(poke_api._groups) == 1 # should be only 1 group so far
+        self.assertTrue(poke_api.close_enough(sterling, sterling))
+        self.assertTrue(poke_api.close_enough(sterling, firestone))
+        self.assertTrue(poke_api.close_enough(sterling, varsity))
+        self.assertTrue(poke_api.close_enough(firestone, varsity))
+        self.assertEqual(len(poke_api._groups), 1)  # should only have 1 group
 
-        # arbor should be close enough to sterling and firestone, but not to varsity
+        # arbor should be close enough to sterling and firestone,
+        # but not to varsity
         poke_api.update_data(arbor, False)
-        assert poke_api.close_enough(arbor, sterling)
-        assert poke_api.close_enough(arbor, firestone)
-        assert not poke_api.close_enough(arbor, varsity)
+        self.assertTrue(poke_api.close_enough(arbor, sterling))
+        self.assertTrue(poke_api.close_enough(arbor, firestone))
+        self.assertFalse(poke_api.close_enough(arbor, varsity))
 
         # so arbor shouldn't be in the clique, we should have a new group
-        assert len(poke_api._groups) == 2
+        self.assertEqual(len(poke_api._groups), 2)
 
-        assert not poke_api.pos_changed(sterling, sterling)
-        assert poke_api.pos_changed(sterling, firestone)
+        self.assertFalse(poke_api.pos_changed(sterling, sterling))
+        self.assertTrue(poke_api.pos_changed(sterling, firestone))
 
         # center of group should be close enough to everyone in the group
         group_0 = poke_api._groups[0]
@@ -64,7 +65,7 @@ class PnuPokeApiTests(unittest.TestCase):
             "longitude": group_0_loc[1]
         })
         for member in group_0:
-            assert poke_api.close_enough(group_0_proxy, member)
+            self.assertTrue(poke_api.close_enough(group_0_proxy, member))
 
 
 if __name__ == "__main__":
