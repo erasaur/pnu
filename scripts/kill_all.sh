@@ -33,7 +33,7 @@ else
   echo "redis-pending not running."
 fi
 
-pid_main=$(get_pid main.py)
+pid_main=$(get_pid $MAIN_PROCESS)
 if [ -n "$pid_main" ]; then 
   read -p "Kill pid $pid_main? [y/n]" -n 1 -r
   echo
@@ -41,5 +41,15 @@ if [ -n "$pid_main" ]; then
     kill -9 $pid_main
   fi
 else
-  echo "main.py not running."
+  echo "$MAIN_PROCESS not running."
+fi
+
+if [ -x "$(command -v service)" ]; then
+  read -p "Kill redis services? [y/n]" -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    service $REDIS_PROCESS stop
+    service $REDIS_PENDING_SERVICE stop
+    service $REDIS_USER_SERVICE stop
+  fi
 fi
