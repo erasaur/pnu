@@ -34,8 +34,8 @@ else
 fi
 
 pid_main=$(get_pid main.py)
-if [ -n "$pid_redis_pending" ]; then 
-  read -p "Kill pid $pid_redis_pending? [y/n]" -n 1 -r
+if [ -n "$pid_main" ]; then 
+  read -p "Kill pid $pid_main? [y/n]" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     kill -9 $pid_main
