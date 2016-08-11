@@ -15,9 +15,7 @@ Detailed instructions [here](https://pnu.space).
 ## How to become a Champion for your location
 Please refer to the [wiki](https://github.com/erasaur/pnu/wiki/Enroll-to-be-a-Champion).
 
-# For devs
-
-## Setup
+## Development setup
 ```bash
 git clone git://github.com/erasaur/pnu.git
 cd pnu
