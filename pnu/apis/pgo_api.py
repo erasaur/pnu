@@ -1,13 +1,17 @@
+from google.protobuf.internal import encoder
 from pgoapi import PGoApi
 from pgoapi import exceptions
 from pgoapi import utilities as util
+from s2sphere import Cell, CellId, LatLng
 
 from pnu.config import pub_config, private_config
 from pnu.models import Pokemon
-from s2sphere import Cell, CellId, LatLng
-from google.protobuf.internal import encoder
-import math, time, random, sys
 
+
+import math
+import random
+import sys
+import time
 import threading
 from threading import Thread, Lock
 from queue import Queue
@@ -15,8 +19,10 @@ from queue import Queue
 import logging
 logging = logging.getLogger(__name__)
 
+
 class PgoAPI ():
-    def __init__ (self):
+
+    def __init__(self):
         self._changed = False
         self._queue = Queue()
         self._user_queue = Queue()
@@ -52,19 +58,20 @@ class PgoAPI ():
 
         self.start_threads(10)
 
-    def encode (self, cellid):
+    def encode(self, cellid):
         output = []
         encoder._VarintEncoder()(output.append, cellid)
         return ''.join(output)
 
-    def start_threads (self, num):
+    def start_threads(self, num):
         for i in range(num): 
-            t = Thread(target=self.search_thread, name='search_thread-{}'.format(i))
+            t = Thread(target=self.search_thread, name='search_thread-{}'
+                       .format(i))
             t.daemon = True
             t.start()
             self._threads.append(t)
 
-    def send_map_request (self, user, position):
+    def send_map_request(self, user, position):
         try:
             cell_ids = util.get_cell_ids(position[0], position[1])
             user._last_call = time.time()
@@ -76,17 +83,19 @@ class PgoAPI ():
                 cell_id=cell_ids
             )
         except Exception as e:
-            logging.info("Uncaught exception when downloading map: {}".format(e))
+            logging.info("Uncaught exception when downloading map: {}"
+                         .format(e))
             return False
 
-    def parse_map (self, map_dict, step, step_location):
+    def parse_map(self, map_dict, step, step_location):
         if map_dict["responses"]["GET_MAP_OBJECTS"]["status"] != 1:
             return
 
         cells = map_dict["responses"]["GET_MAP_OBJECTS"]["map_cells"]
         for cell in cells:
             for p in cell.get("wild_pokemons", []):
-                expiration_time = (p["last_modified_timestamp_ms"] + p["time_till_hidden_ms"])/1000.0
+                expiration_time = (p["last_modified_timestamp_ms"] +
+                                   p["time_till_hidden_ms"]) / 1000.0
                 pokemon_id = p["pokemon_data"]["pokemon_id"]
 
                 self._result.append(Pokemon({
@@ -96,7 +105,7 @@ class PgoAPI ():
                     "expiration_time": expiration_time
                 }))
 
-    def search_thread (self):
+    def search_thread(self):
         queue = self._queue
         user_queue = self._user_queue
         threadname = threading.currentThread().getName()
@@ -107,7 +116,7 @@ class PgoAPI ():
             now = time.time()
 
             if user._auth_provider._ticket_expire:
-                remaining_time = user._auth_provider._ticket_expire/1000.0 - now
+                remaining_time = user._auth_provider._ticket_expire/1000.0-now
                 if remaining_time < self._min_time_need_reauth:
                     self.auth(user)
 
@@ -134,11 +143,17 @@ class PgoAPI ():
                             self.parse_map(response_dict, step, step_location)
                             self._changed = True
                         except KeyError:
-                            logging.info('Search thread failed. Response dictionary key error')
-                            logging.info('{}: step {} failed. Response dictionary key error.'.format(threadname, step))
+                            logging.info("Search thread failed. " +
+                                         "Response dictionary key error")
+                            logging.info("{}: step {} failed. "
+                                         .format(threadname, step) +
+                                         "Response dictionary key error."
+                                         .format(threadname, step))
                             failed_consecutive += 1
                             if (failed_consecutive >= self._max_tries):
-                                logging.info('Niantic servers under heavy load. Waiting before trying again')
+                                logging.info("Niantic servers under heavy " +
+                                             "load. Waiting before trying " +
+                                             "again")
                                 time.sleep(self._recovery_time)
                                 failed_consecutive = 0
                             response_dict = {}
@@ -150,7 +165,7 @@ class PgoAPI ():
             queue.task_done()
             user_queue.put(user)
 
-    def auth (self, user):
+    def auth(self, user):
         user_data = user._data
         auth_service = user_data["auth_service"]
         username = user_data["username"]
@@ -162,22 +177,29 @@ class PgoAPI ():
             lon = float(user_data["longitude"])
             user.set_position(lat, lon, 8)
 
-        user.set_authentication(provider=auth_service, username=username, password=password)
+        user.set_authentication(provider=auth_service, username=username,
+                                password=password)
 
-    def get_new_coords (self, init_loc, distance, bearing):
-        """ Given an initial lat/lng, a distance(in kms), and a bearing (degrees),
-        this will calculate the resulting lat/lng coordinates.
-        """ 
+    def get_new_coords(self, init_loc, distance, bearing):
+        """ Given an initial lat/lng, a distance(in kms),
+        and a bearing (degrees), this will calculate the resulting lat/lng
+        coordinates.
+        """
         R = self._earth_radius
         bearing = math.radians(bearing)
 
-        init_coords = [math.radians(init_loc[0]), math.radians(init_loc[1])] # convert lat/lng to radians
+        init_coords = [math.radians(init_loc[0]),
+                       math.radians(init_loc[1])] # convert lat/lng to radians
 
-        new_lat = math.asin(math.sin(init_coords[0])*math.cos(distance/R) +
-            math.cos(init_coords[0])*math.sin(distance/R)*math.cos(bearing))
+        new_lat = math.asin(math.sin(init_coords[0]) * math.cos(distance/R) +
+                            math.cos(init_coords[0]) * math.sin(distance/R) *
+                            math.cos(bearing))
 
-        new_lon = init_coords[1] + math.atan2(math.sin(bearing)*math.sin(distance/R)*math.cos(init_coords[0]),
-            math.cos(distance/R)-math.sin(init_coords[0])*math.sin(new_lat))
+        new_lon = (init_coords[1] +
+                  math.atan2(math.sin(bearing) * math.sin(distance/R) *
+                             math.cos(init_coords[0]),
+                             math.cos(distance/R) - math.sin(init_coords[0]) *
+                             math.sin(new_lat)))
 
         return [math.degrees(new_lat), math.degrees(new_lon)]
 
@@ -188,9 +210,9 @@ class PgoAPI ():
         SOUTH = 180
         WEST = 270
 
-        pulse_radius = 0.07                 # km - radius of players heartbeat is 70m
-        xdist = math.sqrt(3)*pulse_radius   # dist between column centers
-        ydist = 3*(pulse_radius/2)          # dist between row centers
+        pulse_radius = 0.07  # km - radius of players heartbeat is 70m
+        xdist = math.sqrt(3)*pulse_radius  # dist between column centers
+        ydist = 3*(pulse_radius/2)  # dist between row centers
 
         yield (initial_loc[0], initial_loc[1], 0) #insert initial location
 
@@ -221,7 +243,7 @@ class PgoAPI ():
                     yield (loc[0], loc[1], 0)
             ring += 1
 
-    def get_nearby (self, lat, lon, num_steps):
+    def get_nearby(self, lat, lon, num_steps):
         queue_size = self._queue.qsize()
         user_queue_size = self._user_queue.qsize()
         logging.info("Task queue size: {}".format(queue_size))
