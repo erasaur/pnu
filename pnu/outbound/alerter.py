@@ -76,12 +76,18 @@ class PnuAlertDispatcher:
         Args:
             message: string of text to be sent in the body of the message
         """
+        try:
+            recipients = [email for email in private_config['notify']['email']]
+        except KeyError:
+            logging.error("No one to be notified for fatal problems :( " +
+                          "Slowly dying instead")
+            return
 
         # get the currently logged to file
         logFilename = logging.root.handlers[0].baseFilename
 
         msg = MIMEMultipart()
-        recipients = [email for email in private_config['notify']['email']]
+
         msg['To'] = COMMASPACE.join(recipients)
         msg['From'] = private_config['gmail']['username']
         msg['Subject'] = constants.ERROR_SUBJECT

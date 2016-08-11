@@ -6,6 +6,10 @@
   "goo.gl": {
     "API_KEY": "INSERT_YOUR_GOOGLE_URL_API_HERE"
   },
+  "notify": {
+      "email": ["INSERT_YOUR_PERSONAL_EMAIL_TO_BE_ALERTED_AT",
+                "INSERT_SECOND_EMAIL_FOR_SOMEONE_TO_BE_ALERTED_AT"]
+  },
   "poke_api": {
     "accounts": [{
       "auth_service": "google",
