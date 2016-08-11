@@ -9,24 +9,34 @@ else
 fi
 echo
 
-redis_user="127.0.0.1:6379"
+redis_user="$REDIS_USER_HOST:$REDIS_USER_PORT"
 pid_redis_user=$(get_pid $redis_user)
 if [ -n "$pid_redis_user" ]; then 
   read -p "Kill pid $pid_redis_user? [y/n]" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
+    read -p "Attempt to save first? [y/n]" -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      redis-cli -p $REDIS_USER_PORT save
+    fi
     kill -2 $pid_redis_user
   fi
 else
   echo "redis-user not running."
 fi
 
-redis_pending="127.0.0.1:6380"
+redis_pending="$REDIS_PENDING_HOST:$REDIS_PENDING_PORT"
 pid_redis_pending=$(get_pid $redis_pending)
 if [ -n "$pid_redis_pending" ]; then 
   read -p "Kill pid $pid_redis_pending? [y/n]" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
+    read -p "Attempt to save first? [y/n]" -n 1 -r
+    echo
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      redis-cli -p $REDIS_PENDING_PORT save
+    fi
     kill -2 $pid_redis_pending
   fi
 else

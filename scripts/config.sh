@@ -32,6 +32,12 @@ MAIN_ERR_FILE="$APP_LOG_DIR/main.err"
 REDIS_PENDING_DUMP_DIR=db/pending
 REDIS_USER_DUMP_DIR=db/user
 
+# host and port should match with redis config files
+REDIS_USER_HOST="127.0.0.1"
+REDIS_PENDING_PORT=6379
+REDIS_PENDING_HOST="127.0.0.1"
+REDIS_PENDING_PORT=6380
+
 # run dir is where dumpfiles will go
 # service dir is where config files are read from
 # run dir should match with the run dir specified in redis service files
