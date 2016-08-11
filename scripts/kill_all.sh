@@ -15,7 +15,7 @@ if [ -n "$pid_redis_user" ]; then
   read -p "Kill pid $pid_redis_user? [y/n]" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    kill -9 $pid_redis_user
+    kill -2 $pid_redis_user
   fi
 else
   echo "redis-user not running."
@@ -27,7 +27,7 @@ if [ -n "$pid_redis_pending" ]; then
   read -p "Kill pid $pid_redis_pending? [y/n]" -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
-    kill -9 $pid_redis_pending
+    kill -2 $pid_redis_pending
   fi
 else
   echo "redis-pending not running."
