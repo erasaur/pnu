@@ -27,7 +27,7 @@ class PnuRequestHandler (PnuRunnable):
         inbound_users = self._requester.run()
         for inbound_user in inbound_users:
             if inbound_user.empty():
-                logging.info("Empty user: {}".format(inbound_user.get_json())
+                logging.info("Empty user: {}".format(inbound_user.get_json()))
                 continue
 
             status = inbound_user.get_status()
