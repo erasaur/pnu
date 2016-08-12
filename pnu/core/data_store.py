@@ -98,8 +98,8 @@ class RedisDataStore ():
             raw_user = {}
         return raw_user
 
-    def delete_user(self, del_key):
-        logging.info("Deleting user: {}".format(del_key))
+    def delete (self, del_key):
+        logging.info("Deleting: {}".format(del_key))
         _ = self._redis.delete(del_key)
 
 
