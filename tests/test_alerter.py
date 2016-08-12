@@ -25,7 +25,7 @@ class PnuAlerterTests(unittest.TestCase):
             "expiration_time": 123456789
         }
         user_json = {
-                "phone_number": "test@example.com",
+                "phone_number": "test@gmail.com",
                 "pokemon_wanted": [],
                 "status": constants.PAUSE,
                 "location": {
@@ -44,7 +44,7 @@ class PnuAlerterTests(unittest.TestCase):
 
     def test_stop_message(self):
         info = {
-                "phone_number": "test@example.com",
+                "phone_number": "test@gmail.com",
                 "pokemon_wanted": ['abra', 'snorlax', 'ekans'],
                 "status": constants.STOP,
                 "location": {
@@ -57,7 +57,7 @@ class PnuAlerterTests(unittest.TestCase):
 
     def test_pause_message(self):
         info = {
-                "phone_number": "test@example.com",
+                "phone_number": "test@gmail.com",
                 "pokemon_wanted": [],
                 "status": constants.PAUSE,
                 "location": {
@@ -70,7 +70,7 @@ class PnuAlerterTests(unittest.TestCase):
 
     def test_resume_message(self):
         info = {
-                "phone_number": "test@example.com",
+                "phone_number": "test@gmail.com",
                 "pokemon_wanted": [],
                 "status": constants.RESUME,
                 "location": {
@@ -83,7 +83,7 @@ class PnuAlerterTests(unittest.TestCase):
 
     def test_enroll_message(self):
         info = {
-                "phone_number": "test@example.com",
+                "phone_number": "test@gmail.com",
                 "pokemon_wanted": [],
                 "status": constants.ENROLL,
                 "location": {

@@ -55,6 +55,23 @@ class LatLonRegexTests(unittest.TestCase):
             self.assertTrue(lat)
             self.assertTrue(lon)
 
+    def test_get_from_address(self):
+        phone_num = '1234567890@vtext.com'
+        phone_num1 = '1234567890@mms.att.net'
+        email = 'message Daemon <message-daemon@gmail.com>'
+        email1 = 'John Doe <johndoe@gmail.com>'
+        email2 = 'John Doe <john.doe@gmail.com>'
+        phone_num_res = self.req.get_from_address(phone_num)
+        phone_num1_res = self.req.get_from_address(phone_num1)
+        email_res = self.req.get_from_address(email)
+        email1_res = self.req.get_from_address(email1)
+        email2_res = self.req.get_from_address(email2)
+        self.assertEqual(phone_num_res, phone_num)
+        self.assertEqual(phone_num1_res, phone_num1)
+        self.assertEqual(email_res, "message-daemon@gmail.com")
+        self.assertEqual(email1_res, "johndoe@gmail.com")
+        self.assertEqual(email2_res, "john.doe@gmail.com")
+
     def test_pokemon_wanted_list_valid(self):
         pokemon_wanted = "Pokemon wanted: abra, alakazam, nidoran-f, " +\
                          "nidoran-m, pidgey, zebra"

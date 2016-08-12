@@ -50,6 +50,7 @@ class PnuRequest:
                 self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
                 u, data = self.mail.login(private_config['gmail']['username'],
                                           private_config['gmail']['password'])
+                return
             except imaplib.IMAP4.error as e:
                 logging.error("Login to retrieve emails failed!")
                 logging.error(e)
@@ -107,7 +108,7 @@ class PnuRequest:
             pokemon_wanted = None
             status = None
             user = {
-                'phone_number': msg['From'],
+                'phone_number': self.get_from_address(msg['From']),
                 'pokemon_wanted': pokemon_wanted,
                 'location': None,
                 'status': status,
@@ -215,9 +216,21 @@ class PnuRequest:
                 if filename == "Current Location.loc.vcf":
                     return part.get_payload(decode=True)
 
+    def get_from_address(self, from_addr):
+        logging.info("parsing from_addr: {}".format(from_addr))
+        from_addr_email = re.search('<(.*?)>', from_addr)
+
+        if not from_addr_email:
+            return from_addr
+
+        try:
+            return from_addr_email.group(1)
+        except AttributeError:
+            logging.error("Unsure what platform the user messaged with")
+            return None
+
     def parse_android_lat_lon(self, body):
         """ gets the latitude and longitude from an android message
-
         Args:
             body    byte string containing the address and google maps link
                     to their latitude and longitude

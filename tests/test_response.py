@@ -11,7 +11,7 @@ from pnu.etc import constants
 class PnuResponseTest(unittest.TestCase):
 
     def setUp(self):
-        self.to = "test@example.com"
+        self.to = "test@gmail.com"
         user_info = {
             "phone_number": self.to,
             "pokemon_wanted": [],
