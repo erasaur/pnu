@@ -86,7 +86,7 @@ class PnuRequestHandler (PnuRunnable):
             json_user['status'] = constants.ENROLL
             user = User(json_user)
             logging.info("The full inbound_user account is: {}"
-                        .format(user.get_json()))
+                         .format(user.get_json()))
 
             # user still needs to fully enroll
             if not user.is_active():
