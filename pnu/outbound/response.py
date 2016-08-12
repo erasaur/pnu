@@ -175,7 +175,10 @@ class BuildResponse:
 
     def _title_case_pokemon_wanted(self):
         """ rattata == Rattata, pidgey == Pidgey """
-        self.pokemon_wanted = [poke.title() for poke in self.pokemon_wanted]
+        try:
+            self.pokemon_wanted = [p.title() for p in self.pokemon_wanted]
+        except TypeError:
+            logging.info("No pokemon listed to titlecase")
 
     def build_message(self):
         """ returns the text message to be sent to the receiver
