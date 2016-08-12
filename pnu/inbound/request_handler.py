@@ -27,6 +27,7 @@ class PnuRequestHandler (PnuRunnable):
         inbound_users = self._requester.run()
         for inbound_user in inbound_users:
             if inbound_user.empty():
+                logging.info("Empty user: {}".format(inbound_user.get_json())
                 continue
 
             status = inbound_user.get_status()
@@ -61,10 +62,14 @@ class PnuRequestHandler (PnuRunnable):
 
             # at this point, we know the user is either updating their location
             # or their list of pokemon wanted (potentially for the first time)
+            logging.info("Updating inbound_user to see if their account is " +
+                         "complete")
             PnuUserDataStore.update(phone_number, inbound_user)
             json_user = PnuUserDataStore.get(phone_number)
             json_user['status'] = constants.ENROLL
             user = User(json_user)
+            loggin.info("The full inbound_user account is: {}"
+                        .format(user.get_json()))
 
             # user still needs to fully enroll
             if not user.is_active():
@@ -77,4 +82,5 @@ class PnuRequestHandler (PnuRunnable):
             # to add a new entry; if not, we want to update an existing entry),
             # hence we pass in the `old_user_active` flag.
             else:
+                logging.info("User is fully enrolled")
                 self._poke_api.update_data(user, old_user_active)
