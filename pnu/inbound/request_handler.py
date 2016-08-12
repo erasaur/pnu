@@ -53,10 +53,25 @@ class PnuRequestHandler (PnuRunnable):
                     PnuUserDataStore.delete_user(phone_number)
                 # resume or pause status
                 else:
-                    PnuUserDataStore.update(phone_number, inbound_user)
-                    user_to_notify = PnuUserDataStore.get(phone_number)
+                    # only save the update and save the status if pause is sent
+                    if inbound_user.get_status() == constants.PAUSE:
+                        PnuUserDataStore.update(phone_number, inbound_user)
+                        user_to_notify = PnuUserDataStore.get(phone_number)
+                        logging.info("Pausing user based on PAUSE message")
 
-                logging.info("Setting user to be notified")
+                    # so we don't actually save the 'RESUME' status
+                    if inbound_user.get_status() == constants.RESUME:
+                        # clear the previous status of 'PAUSE' for the user
+                        # and update it in the store
+                        inbound_user.set_status(None)
+                        PnuUserDataStore.update(phone_number, inbound_user)
+                        user_to_notify = PnuUserDataStore.get(phone_number)
+                        user_to_notify['status'] = constants.RESUME
+                        logging.info("Bringing user into normal alert cycle " +
+                                     "base on RESUME message")
+
+                logging.info("Setting user to be notified: {}"
+                             .format(user_to_notify))
                 PnuPendingDataStore.append(constants.ENROLL, user_to_notify)
                 continue
 
