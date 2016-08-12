@@ -32,30 +32,44 @@ class PnuRequest:
     resume_regex = re.compile('resume', re.IGNORECASE)
 
     def __init__(self):
-        self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
-        try:
-            u, data = self.mail.login(private_config['gmail']['username'],
-                        private_config['gmail']['password'])
-        except imaplib.IMAP4.error as e:
-            logging.error("Login to retrieve emails failed!")
-            logging.error(e)
-            raise ConnectionError("Login to retrieve emails failed!")
-
+        self.reconnect()
 
     def __exit__(self):
         """ closes the open mailbox and logs out of the email account """
         self.mail.close()
         self.mail.logout()
 
+    def reconnect(self):
+        auth_attempts = 0
+
+        while auth_attempts <= constants.MAX_RECONNECT_RETRIES:
+            auth_attempts += 1
+
+            try:
+                self.mail = imaplib.IMAP4_SSL(pub_config['gmail']['imap'])
+                u, data = self.mail.login(private_config['gmail']['username'],
+                                          private_config['gmail']['password'])
+            except imaplib.IMAP4.error as e:
+                logging.error("Login to retrieve emails failed!")
+                logging.error(e)
+
+            except Exception as e:
+                logging.error("Error from IMAP! Trying to reconnect...")
+                logging.error(e)
+
+            time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
+
+        if auth_attempts > constants.MAX_RECONNECT_RETRIES:
+            from pnu.outbound import smtp
+            logging.critical("Could not connect to IMAP handler")
+            smtp.send_error("Could not connect to IMAP handler")
+
     def get_inbox(self):
         """ returns the main 'INBOX' of the email account
-
         Args:
             None
-
         Results:
             returns the INBOX data associated with this email account
-
         """
         resp, data = self.mail.select(pub_config['gmail']['mailbox'])
         self.check_resp(resp)
@@ -206,7 +220,6 @@ class PnuRequest:
         Args:
             body    byte string containing the address and google maps link
                     to their latitude and longitude
-
         Returns:
             a tuple containing the (lat, long) of the message
         """
@@ -217,11 +230,9 @@ class PnuRequest:
 
     def parse_ios_lat_lon(self, msg):
         """ gets the latitude and longitude from an iOS message attachment
-
         Args:
             msg     most of the email including the attachment, subject,
                     and body
-
         Returns:
             a tuple containing the (lat, long) of the message
         """
@@ -278,9 +289,28 @@ class PnuRequest:
 
     def run(self):
         """ yields new unread messages """
-        self.get_inbox()
-        msgs = self.get_unread_messages()
-        return self.parse_msgs(msgs)
+        get_inbox_attempts = 0
+        while get_inbox_attempts <= constants.MAX_RECONNECT_RETRIES:
+            get_inbox_attempts += 1
+            try:
+                self.get_inbox()
+                msgs = self.get_unread_messages()
+                users_from_msgs = self.parse_msgs(msgs)
+                logging.info("Successfully connected to IMAP inbox and " +
+                             "parsed messages after {} tries."
+                             .format(get_inbox_attempts))
+                return users_from_msgs
+
+            except Exception as e:
+                logging.error("Error while trying to get inbox messages")
+                logging.error(e)
+                self.reconnect()
+
+        # should only get here in the case of too many reconnects/failures
+        message = ("Attempted to retrieve the inbox messages more than 10 " +
+                   "times and a successful connection could not be made. " +
+                   "Attached are the most recent logs to help.")
+        self.send_error(message)
 
 if __name__ == "__main__":
     import logging

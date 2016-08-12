@@ -35,7 +35,7 @@ class PnuAlertDispatcher:
     def reconnect(self):
         auth_attempts = 0
 
-        while auth_attempts < 5:
+        while auth_attempts <= constants.MAX_RECONNECT_RETRIES:
             auth_attempts += 1
             try:
                 self.smtp = SMTP(pub_config['smtp']['host'],
@@ -67,8 +67,9 @@ class PnuAlertDispatcher:
 
             time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
 
-        if auth_attempts >= 5:
-            raise SMTPException("Failed connecting with the SMTP server. :(")
+        if auth_attempts > constants.MAX_RECONNECT_RETRIES:
+            logging.critical("Could not connect to SMTP handler")
+            self.send_error("Could not connect to SMTP handler")
 
     def send_error(self, message):
         """ create an email with the most recent log file attached and send it
@@ -79,8 +80,8 @@ class PnuAlertDispatcher:
         try:
             recipients = [email for email in private_config['notify']['email']]
         except KeyError:
-            logging.error("No one to be notified for fatal problems :( " +
-                          "Slowly dying instead")
+            logging.critical("No one to be notified for fatal problems :( " +
+                             "Slowly dying instead...")
             return
 
         # get the currently logged to file
@@ -108,8 +109,8 @@ class PnuAlertDispatcher:
                                private_config['notify']['email'],
                                msg.as_string())
         except:
-            logging.error("COULD NOT SEND ERROR EMAIL :(" +
-                          "THINGS WILL NOW PROCEED TO BURN DOWN")
+            logging.critical("COULD NOT SEND ERROR EMAIL :(" +
+                             "THINGS WILL NOW PROCEED TO BURN DOWN")
 
     def send_message(self, user):
         """ sends a text message alert to the specified user
@@ -122,12 +123,13 @@ class PnuAlertDispatcher:
 
         send_attempts = 0
         while send_attempts < 10:
+            send_attempts += 1
             try:
-                send_attempts += 1
                 self.smtp.sendmail(private_config['gmail']['username'],
                                    phone_number, msg)
                 send_attempts = 200
-                logging.info("Successfully sent message")
+                logging.info("Successfully sent message after {} tries"
+                             .format(send_attempts))
             except SMTPSenderRefused as e:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("Sender refused error. Phone #: {}"

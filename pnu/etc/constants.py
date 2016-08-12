@@ -7,6 +7,7 @@ RESPONSE_STATUS_LIST = [PAUSE, RESUME, STOP]
 
 # for alerts
 ERROR_SUBJECT = "[PNU Alert] Things are on fire!!"
+MAX_RECONNECT_RETRIES = 10
 
 # Alerter.py
 MAX_SMS_MESSAGE_LEN = 159
