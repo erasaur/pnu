@@ -63,7 +63,7 @@ class PnuRequestHandler (PnuRunnable):
                     if inbound_user.get_status() == constants.RESUME:
                         # clear the previous status of 'PAUSE' for the user
                         # and update it in the store
-                        inbound_user.set_status(None)
+                        inbound_user.set_status('')
                         PnuUserDataStore.update(phone_number, inbound_user)
                         user_to_notify = PnuUserDataStore.get(phone_number)
                         user_to_notify['status'] = constants.RESUME
@@ -73,6 +73,8 @@ class PnuRequestHandler (PnuRunnable):
                 logging.info("Setting user to be notified: {}"
                              .format(user_to_notify))
                 PnuPendingDataStore.append(constants.ENROLL, user_to_notify)
+                # don't need to send any more messages so continue to the
+                # next person to be messaged
                 continue
 
             # at this point, we know the user is either updating their location
