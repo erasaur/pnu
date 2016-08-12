@@ -18,7 +18,7 @@ class PnuAlertDispatcher(PnuRunnable):
         # followed by a list of users who need to be notified
         # for the said pokemon
         for alert in alerts:
-            log_msg = "Dispatching message for {} to {}\n\n".format(
+            log_msg = "Dispatching message for {} to {}\n".format(
                 alert.get_pokemon_names(),
                 alert.get_phone_numbers())
             logging.info(log_msg)
@@ -28,8 +28,10 @@ class PnuAlertDispatcher(PnuRunnable):
             # update users' last notified times so we don't
             # keep alerting them about the same pokemon
             for user in alert.get_users():
+                logging.info("Updating users' last notified time: {}"
+                             .format(user.get_json()))
                 PnuUserDataStore.update(
-                    user.get_phone_number(), 
+                    user.get_phone_number(),
                     # only modify last_notif
                     { "last_notif": user.get_last_notif() }
                 )
@@ -37,6 +39,6 @@ class PnuAlertDispatcher(PnuRunnable):
     def prompt_alerts(self):
         while True:
             raw_user = PnuPendingDataStore.pop(constants.ENROLL)
-            logging.info("Got pending user: {}".format(raw_user))
+            logging.info("Got user to send msg to: {}".format(raw_user))
             if len(raw_user) > 0:
                 smtp.send_message(User(raw_user))
