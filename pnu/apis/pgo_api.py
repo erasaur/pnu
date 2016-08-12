@@ -246,8 +246,8 @@ class PgoAPI ():
     def get_nearby(self, lat, lon, num_steps):
         queue_size = self._queue.qsize()
         user_queue_size = self._user_queue.qsize()
-        logging.info("Task queue size: {}".format(queue_size))
-        logging.info("User queue size: {}".format(user_queue_size))
+        logging.info("Task queue size: {}".format(queue_size) +
+                     " User queue size: {}".format(user_queue_size))
         if queue_size <= self._min_queue_size:
             # finished previous load, time for more
             logging.info("Starting new search...")
