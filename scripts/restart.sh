@@ -1,5 +1,7 @@
 #!/bin/bash
 
+git pull --rebase
+
 source scripts/config.sh
 
 echo "PIDS:"
