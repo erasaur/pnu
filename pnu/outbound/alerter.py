@@ -132,8 +132,6 @@ class PnuAlertDispatcher:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("Sender refused error. Phone #: {}"
                               .format(phone_number))
-                logging.error("Sender refused address is: {}"
-                              .format(SMTPResponseException.sender))
                 logging.error("Error is: {}".format(e))
                 logging.error("Message: {}".format(msg))
                 # try reconnecting anyway :shrug:
