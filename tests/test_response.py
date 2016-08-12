@@ -3,6 +3,7 @@ import unittest
 
 from pnu.models import Alert
 from pnu.models import User
+from pnu.models import Pokemon
 from pnu.outbound import BuildResponse
 from pnu.etc import constants
 
@@ -79,7 +80,7 @@ class PnuResponseTest(unittest.TestCase):
         msg, to = BuildResponse(user_resume).build_message()
         self.assertIn("Alerts will now be sent", msg)
 
-    def test_make_active_msg_valid(self):
+    def test_make_active_msg_user_valid(self):
         self.user_info['status'] = constants.ACTIVE
         self.user_info['pokemon_wanted'] = ['pidgey', 'rattata', 'ekans']
         user_active = User(self.user_info)
@@ -88,6 +89,22 @@ class PnuResponseTest(unittest.TestCase):
         self.assertIn("Pidgey", msg)
         self.assertIn("Rattata", msg)
         self.assertIn("Ekans", msg)
+
+    def test_make_active_msg_alert_valid(self):
+        self.user_info['status'] = constants.ACTIVE
+        self.user_info['pokemon_wanted'] = ['pidgey']
+        poke = {
+            "pokemonId": 16,
+            "latitude": 42.01,
+            "longitude": -83.69,
+            "expiration_time": 14789029
+        }
+        poke = Pokemon(poke)
+        user_active = Alert([poke], [User(self.user_info)])
+        msg, to = BuildResponse(user_active).build_message()
+        self.assertIn("There\'s a wild", msg)
+        self.assertIn("Pidgey", msg)
+        self.assertIn("goo.gl", msg)
 
     # continue with invalid active messages (no poke, no loc)
     # then test all above cases with errors

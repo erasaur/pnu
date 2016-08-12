@@ -185,6 +185,7 @@ class BuildResponse:
             One of four messages. Either the STOP message, PAUSE message,
             RESUME message, or ACTIVE
         """
+        logging.info("Sending message with status of {}".format(self.status))
         # new user, no pokemon listed
         if self.status == constants.ACTIVE:
             return self._make_active_msg(), self.to
