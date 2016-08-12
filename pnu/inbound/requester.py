@@ -61,7 +61,7 @@ class PnuRequest:
             time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
 
         if auth_attempts > constants.MAX_RECONNECT_RETRIES:
-            from pnu.outbound import smtp
+            from pnu.outbound.alerter import smtp
             logging.critical("Could not connect to IMAP handler")
             smtp.send_error("Could not connect to IMAP handler")
 
