@@ -49,7 +49,7 @@ class BuildResponse:
                        "previous alerts\nSTOP - quit receiving alerts")
         self.to = self._check_len_of_msg(msg.get_payload())
 
-        msg['To'] = self.to[0]
+        msg['To'] = self.to
         msg['From'] = private_config['gmail']['username']
         msg['Subject'] = self.SUBJECT
 
