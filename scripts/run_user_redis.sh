@@ -3,12 +3,7 @@
 # should be called from run.sh in root of project
 source scripts/config.sh
 
-if [[ $PNU_ENV == "prod" ]]; then
-  redis_service=$REDIS_USER_SERVICE
-else
-  redis_service=redis-server
-fi
-
+redis_service="$REDIS_USER_HOST:$REDIS_USER_PORT"
 pid_redis=$(get_pid $redis_service)
 if [ ! -n "$pid_redis" ]; then
   if [[ $PNU_ENV == "prod" ]]; then

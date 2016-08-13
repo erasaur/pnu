@@ -20,7 +20,7 @@ if [ -n "$pid_redis_user" ]; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       redis-cli -p $REDIS_USER_PORT save
     fi
-    kill -2 $pid_redis_user
+    kill -9 $pid_redis_user
   fi
 else
   echo "redis-user not running."
@@ -37,7 +37,7 @@ if [ -n "$pid_redis_pending" ]; then
     if [[ $REPLY =~ ^[Yy]$ ]]; then
       redis-cli -p $REDIS_PENDING_PORT save
     fi
-    kill -2 $pid_redis_pending
+    kill -9 $pid_redis_pending
   fi
 else
   echo "redis-pending not running."
