@@ -138,6 +138,7 @@ class PnuRequest:
                     "lon": lon
                 }
 
+            errors = []
             if body:
                 pokemon_wanted, errors = self.parse_pokemon_wanted(body)
 
