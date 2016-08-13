@@ -100,4 +100,5 @@ class PnuRequestHandler (PnuRunnable):
             # hence we pass in the `old_user_active` flag.
             else:
                 logging.info("User is fully enrolled")
+                PnuPendingDataStore.append(constants.ENROLL, user)
                 self._poke_api.update_data(user, old_user_active)
