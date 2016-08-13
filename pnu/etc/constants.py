@@ -14,6 +14,7 @@ MAX_SMS_MESSAGE_LEN = 159
 SMTP_RECONNECT_SLEEP_TIME = 3
 
 POKEMON_ID_TO_NAME = [
+    "OFF_BY_ONE_ERROR",
     "bulbasaur",
     "ivysaur",
     "venusaur",
