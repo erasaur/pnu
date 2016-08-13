@@ -63,7 +63,8 @@ class PnuAlertDispatcher:
 
             except Exception as e:
                 logging.error("An error occurred while initializing " +
-                              "SMTP:\n{}".format(e))
+                              "SMTP:\n{}Maybe check internet " +
+                              "connectivity".format(e))
 
             time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
 
@@ -85,6 +86,7 @@ class PnuAlertDispatcher:
             return
 
         # get the currently logged to file
+
         logFilename = logging.root.handlers[0].baseFilename
 
         msg = MIMEMultipart()
