@@ -40,6 +40,9 @@ class BuildResponse:
 
         self._title_case_pokemon_wanted()
 
+    def _enc_string(self, msg):
+        return MIMEText(msg).as_string()
+
     def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
         msg = MIMEText("\nTo activate your user, respond in the form of \"" +
@@ -57,29 +60,34 @@ class BuildResponse:
 
     def _make_stop_msg(self):
         logging.info("Sending STOP message")
-        return "Sorry to see you go! Best of luck catchin' 'em all!"
+        msg = "Sorry to see you go! Best of luck catchin' 'em all!"
+        return self._enc_string(msg)
 
     def _make_pause_msg(self):
         logging.info("Sending PAUSE message")
-        return "Respond with RESUME to begin alerts"
+        return self._enc_string("Respond with RESUME to begin alerts")
 
     def _make_resume_msg(self):
         logging.info("Sending RESUME message")
-        return "Alerts will now be sent for new pokemon near you!"
+        msg = "Alerts will now be sent for new pokemon near you!"
+        return self._enc_string(msg)
 
     def _make_no_pokemon_listed_msg(self):
         logging.info("Sending no pokemon message")
-        return "There are no pokemon listed for your user."
+        msg = "There are no pokemon listed for your user."
+        return self._enc_string(msg)
 
     def _make_no_location_msg(self):
         logging.info("Sending no location message")
-        return ("It does not look like we have your location. Please send " +
-                "us your location and try your request again.")
+        msg = ("It does not look like we have your location. Please send " +
+               "us your location and try your request again.")
+        return self._enc_string(msg)
 
     def _make_reenroll_msg(self):
         logging.info("Sending no re-enroll message")
-        return ("There seems to be a miscommunication. Please try " +
-                "re-enrolling by sending us your location first.")
+        msg = ("There seems to be a miscommunication. Please try " +
+               "re-enrolling by sending us your location first.")
+        return self._enc_string(msg)
 
     def _make_active_msg(self):
         """ returns the text message to be sent to the receiver
@@ -118,12 +126,12 @@ class BuildResponse:
                .format(incorrect_pokemon) + "Double check the spelling and " +
                "try again.")
 
-        return msg
+        return self._enc_string(msg)
 
     def _make_received_msg(self):
         msg = ("We are currently tracking these Pokémon for you: {}"
                .format(self.poke_list_to_str()))
-        return msg
+        return self._enc_string(msg)
 
     def _check_len_of_msg(self, msg):
         """ checks if the message length is longer than 159 chars """
@@ -176,6 +184,11 @@ class BuildResponse:
     def _title_case_pokemon_wanted(self):
         """ rattata == Rattata, pidgey == Pidgey """
         try:
+            # test if we have pokeID's or pokemon names
+            if isinstance(self.pokemon_wanted[0], int):
+                self.pokemon_wanted = [constants.POKEMON_ID_TO_NAME[p]
+                                       for p in self.pokemon_wanted]
+
             self.pokemon_wanted = [p.title() for p in self.pokemon_wanted]
         except TypeError:
             logging.info("No pokemon listed to titlecase")
@@ -196,6 +209,9 @@ class BuildResponse:
         elif self.status == constants.ENROLL:
             if self.errors:
                 return self._make_error_msg(), self.to
+            # if they send us pokemon wanted before sending location
+            elif self.pokemon_wanted and not self.location:
+                return self._make_no_location_msg(), self.to
             elif self.pokemon_wanted:
                 return self._make_received_msg(), self.to
 
