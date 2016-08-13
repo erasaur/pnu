@@ -127,9 +127,9 @@ class PnuAlertDispatcher:
             try:
                 self.smtp.sendmail(private_config['gmail']['username'],
                                    phone_number, msg)
-                send_attempts = 200
                 logging.info("Successfully sent message after {} tries"
                              .format(send_attempts))
+                send_attempts = 200
             except SMTPSenderRefused as e:
                 time.sleep(constants.SMTP_RECONNECT_SLEEP_TIME)
                 logging.error("Sender refused error. Phone #: {}"
