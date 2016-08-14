@@ -39,10 +39,12 @@ class BuildResponse:
             self.pokemon_wanted = user.get_pokemon_wanted()
             self.location = (user.get_lat() or user.get_lon())
 
-        self._title_case_pokemon_wanted()
+        # may be empty if only an error is being sent
+        if self.pokemon_wanted:
+            self._title_case_pokemon_wanted()
 
     def _enc_string(self, msg, subject):
-        msg =  MIMEText(msg)
+        msg = MIMEText(msg)
         msg['From'] = private_config['gmail']['username']
         msg['Subject'] = subject
         self.to = self._check_len_of_msg(msg.get_payload())
@@ -98,7 +100,7 @@ class BuildResponse:
         return self._enc_string(msg, subj)
 
     def _make_reenroll_msg(self):
-        logging.info("Sending no re-enroll message")
+        logging.info("Sending re-enroll message")
         msg = ("There seems to be a miscommunication. Please try " +
                "re-enrolling by sending us your location first.")
         subj = "Oops!"
