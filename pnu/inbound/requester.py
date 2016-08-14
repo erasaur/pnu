@@ -130,19 +130,20 @@ class PnuRequest:
             if status:
                 user['status'] = status
                 yield User(user)
+                continue
 
             lat, lon = self.parse_lat_lon(msg)
-            if (lat or lon):
+            if (lat and lon):
                 loc = private_config['location']
-                user['location'] = {
-                    "lat": lat,
-                    "lon": lon,
-                }
 
                 # user is within our ranges, so we continue
                 if ((loc['min_lat'] < lat < loc['max_lat']) and
-                    (loc['min_lon'] < lon < loc['max_lon'])):
-                    pass
+                   (loc['min_lon'] < lon < loc['max_lon'])):
+                    logging.info("User is within location restrictions")
+                    user['location'] = {
+                        "lat": lat,
+                        "lon": lon,
+                    }
 
                 # user is outside our range
                 else:
@@ -154,7 +155,7 @@ class PnuRequest:
                     }
 
                     yield User(user)
-
+                    continue
 
             errors = []
             if body:
