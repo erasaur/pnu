@@ -133,17 +133,39 @@ class PnuRequest:
 
             lat, lon = self.parse_lat_lon(msg)
             if (lat or lon):
+                loc = private_config['location']
                 user['location'] = {
                     "lat": lat,
-                    "lon": lon
+                    "lon": lon,
                 }
+
+                # user is within our ranges, so we continue
+                if ((loc['min_lat'] < lat < loc['max_lat']) and
+                    (loc['min_lon'] < lon < loc['max_lon'])):
+                    pass
+
+                # user is outside our range
+                else:
+                    logging.info("User is outside the location restriction. " +
+                                 "Their (lat, lon): ({},{})".format(lat, lon))
+                    user['error_data'] = {
+                        "code": "OOR",
+                        "data": [lat, lon],
+                    }
+
+                    yield User(user)
+
 
             errors = []
             if body:
                 pokemon_wanted, errors = self.parse_pokemon_wanted(body)
+                if errors:
+                    user['error_data'] = {
+                        "code": "PNE",
+                        "data": errors,
+                    }
 
             user['pokemon_wanted'] = pokemon_wanted
-            user['error_data'] = errors
 
             # probably didn't find a location msg, instead is junk or
             # pokemon wanted msg
@@ -200,6 +222,10 @@ class PnuRequest:
                         constants.POKEMON_NAME_TO_ID[pokemon.strip().lower()])
 
             except KeyError:
+                # user most likely had "poke1, poke2, and poke3"
+                if pokemon.strip().lower() == 'and':
+                    continue
+                # user most likely had "poke1, poke2, and poke3"
                 logging.info("User submitted fake pokemon: {}".format(pokemon))
                 errors.append(pokemon)
                 continue

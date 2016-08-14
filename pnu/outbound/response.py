@@ -2,6 +2,7 @@ from email.mime.text import MIMEText
 from pnu.config import private_config
 from pnu.etc import constants
 from pnu.models import Alert
+from pnu.models import ErrorMsg
 
 import logging
 logging = logging.getLogger(__name__)
@@ -40,14 +41,19 @@ class BuildResponse:
 
         self._title_case_pokemon_wanted()
 
-    def _enc_string(self, msg):
-        return MIMEText(msg).as_string()
+    def _enc_string(self, msg, subject):
+        msg =  MIMEText(msg)
+        msg['From'] = private_config['gmail']['username']
+        msg['Subject'] = subject
+        self.to = self._check_len_of_msg(msg.get_payload())
+        msg['To'] = self.to
+        return msg.as_string()
 
     def _make_enroll_msg(self):
         logging.info("Sending WELCOME message")
         msg = MIMEText("\nTo activate your user, respond in the form of \"" +
                        "Pokemon wanted: poke1, poke2, poke3...\" with up to " +
-                       "five Pokemon. A list of commands are:\nPAUSE - " +
+                       "10 Pokemon. A list of commands are:\nPAUSE - " +
                        "temporarily suspend alerts\nRESUME - resume " +
                        "previous alerts\nSTOP - quit receiving alerts")
         self.to = self._check_len_of_msg(msg.get_payload())
@@ -61,33 +67,42 @@ class BuildResponse:
     def _make_stop_msg(self):
         logging.info("Sending STOP message")
         msg = "Sorry to see you go! Best of luck catchin' 'em all!"
-        return self._enc_string(msg)
+        subj = "Goodbye"
+        return self._enc_string(msg, subj)
 
     def _make_pause_msg(self):
         logging.info("Sending PAUSE message")
-        return self._enc_string("Respond with RESUME to begin alerts")
+        msg = "Response with RESUME to begin alerts"
+        subj = "Pausing"
+        return self._enc_string(msg, subj)
 
     def _make_resume_msg(self):
         logging.info("Sending RESUME message")
         msg = "Alerts will now be sent for new pokemon near you!"
-        return self._enc_string(msg)
+        subj = "Resuming"
+        return self._enc_string(msg, subj)
 
     def _make_no_pokemon_listed_msg(self):
         logging.info("Sending no pokemon message")
-        msg = "There are no pokemon listed for your user."
-        return self._enc_string(msg)
+        msg = ("There are no pokemon listed for your user. Please respond in " +
+               "the form of \"Pokemon wanted: poke1, poke2, poke3...\" with " +
+               "up to 10 pokemon.")
+        subj = "Incomplete Pokemon Wanted"
+        return self._enc_string(msg, subj)
 
     def _make_no_location_msg(self):
         logging.info("Sending no location message")
         msg = ("It does not look like we have your location. Please send " +
                "us your location and try your request again.")
-        return self._enc_string(msg)
+        subj = "No Location Listed"
+        return self._enc_string(msg, subj)
 
     def _make_reenroll_msg(self):
         logging.info("Sending no re-enroll message")
         msg = ("There seems to be a miscommunication. Please try " +
                "re-enrolling by sending us your location first.")
-        return self._enc_string(msg)
+        subj = "Oops!"
+        return self._enc_string(msg, subj)
 
     def _make_active_msg(self):
         """ returns the text message to be sent to the receiver
@@ -121,17 +136,24 @@ class BuildResponse:
 
     def _make_error_msg(self):
         logging.info("Error message being sent")
-        incorrect_pokemon = (', ').join(self.errors)
-        msg = ("We didn't recognize these pokemon: {}."
-               .format(incorrect_pokemon) + "Double check the spelling and " +
-               "try again.")
+        em = ErrorMsg()
+        err = None
 
-        return self._enc_string(msg)
+        if self.errors['code'] == 'PNE':
+            logging.info("Pokemon Not Existent error")
+            incorrect_pokemon = (', ').join(self.errors)
+            err = em.pne(incorrect_pokemon)
+        elif self.errors['code'] == 'OOR':
+            logging.info("User Out Of Range error")
+            err = em.oor(self.errors['data'][0], self.errors['data'][1])
+
+        return self._enc_string(err.msg, err.subj)
 
     def _make_received_msg(self):
-        msg = ("We are currently tracking these Pokémon for you: {}"
+        msg = ("We are currently tracking these Pokemon for you: {}"
                .format(self.poke_list_to_str()))
-        return self._enc_string(msg)
+        subj = ""
+        return self._enc_string(msg, subj)
 
     def _check_len_of_msg(self, msg):
         """ checks if the message length is longer than 159 chars """
@@ -233,6 +255,6 @@ class BuildResponse:
 
         logging.error("Type of message is undetermined. Here's some data to " +
                       "help")
-        logging.error("Pokemon wanted: {}".format(self.pokemon_wanted))
+        logging.error("Pokemon wanted: {}".format(self. pokemon_wanted))
         logging.error("Status of user: {}".format(self.status))
         return self._make_reenroll_msg(), self.to

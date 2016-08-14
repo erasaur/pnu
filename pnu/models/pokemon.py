@@ -15,7 +15,7 @@ class Pokemon (Base):
         super().load_json(data)
 
         try:
-            self.pokemon_name = POKEMON_ID_TO_NAME[self.pokemonId - 1]
+            self.pokemon_name = POKEMON_ID_TO_NAME[self.pokemonId]
         except:
             self.pokemon_name = None
 
