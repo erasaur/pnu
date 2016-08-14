@@ -22,7 +22,7 @@ class PnuRequestHandler (PnuRunnable):
         self._poke_api = poke_api
         self._requester = PnuRequest()
 
-    def update (self):
+    def update(self):
         # query using PnuRequest api, write changes to store
         inbound_users = self._requester.run()
         for inbound_user in inbound_users:
@@ -49,7 +49,8 @@ class PnuRequestHandler (PnuRunnable):
 
                 # sends correct status message based on status field
                 if status == constants.STOP:
-                    self._poke_api.delete(phone_number)
+                    user_to_notify = inbound_user
+                    self._poke_api.delete_user(phone_number)
                     PnuUserDataStore.delete(phone_number)
                 # resume or pause status
                 else:
