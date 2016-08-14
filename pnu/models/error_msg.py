@@ -22,10 +22,10 @@ class ErrorMsg:
         """ error message for when a user enrolls and is not within the
         location designated by their host
         """
-
-        msg = ("We're sorry, it looks like you are outside this regions " +
+        link = "https://github.com/erasaur/pnu/wiki/Location-Restrictions"
+        msg = ("We're sorry, it looks like you are outside this regions' " +
                "designated tracking area. More information can be found " +
-               "here https://github.com/erasaur/pnu/wiki/Location-Restrictions")
+               "here {}".format(link))
         subj = "Out of Range"
 
         return Error(msg, subj)
