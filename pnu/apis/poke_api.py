@@ -1,54 +1,57 @@
-import asyncio, aiohttp, time
-from math import cos, sin, atan2, sqrt, radians, pi
+import time
 
+from queue import Queue
 from pnu.core.data_store import PnuUserDataStore
-from pnu.apis.pgo_api import PgoAPI
 from pnu.config import pub_config
-from pnu.models import User
-from pnu.models import Pokemon
-from pnu.models import Alert
+from pnu.models import User, Pokemon, Alert
+from pnu.apis import PgoApi, PnuScanApi
+from pnu.apis.poke_helpers import close_enough, get_center_of_group
 
 import logging
 logging = logging.getLogger(__name__)
 
-class PnuPokeApi ():
-    def __init__ (self):
-        self._pgo_api = PgoAPI()
-        self._earth_radius = pub_config["poke_api"]["earth_radius_km"]
-        self._group_member_dist = pub_config["poke_api"]["group_member_dist_km"]
-        self._group_scan_dist = pub_config["poke_api"]["group_scan_dist_km"]
-        self._step_size = pub_config["poke_api"]["step_size_km"]
-        self._groups = []
-        self.update_data_from_store()
+class PnuPokeApi (PnuRunnable):
 
-    def update_data_from_store (self):
+    def __init__ (self, dispatcher):
+        self._queue = Queue()
+        self._dispatcher = dispatcher
+        self._pgo_api = PgoApi()
+        self._scanner = PnuScanApi(self._queue)
+
+        self._update_interval = pub_config["poke_api"]["update_interval_sec"]
+
+        # only regularly scan locations with spawn count above a certain threshold
+        self._last_scan = 0
+        self._scan_interval = pub_config["poke_api"]["scan_interval_sec"]
+
+        # perform a full scan every once in a while to catch missing spawn locations
+        self._last_full_scan = 0
+        self._full_scan_interval = pub_config["poke_api"]["full_scan_interval_sec"]
+
+        # occasionally resync group data from data store
+        self._last_sync = 0
+        self._sync_group_data_interval = pub_config["poke_api"]["sync_group_data_interval_sec"]
+
+        # users grouped by location
+        self._groups = []
+
+        # on startup, load existing users into memory
+        self.sync_data_from_store()
+
+    def run (self):
+        super().run(self._update_interval)
+        self.run_once(self.process_queue)
+
+    def sync_data_from_store (self):
+        # reset groups
+        self._groups = []
         init_users = PnuUserDataStore.list()
+
+        # re-add all active users
         for user in init_users:
             user = User(user)
             if user.is_active():
                 self.update_data(user, True)
-
-    def pos_changed (self, user_a, user_b):
-        if user_a is None or user_b is None:
-            raise ValueError("invalid users")
-        return (user_a.is_active() != user_b.is_active()) or (self.distance(user_a, user_b) > 0)
-
-    def distance (self, user_a, user_b):
-        lat1 = radians(float(user_a.get_lat()))
-        lon1 = radians(float(user_a.get_lon()))
-        lat2 = radians(float(user_b.get_lat()))
-        lon2 = radians(float(user_b.get_lon()))
-
-        dlon = lon2 - lon1
-        dlat = lat2 - lat1
-
-        a = sin(dlat / 2)**2 + cos(lat1) * cos(lat2) * sin(dlon / 2)**2
-        c = 2 * atan2(sqrt(a), sqrt(1 - a))
-
-        return self._earth_radius * c
-
-    def close_enough (self, user_a, user_b):
-        return self.distance(user_a, user_b) < self._group_member_dist
 
     def delete_user (self, phone_number):
         for group_index, group in enumerate(self._groups):
@@ -75,7 +78,7 @@ class PnuPokeApi ():
             for member in group:
                 if member.get_phone_number() == user.get_phone_number():
                     old_index = index
-                if not self.close_enough(user, member):
+                if not close_enough(user, member):
                     break
                 index += 1
 
@@ -106,96 +109,93 @@ class PnuPokeApi ():
         if group_index >= len(self._groups):
             self._groups.append([user])
 
-    def get_cover (self, group):
-        x = 0
-        y = 0
-        z = 0
+    def send_alerts (self, group, pokes_nearby):
+        res = {} # mapping of lists of pokemon to lists of users
 
-        for member in group:
-            lat = radians(float(member.get_lat()))
-            lon = radians(float(member.get_lon()))
-            x += cos(lat) * cos(lon)
-            y += cos(lat) * sin(lon)
-            z += sin(lat)
+        # if multiple users are going to be alerted of the same set of pokemon,
+        # group those users together so we can notify them all at once
+        logging.info("Found {} pokemon nearby".format(len(pokes_nearby)))
+        if len(pokes_nearby) < 1:
+            continue
 
-        x = float(x / len(group))
-        y = float(y / len(group))
-        z = float(z / len(group))
+        # sort so we get expiration times in ascending order, hence
+        # check all copies of the newly appeared pokes
+        pokes_nearby = sorted(
+            pokes_nearby, 
+            key=lambda poke: poke.get_expiration_time()
+        )
 
-        center_lat = 180 * atan2(z, sqrt(x * x + y * y)) / pi
-        center_lon = 180 * atan2(y, x) / pi
+        for user in group:
+            curr = set() # don't want duplicates
+            for poke in pokes_nearby:
+                if user.should_be_alerted(poke):
+                    curr.add(( # tuple order matters here
+                        poke.get_id(), 
+                        poke.get_lat(), 
+                        poke.get_lon(),
+                        poke.get_expiration_time()
+                    ))
+                    # TODO only need to set this once per unique poke, ie if
+                    # have 100 same poke, only need to set to the last poke's
+                    # time because we've sorted the list
+                    user.set_last_notif_for_poke(poke)
 
-        step_count = int(self._group_scan_dist / self._step_size)
+            if len(curr) > 0:
+                # sort so that multiple tuples with the same elements (but
+                # potentially in different order) still map to same key
+                curr = sorted(curr)
 
-        # TODO: increase radius based on number of members in group
-        return center_lat, center_lon, step_count
+                # convert poke tuples into poke objects
+                poke_list = []
+                for poke_args in curr:
+                    poke_list.append(Pokemon(*poke_args))
 
-    def get_pokemon_alerts (self):
-        # for each such location, get the nearby pokes, and filter out the
-        temp = {} # result to return
-        fut_list = []
-        logging.info("Have {} users...".format(len(PnuUserDataStore.list())))
-        logging.info("Processing {} groups...".format(len(self._groups)))
-        for group in self._groups:
-            if len(group) < 1:
-                logging.info("Something's wrong with the grouping code!")
-                continue
+                # convert back to tuple because dicts need immutable keys
+                poke_tuple = tuple(poke_list)
+                if poke_tuple in res:
+                    res[poke_tuple].append(user)
+                else:
+                    res[poke_tuple] = [user]
 
-            lat, lon, step_radius = self.get_cover(group)
-            pokes_nearby = self._pgo_api.get_nearby(lat, lon, step_radius)
-
-            logging.info("Found {} pokemon nearby".format(len(pokes_nearby)))
-            if len(pokes_nearby) < 1:
-                continue
-
-            # sort so we get expiration times in ascending order, hence
-            # check all copies of the newly appeared pokes
-            pokes_nearby = sorted(
-                pokes_nearby, 
-                key=lambda poke: poke.get_expiration_time()
-            )
-
-            for user in group:
-                curr = set() # don't want duplicates
-                for poke in pokes_nearby:
-                    if user.should_be_alerted(poke):
-                        curr.add(( # tuple order matters here
-                            poke.get_id(), 
-                            poke.get_lat(), 
-                            poke.get_lon(),
-                            poke.get_expiration_time()
-                        ))
-                        # TODO only need to set this once per unique poke, ie if
-                        # have 100 same poke, only need to set to the last poke's
-                        # time because we've sorted the list
-                        user.set_last_notif_for_poke(poke)
-
-                if len(curr) > 0:
-                    # sort so that multiple tuples with the same elements (but
-                    # potentially in different order) still map to same key
-                    curr = sorted(curr)
-
-                    # convert poke tuples into poke objects
-                    poke_list = []
-                    for poke_args in curr:
-                        poke_list.append(Pokemon(*poke_args))
-
-                    # convert back to tuple because dicts need immutable keys
-                    poke_tuple = tuple(poke_list)
-                    if poke_tuple in temp:
-                        temp[poke_tuple].append(user)
-                    else:
-                        temp[poke_tuple] = [user]
-
-        res = []
-        if len(temp) > 0:
-            logging.info("\n\n-------START--------\n\n")
-            for poke_tuple, user_list in temp.items():
+        alerts = []
+        if len(res) > 0:
+            for poke_tuple, user_list in res.items():
                 logging.info("\n\nsending to users: {}".format(user_list))
                 for t in poke_tuple:
                     logging.info("{} ".format(t))
                 logging.info("\n\n")
-                res.append(Alert(poke_tuple, user_list))
-            logging.info("\n\n-------END--------\n\n")
+                alerts.append(Alert(poke_tuple, user_list))
 
-        return res
+        self._dispatcher.dispatch(alerts)
+
+    def process_queue (self):
+        while True:
+            # blocks until there is something
+            (loc, group) = self._queue.get()
+            pokes_nearby = self._pgo_api.get_nearby(loc)
+
+            if not self.seen_before(loc):
+                logging.info("shouldn't enqueue unseen locations!")
+                continue
+
+            if len(pokes_nearby) > 0 :
+                self._spawn_locations[loc]["spawn_count"] += 1
+            else:
+                self._spawn_locations[loc]["spawn_count"] -= 1
+
+            self.send_alerts(group, pokes_nearby)
+
+    def update (self):
+        now = time.time()
+        if (now - self._last_sync >= self._sync_group_data_interval):
+            self.sync_data_from_store()
+            self._last_sync = now
+
+        if (now - self._last_full_scan >= self._full_scan_interval):
+            full_scan = True
+            self._full_scan_interval = now
+        elif (now - self._last_scan >= self._scan_interval):
+            full_scan = False
+            self._scan_interval = now
+
+        self._scanner.scan(self._groups, full_scan)
