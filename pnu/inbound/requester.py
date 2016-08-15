@@ -137,8 +137,8 @@ class PnuRequest:
                 loc = private_config['location']
 
                 # user is within our ranges, so we continue
-                if ((loc['min_lat'] < lat < loc['max_lat']) and
-                   (loc['min_lon'] < lon < loc['max_lon'])):
+                if ((loc['min_lat'] < float(lat) < loc['max_lat']) and
+                   (loc['min_lon'] < float(lon) < loc['max_lon'])):
                     logging.info("User is within location restrictions")
                     user['location'] = {
                         "lat": lat,
