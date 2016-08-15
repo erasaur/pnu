@@ -1,18 +1,13 @@
 from google.protobuf.internal import encoder
-from pgoapi import PGoApi
-from pgoapi import exceptions
+from pgoapi import PGoApi, exceptions
 from pgoapi import utilities as util
 from s2sphere import Cell, CellId, LatLng
 
+from pnu.apis import PnuPokeHelpers
 from pnu.config import pub_config, private_config
 from pnu.models import Pokemon
 
-
-import math
-import random
-import sys
-import time
-import threading
+import math, random, sys, time, threading
 from threading import Thread, Lock
 from queue import Queue
 
@@ -22,7 +17,7 @@ logging = logging.getLogger(__name__)
 
 class PgoAPI ():
 
-    def __init__(self):
+    def __init__ (self):
         self._changed = False
         self._queue = Queue()
         self._user_queue = Queue()
@@ -38,10 +33,9 @@ class PgoAPI ():
         else:
             raise ValueError("un-supported system")
 
-        self._min_time_need_reauth = pub_config["poke_api"]["min_time_need_reauth_sec"]
-        self._min_queue_size = pub_config["poke_api"]["min_queue_size"]
-        self._request_throttle = pub_config["poke_api"]["request_throttle"]
-        self._earth_radius = pub_config["poke_api"]["earth_radius_km"]
+        self._min_sec_before_reauth = pub_config["poke_api"]["min_sec_before_reauth"]
+        self._min_queue_size_before_rescan = pub_config["poke_api"]["min_queue_size_before_rescan"]
+        self._scan_throttle_sec = pub_config["poke_api"]["scan_throttle_sec"]
         self._max_tries = pub_config["poke_api"]["max_tries_per_request"]
         self._recovery_time = pub_config["poke_api"]["sleep_after_max_tries"]
         self._sleep_time = pub_config["poke_api"]["sleep_per_request"]
@@ -58,12 +52,12 @@ class PgoAPI ():
 
         self.start_threads(10)
 
-    def encode(self, cellid):
+    def encode (self, cellid):
         output = []
         encoder._VarintEncoder()(output.append, cellid)
         return ''.join(output)
 
-    def start_threads(self, num):
+    def start_threads (self, num):
         for i in range(num):
             t = Thread(target=self.search_thread, name='search_thread-{}'
                        .format(i))
@@ -71,7 +65,7 @@ class PgoAPI ():
             t.start()
             self._threads.append(t)
 
-    def send_map_request(self, user, position):
+    def send_map_request (self, user, position):
         try:
             cell_ids = util.get_cell_ids(position[0], position[1])
             user._last_call = time.time()
@@ -87,7 +81,7 @@ class PgoAPI ():
                          .format(e))
             return False
 
-    def parse_map(self, map_dict, step, step_location):
+    def parse_map (self, map_dict, step, step_location):
         if map_dict["responses"]["GET_MAP_OBJECTS"]["status"] != 1:
             return
 
@@ -105,7 +99,7 @@ class PgoAPI ():
                     "expiration_time": expiration_time
                 }))
 
-    def search_thread(self):
+    def search_thread (self):
         queue = self._queue
         user_queue = self._user_queue
         threadname = threading.currentThread().getName()
@@ -117,10 +111,10 @@ class PgoAPI ():
 
             if user._auth_provider._ticket_expire:
                 remaining_time = user._auth_provider._ticket_expire/1000.0-now
-                if remaining_time < self._min_time_need_reauth:
+                if remaining_time < (self._min_sec_before_reauth * 1000):
                     self.auth(user)
 
-            if now - user._last_call < self._request_throttle:
+            if now - user._last_call < (self._scan_throttle_sec * 1000):
                 logging.info("Not ready to search yet")
                 user_queue.put(user)
                 time.sleep(self._sleep_time)
@@ -165,7 +159,7 @@ class PgoAPI ():
             queue.task_done()
             user_queue.put(user)
 
-    def auth(self, user):
+    def auth (self, user):
         user_data = user._data
         auth_service = user_data["auth_service"]
         username = user_data["username"]
@@ -179,29 +173,6 @@ class PgoAPI ():
 
         user.set_authentication(provider=auth_service, username=username,
                                 password=password)
-
-    def get_new_coords(self, init_loc, distance, bearing):
-        """ Given an initial lat/lng, a distance(in kms),
-        and a bearing (degrees), this will calculate the resulting lat/lng
-        coordinates.
-        """
-        R = self._earth_radius
-        bearing = math.radians(bearing)
-
-        init_coords = [math.radians(init_loc[0]),
-                       math.radians(init_loc[1])]  # convert lat/lng to radians
-
-        new_lat = math.asin(math.sin(init_coords[0]) * math.cos(distance/R) +
-                            math.cos(init_coords[0]) * math.sin(distance/R) *
-                            math.cos(bearing))
-
-        new_lon = (init_coords[1] +
-                   math.atan2(math.sin(bearing) * math.sin(distance/R) *
-                              math.cos(init_coords[0]),
-                              math.cos(distance/R) - math.sin(init_coords[0]) *
-                              math.sin(new_lat)))
-
-        return [math.degrees(new_lat), math.degrees(new_lon)]
 
     def generate_location_steps (self, initial_loc, step_count):
         #Bearing (degrees)
@@ -220,35 +191,35 @@ class PgoAPI ():
         loc = initial_loc
         while ring < step_count:
             #Set loc to start at top left
-            loc = self.get_new_coords(loc, ydist, NORTH)
-            loc = self.get_new_coords(loc, xdist/2, WEST)
+            loc = get_coor_in_dir(loc, ydist, NORTH)
+            loc = get_coor_in_dir(loc, xdist/2, WEST)
             for direction in range(6):
                 for i in range(ring):
                     if direction == 0: # RIGHT
-                        loc = self.get_new_coords(loc, xdist, EAST)
+                        loc = get_coor_in_dir(loc, xdist, EAST)
                     if direction == 1: # DOWN + RIGHT
-                        loc = self.get_new_coords(loc, ydist, SOUTH)
-                        loc = self.get_new_coords(loc, xdist/2, EAST)
+                        loc = get_coor_in_dir(loc, ydist, SOUTH)
+                        loc = get_coor_in_dir(loc, xdist/2, EAST)
                     if direction == 2: # DOWN + LEFT
-                        loc = self.get_new_coords(loc, ydist, SOUTH)
-                        loc = self.get_new_coords(loc, xdist/2, WEST)
+                        loc = get_coor_in_dir(loc, ydist, SOUTH)
+                        loc = get_coor_in_dir(loc, xdist/2, WEST)
                     if direction == 3: # LEFT
-                        loc = self.get_new_coords(loc, xdist, WEST)
+                        loc = get_coor_in_dir(loc, xdist, WEST)
                     if direction == 4: # UP + LEFT
-                        loc = self.get_new_coords(loc, ydist, NORTH)
-                        loc = self.get_new_coords(loc, xdist/2, WEST)
+                        loc = get_coor_in_dir(loc, ydist, NORTH)
+                        loc = get_coor_in_dir(loc, xdist/2, WEST)
                     if direction == 5: # UP + RIGHT
-                        loc = self.get_new_coords(loc, ydist, NORTH)
-                        loc = self.get_new_coords(loc, xdist/2, EAST)
+                        loc = get_coor_in_dir(loc, ydist, NORTH)
+                        loc = get_coor_in_dir(loc, xdist/2, EAST)
                     yield (loc[0], loc[1], 0)
             ring += 1
 
-    def get_nearby(self, lat, lon, num_steps):
+    def get_nearby (self, lat, lon, num_steps):
         queue_size = self._queue.qsize()
         user_queue_size = self._user_queue.qsize()
         logging.info("Task queue size: {}".format(queue_size) +
                      " User queue size: {}".format(user_queue_size))
-        if queue_size <= self._min_queue_size:
+        if queue_size <= self._min_queue_size_before_rescan:
             # finished previous load, time for more
             logging.info("Starting new search...")
             lock = Lock()
