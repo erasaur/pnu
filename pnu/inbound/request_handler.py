@@ -49,7 +49,7 @@ class PnuRequestHandler (PnuRunnable):
 
                 # sends correct status message based on status field
                 if status == constants.STOP:
-                    self._poke_api.delete(phone_number)
+                    self._poke_api.delete_user(phone_number)
                     PnuUserDataStore.delete(phone_number)
                 # resume or pause status
                 else:
