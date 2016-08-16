@@ -149,7 +149,7 @@ class PnuPokeApi (PnuRunnable):
         for user in group:
             curr = set() # don't want duplicates
             for poke in pokes_nearby:
-                if (poke.get_expiration_time() - now) <= self._min_expiration_for_alert:
+                if (poke.get_expiration_time() - now) <= self._min_expiration_sec_for_alert:
                     # discarding the poke, it's too old
                     continue
 
