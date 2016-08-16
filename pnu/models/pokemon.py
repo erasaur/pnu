@@ -51,4 +51,6 @@ class Pokemon (Base):
         return self.expiration_time
 
     def __str__ (self):
-        return "{}".format(self.get_name())
+        return "Id: {}\nName: {}\nLat: {}\nLon: {}\nExpiration: {}".format(
+            self.get_id(), self.get_name(), self.get_lat(),
+            self.get_lon(), self.get_expiration_time())
