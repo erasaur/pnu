@@ -36,8 +36,8 @@
     },
 
     "scan_filter": {
-        "update_interval_sec": 1800,
-        "sync_to_file_interval_sec": 1800,
+        "update_interval_sec": 60,
+        "sync_to_file_interval_sec": 500,
         "spawn_count_threshold": 5,
         "group_scan_radius_km": 1.5,
         "sync_file": "./pnu/etc/spawns.json"
@@ -58,10 +58,11 @@
     },
 
     "poke_api": {
-        "update_interval_sec": 30,
+        "update_interval_sec": 15,
         "scan_interval_sec": 60,
-        "full_scan_interval_sec": 900,
-        "sync_from_store_interval_sec": 1800
+        "full_scan_interval_sec": 500,
+        "sync_from_store_interval_sec": 800,
+        "min_queue_size_before_rescan": 20
     },
 
     "geo": {
