@@ -1,7 +1,8 @@
 import time, json
 
+from math import sqrt, cos, radians
 from pnu.core.runnable import PnuRunnable
-from pnu.apis.geo import close_enough, get_coor_in_dir
+from pnu.apis.geo import close_enough, get_coor_in_dir, get_center_of_group
 from pnu.config import pub_config
 
 import logging
@@ -21,6 +22,9 @@ class PnuScanFilter (PnuRunnable):
 
         # minimal count to be considered for regular spawn
         self._spawn_count_threshold = pub_config["scan_filter"]["spawn_count_threshold"]
+
+        # delay between scans for the same location
+        self._spawn_interval = pub_config["poke_api"]["scan_interval_sec"]
 
         # how far to scan per group
         self._group_scan_radius = pub_config["scan_filter"]["group_scan_radius_km"]
@@ -62,22 +66,24 @@ class PnuScanFilter (PnuRunnable):
         logging.info("Done syncing locations")
 
     def update_data (self, loc, pokes):
-        if loc not in self._spawn_locations:
+        if not self.seen_before(loc):
             logging.info("trying to update filter data with invalid data")
             return
+        spawn_loc, spawn_data = self.get_spawn_location(loc)
         if len(pokes) > 0:
-            self._spawn_locations[loc] += 1
+            spawn_data["spawn_count"] += 1
         else:
-            self._spawn_locations[loc] -= 1
+            spawn_data["spawn_count"] -= 1
 
     def get_corners (self, group):
         NORTH = 0
         EAST = 90
         SOUTH = 180
         WEST = 270
-        
+
+        loc = get_center_of_group(group)
         radius = self._group_scan_radius
-        xdist = ydist = sqrt(2)/2 * radius
+        xdist = ydist = sqrt(2)/2 * (radius/2)
 
         bot_left = get_coor_in_dir(loc, ydist, SOUTH)
         bot_left = get_coor_in_dir(bot_left, xdist, WEST)
@@ -89,15 +95,15 @@ class PnuScanFilter (PnuRunnable):
 
     def get_locations (self, group):
         locations = []
-        bot_left, top_right = self.get_corners(group)
+        rect = self.get_corners(group)
         dlat = 0.00089
-        dlng = dlat / math.cos(math.radians((bot_left[0]+top_right[2])*0.5))
-        startLat = min(bot_left[0], top_right[2])+(0.624*dlat)
-        startLng = min(bot_left[1], top_right[3])+(0.624*dlng)
-        latSteps = int((((max(bot_left[0], top_right[2])-min(bot_left[0], top_right[2])))/dlat)+0.75199999)
+        dlng = dlat / cos(radians((rect[0]+rect[2])*0.5))
+        startLat = min(rect[0], rect[2])+(0.624*dlat)
+        startLng = min(rect[1], rect[3])+(0.624*dlng)
+        latSteps = int((((max(rect[0], rect[2])-min(rect[0], rect[2])))/dlat)+0.75199999)
         if latSteps<1:
             latSteps=1
-        lngSteps = int((((max(bot_left[1], top_right[3])-min(bot_left[1], top_right[3])))/dlng)+0.75199999)
+        lngSteps = int((((max(rect[1], rect[3])-min(rect[1], rect[3])))/dlng)+0.75199999)
         if lngSteps<1:
             lngSteps=1
         for i in range(latSteps):
@@ -105,14 +111,18 @@ class PnuScanFilter (PnuRunnable):
                 locations.append((startLat+(dlat*i), startLng+(dlng*j)))
         return locations
 
-    def seen_before (self, loc, spawn_locations):
-        for spawn_loc in spawn_locations:
-            if not close_enough(loc, spawn_loc):
-                return False
-        return True
+    def seen_before (self, loc):
+        return self.get_spawn_location(loc) is not None
+
+    def get_spawn_location (self, loc):
+        for spawn_loc, spawn_data in self._spawn_locations.items():
+            if close_enough(loc, spawn_loc):
+                return spawn_loc, spawn_data
+        return None
 
     def queue_locations (self, groups, full_scan=False):
         logging.info("Queueing locations to scan...")
+        logging.info("Is full scan? {}".format(full_scan))
 
         now = time.time()
         total_queued = 0
@@ -123,14 +133,14 @@ class PnuScanFilter (PnuRunnable):
                 # if we've seen this location before, and we've waited enough:
                 # if doing a full scan, scan regardless of spawn count
                 # otherwise, scan again only if spawn count is high enough
-                if self.seen_before(loc, self._spawn_locations):
-                    loc_data = self._spawn_locations[loc]
-                    if (now - loc_data["last_scan"]) < self._spawn_interval:
+                if self.seen_before(loc):
+                    spawn_loc, spawn_data = self.get_spawn_location(loc)
+                    if (now - spawn_data["last_scan"]) < self._spawn_interval:
                         # haven't waited long enough yet
                         continue
 
-                    if full_scan or (loc_data["spawn_count"] >= self._spawn_count_threshold):
-                        loc_data["last_scan"] = now
+                    if full_scan or (spawn_data["spawn_count"] >= self._spawn_count_threshold):
+                        spawn_data["last_scan"] = now
                         self._scan_queue.put((loc, group))
                         total_queued += 1
 
