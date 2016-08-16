@@ -1,7 +1,7 @@
-from pnu.apis.poke_api import PnuPokeApi
+from pnu.apis import PnuPokeApi
 
 
 class PnuPokeApiMock(PnuPokeApi):
 
-    def update_data_from_store(self):
+    def sync_data_from_store(self):
         pass

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3.5
 import unittest
 
-from pnu.apis.poke_api import PnuPokeApi
+from pnu.apis import PnuPokeApi
 from tests.mock import PnuPokeApiMock
 from pnu.models import User
 

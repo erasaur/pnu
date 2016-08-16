@@ -1,4 +1,4 @@
-from pnu.apis.google_url_api import PnuUrlShortener
+from pnu.apis import PnuUrlShortener
 
 import logging
 logging = logging.getLogger(__name__)

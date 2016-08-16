@@ -1,6 +1,5 @@
-from pnu.models.base import Base
+from pnu.models import Base
 from pnu.etc.constants import POKEMON_ID_TO_NAME
-
 
 class Pokemon (Base):
     def load_args (self, pokemonId, lat, lon, expiration_time):
@@ -52,4 +51,6 @@ class Pokemon (Base):
         return self.expiration_time
 
     def __str__ (self):
-        return "{}".format(self.get_name())
+        return "Id: {}\nName: {}\nLat: {}\nLon: {}\nExpiration: {}".format(
+            self.get_id(), self.get_name(), self.get_lat(),
+            self.get_lon(), self.get_expiration_time())
