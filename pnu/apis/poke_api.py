@@ -34,6 +34,8 @@ class PnuPokeApi (PnuRunnable):
         self._last_full_scan = 0
         self._full_scan_interval = pub_config["poke_api"]["full_scan_interval_sec"]
 
+        self._min_queue_size = pub_config["poke_api"]["min_queue_size_before_rescan"]
+
         # users grouped by location
         self._groups = []
 
@@ -183,6 +185,7 @@ class PnuPokeApi (PnuRunnable):
                 logging.info("\n\n")
                 alerts.append(Alert(poke_tuple, user_list))
 
+        logging.info("Dispatching {} alerts".format(len(alerts)))
         self._dispatcher.dispatch(alerts)
 
     def process_dispatch_queue (self):
@@ -190,6 +193,8 @@ class PnuPokeApi (PnuRunnable):
             # blocks until there is something
             loc, group, pokes_nearby = self._dispatch_queue.get()
             self._scan_filter.update_data(loc, pokes_nearby)
+            for poke in pokes_nearby:
+                print("{}".format(poke))
             self.send_alerts(group, pokes_nearby)
             self._dispatch_queue.task_done()
 
@@ -200,11 +205,23 @@ class PnuPokeApi (PnuRunnable):
         if (now - self._last_sync >= self._sync_from_store_interval):
             self.sync_from_store()
 
-        if (now - self._last_full_scan >= self._full_scan_interval):
-            full_scan = True
-            self._full_scan_interval = now
-        elif (now - self._last_scan >= self._scan_interval):
-            full_scan = False
-            self._scan_interval = now
+        scan_queue_size = self._scan_queue.qsize()
+        dispatch_queue_size = self._dispatch_queue.qsize()
 
-        self._scan_filter.queue_locations(self._groups, full_scan)
+        logging.info("Scan queue size: {}".format(scan_queue_size))
+        logging.info("Dispatch queue size: {}".format(dispatch_queue_size))
+
+        if scan_queue_size <= self._min_queue_size:
+            logging.info("Looks like we should try to rescan now, less than {} in queue".format(self._min_queue_size))
+
+            if (now - self._last_full_scan >= self._full_scan_interval):
+                logging.info("Scheduling a full scan...")
+                full_scan = True
+                self._full_scan_interval = now
+            elif (now - self._last_scan >= self._scan_interval):
+                logging.info("Scheduling a regular scan...")
+                self._scan_interval = now
+            else:
+                logging.info("Not time to scan yet...")
+
+            self._scan_filter.queue_locations(self._groups, full_scan)
