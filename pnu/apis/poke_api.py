@@ -35,6 +35,7 @@ class PnuPokeApi (PnuRunnable):
         self._full_scan_interval = pub_config["poke_api"]["full_scan_interval_sec"]
 
         self._min_queue_size = pub_config["poke_api"]["min_queue_size_before_rescan"]
+        self._min_expiration_sec_for_alert = pub_config["poke_api"]["min_expiration_sec_for_alert"]
 
         # users grouped by location
         self._groups = []
@@ -130,6 +131,7 @@ class PnuPokeApi (PnuRunnable):
 
     def send_alerts (self, group, pokes_nearby):
         res = {} # mapping of lists of pokemon to lists of users
+        now = time.time()
 
         # if multiple users are going to be alerted of the same set of pokemon,
         # group those users together so we can notify them all at once
@@ -147,6 +149,10 @@ class PnuPokeApi (PnuRunnable):
         for user in group:
             curr = set() # don't want duplicates
             for poke in pokes_nearby:
+                if (poke.get_expiration_time() - now) <= self._min_expiration_for_alert:
+                    # discarding the poke, it's too old
+                    continue
+
                 if user.should_be_alerted(poke):
                     curr.add(( # tuple order matters here
                         poke.get_id(), 

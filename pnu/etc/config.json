@@ -62,7 +62,8 @@
         "scan_interval_sec": 60,
         "full_scan_interval_sec": 500,
         "sync_from_store_interval_sec": 800,
-        "min_queue_size_before_rescan": 20
+        "min_queue_size_before_rescan": 20,
+        "min_expiration_sec_for_alert": 45
     },
 
     "geo": {
