@@ -1,4 +1,5 @@
-from math import cos, sin, atan2, sqrt, radians, pi
+from math import cos, sin, asin, atan2, sqrt, radians, degrees, pi
+from pnu.models import Base
 from pnu.config import pub_config
 
 earth_radius = pub_config["geo"]["earth_radius_km"]
@@ -6,16 +7,21 @@ earth_radius = pub_config["geo"]["earth_radius_km"]
 # how close locations have to be in order to be grouped together
 group_member_dist = pub_config["geo"]["group_member_dist_km"]
 
-def pos_changed (self, user_a, user_b):
+def pos_changed (user_a, user_b):
     if user_a is None or user_b is None:
         raise ValueError("invalid users")
-    return (user_a.is_active() != user_b.is_active()) or (self.distance(user_a, user_b) > 0)
+    return (user_a.is_active() != user_b.is_active()) or (distance(user_a, user_b) > 0)
 
-def distance (self, user_a, user_b):
-    lat1 = radians(float(user_a.get_lat()))
-    lon1 = radians(float(user_a.get_lon()))
-    lat2 = radians(float(user_b.get_lat()))
-    lon2 = radians(float(user_b.get_lon()))
+def distance (loc_a, loc_b):
+    if isinstance(loc_a, Base):
+        loc_a = (loc_a.get_lat(), loc_a.get_lon())
+    if isinstance(loc_b, Base):
+        loc_b = (loc_b.get_lat(), loc_b.get_lon())
+
+    lat1 = radians(float(loc_a[0]))
+    lon1 = radians(float(loc_a[1]))
+    lat2 = radians(float(loc_b[0]))
+    lon2 = radians(float(loc_b[1]))
 
     dlon = lon2 - lon1
     dlat = lat2 - lat1
@@ -25,10 +31,10 @@ def distance (self, user_a, user_b):
 
     return earth_radius * c
 
-def close_enough (self, user_a, user_b):
-    return self.distance(user_a, user_b) < group_member_dist
+def close_enough (loc_a, loc_b):
+    return distance(loc_a, loc_b) < group_member_dist
 
-def get_center_of_group (self, group):
+def get_center_of_group (group):
     x = 0
     y = 0
     z = 0
@@ -49,25 +55,25 @@ def get_center_of_group (self, group):
 
     return center_lat, center_lon
 
-def get_coor_in_dir (self, init_loc, distance, bearing):
+def get_coor_in_dir (init_loc, distance, bearing):
     """ Given an initial lat/lng, a distance(in kms),
     and a bearing (degrees), this will calculate the resulting lat/lng
     coordinates.
     """
-    R = self._earth_radius
-    bearing = math.radians(bearing)
+    R = earth_radius
+    bearing = radians(bearing)
 
-    init_coords = [math.radians(init_loc[0]),
-                   math.radians(init_loc[1])]  # convert lat/lng to radians
+    init_coords = [radians(init_loc[0]),
+                   radians(init_loc[1])]  # convert lat/lng to radians
 
-    new_lat = math.asin(math.sin(init_coords[0]) * math.cos(distance/R) +
-                        math.cos(init_coords[0]) * math.sin(distance/R) *
-                        math.cos(bearing))
+    new_lat = asin(sin(init_coords[0]) * cos(distance/R) +
+                        cos(init_coords[0]) * sin(distance/R) *
+                        cos(bearing))
 
     new_lon = (init_coords[1] +
-               math.atan2(math.sin(bearing) * math.sin(distance/R) *
-                          math.cos(init_coords[0]),
-                          math.cos(distance/R) - math.sin(init_coords[0]) *
-                          math.sin(new_lat)))
+               atan2(sin(bearing) * sin(distance/R) *
+                          cos(init_coords[0]),
+                          cos(distance/R) - sin(init_coords[0]) *
+                          sin(new_lat)))
 
-    return [math.degrees(new_lat), math.degrees(new_lon)]
+    return [degrees(new_lat), degrees(new_lon)]
