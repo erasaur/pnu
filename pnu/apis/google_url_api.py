@@ -2,11 +2,13 @@
 
 import json
 import requests
+import time
+
+from pnu.config import private_config
 
 import logging
 logging = logging.getLogger(__name__)
 
-from pnu.config import private_config
 
 class ShortenURL:
 
@@ -24,20 +26,22 @@ class ShortenURL:
 
         logging.info("Requesting shortened URL for: {}".format(link))
 
-        for i in range(3):
+        for i in range(5):
             resp = requests.post(cls.POST_TO_URL, data=json.dumps(payload),
-                    headers=cls.HEADERS)
+                                 headers=cls.HEADERS)
             if resp.status_code == 200:
                 # in case this is the 3rd try, we don't want to trip our
                 # exception below
                 i = 0
                 break
             else:
-                logging.warning("Google URL API status code is {}. Trying again...".format(resp.status_code))
+                time.sleep(3)
+                logging.warning("Google URL API status code is {}. Trying " +
+                                "again...".format(resp.status_code))
 
-        if i == 2:
+        if i == 4:
             logging.error("Could not connect to Google URL API")
-            raise ConnectionError("Could not connect to Google URL API")
+            return link
 
         logging.info("Got shortened URL: {}".format(resp.json()))
 
