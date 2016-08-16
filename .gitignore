@@ -5,6 +5,7 @@ Current Location.loc.vcf
 __pycache__/
 private/
 **/etc/logs/
+scripts/dev/**
 db/
 .notes/
 
