@@ -38,10 +38,10 @@ class PnuScanner ():
         else:
             raise ValueError("un-supported system")
 
-        self._min_ms_before_reauth = pub_config["scanner"]["min_sec_before_reauth"] * 1000
+        self._min_sec_before_reauth = pub_config["scanner"]["min_sec_before_reauth"]
         self._max_tries = pub_config["scanner"]["max_tries_per_request"]
-        self._sleep_ms = pub_config["scanner"]["sleep_per_try_sec"] * 1000
-        self._scan_throttle_ms = pub_config["scanner"]["scan_throttle_sec"] * 1000
+        self._sleep_sec = pub_config["scanner"]["sleep_per_try_sec"]
+        self._scan_throttle_sec = pub_config["scanner"]["scan_throttle_sec"]
         self._delay_between_login_sec = pub_config["scanner"]["delay_between_login_sec"]
         users = private_config["poke_api"]["accounts"]
 
@@ -98,10 +98,12 @@ class PnuScanner ():
                 # handle expiration time overflow
                 if (0 < p['time_till_hidden_ms'] < (60 * 60 * 1000)):
                     # we're within the hour range
-                    expiration_time = p['last_modified_timestamp_ms'] + p['time_till_hidden_ms']
+                    expiration_time = (p['last_modified_timestamp_ms'] +
+                    p['time_till_hidden_ms']) / 1000.0
                 else:
                     # assume 15 minutes since it's clearly larger than that
-                    expiration_time = p['last_modified_timestamp_ms'] + (15 * 60 * 1000)
+                    expiration_time = (p['last_modified_timestamp_ms'] + (15 *
+                        60 * 1000)) / 1000.0
 
                 pokemon_id = p["pokemon_data"]["pokemon_id"]
                 res.append(Pokemon({
@@ -112,8 +114,8 @@ class PnuScanner ():
                 }))
         return res
 
-    def remaining_time (self, start_ms, interval_ms):
-        return max(time.time() * 1000 - (start_ms + interval_ms), 0)
+    def remaining_time (self, start_sec, interval_sec):
+        return max(start_sec + interval_sec - time.time(), 0)
 
     def search_thread (self):
         queue = self._scan_queue
@@ -124,36 +126,37 @@ class PnuScanner ():
         while True:
             # get next available user (this blocks till there is one)
             user = user_queue.get()
-            start = time.time() * 1000
+            start = time.time()
 
             if user._auth_provider._ticket_expire:
-                remaining_time = user._auth_provider._ticket_expire - start
-                if remaining_time < self._min_ms_before_reauth:
+                remaining_time = user._auth_provider._ticket_expire / 1000 - start
+                if remaining_time < self._min_sec_before_reauth:
                     self.auth(user)
 
-            if start - user._last_call < self._scan_throttle_ms:
-                logging.info("Not ready to search yet")
+            if start - user._last_call < self._scan_throttle_sec:
+                logging.info("Not quite ready to search with this user yet")
                 user_queue.put(user)
-                time.sleep(self.remaining_time(start, self._sleep_ms))
+                time.sleep(self.remaining_time(start, self._sleep_sec))
                 continue
 
             # get next task (this blocks till there is one)
             loc, group = self._scan_queue.get()
-            user.set_position(*loc)
+            user.set_position(loc[0], loc[1], 8)
             failed_consecutive = 0
 
             while True:
                 if failed_consecutive >= self._max_tries:
-                    logging.info("tried too many times to parse map, giving up")
+                    logging.info("Tried too many times to search location {}, giving up".format(loc))
                     queue.task_done()
                     break
 
+                logging.info("Searching for location: {}".format(loc))
                 user.activate_signature(self._signature_lib_path)
                 response_dict = self.send_map_request(user, loc)
 
                 if not response_dict:
-                    logging.info("got no results when querying, retrying soon")
-                    time.sleep(self.remaining_time(start, self._sleep_ms))
+                    logging.info("Got no results when searching location {}, retrying soon".format(loc))
+                    time.sleep(self.remaining_time(start, self._sleep_sec))
                     failed_consecutive = 0
                     continue
 
@@ -165,14 +168,15 @@ class PnuScanner ():
                         queue.task_done()
                         break
                     except Exception as e:
-                        logging.info("failed parsing map on thread {} with error: {}".format(threadname, e))
+                        logging.info("Failed parsing map on thread {} with error: {}".format(threadname, e))
                         failed_consecutive += 1
                         am_tired = True
                         # don't sleep here while holding onto the lock!
 
                 if am_tired:
-                    time.sleep(self.remaining_time(start, self._sleep_ms))
+                    time.sleep(self.remaining_time(start, self._sleep_sec))
 
+            time.sleep(self.remaining_time(start, self._scan_throttle_sec))
             user_queue.put(user)
 
     def auth (self, user):
