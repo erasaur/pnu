@@ -1,3 +1,4 @@
+from random import random
 from math import cos, sin, asin, atan2, sqrt, radians, degrees, pi
 from pnu.models import Base
 from pnu.config import pub_config
@@ -11,6 +12,16 @@ def pos_changed (user_a, user_b):
     if user_a is None or user_b is None:
         raise ValueError("invalid users")
     return (user_a.is_enrolled() != user_b.is_enrolled()) or (distance(user_a, user_b) > 0)
+
+def random_alt ():
+    return random() * 0.3 + 5
+
+def random_coor_in_boundary (lat_a, lon_a, lat_b, lon_b):
+    min_lat = min(lat_a, lat_b)
+    min_lon = min(lon_a, lon_b)
+    lat_offset = random() * abs(lat_a - lat_b)
+    lon_offset = random() * abs(lon_a - lon_b)
+    return min_lat + lat_offset, min_lon + lon_offset, random_alt()
 
 def distance (loc_a, loc_b):
     if isinstance(loc_a, Base):

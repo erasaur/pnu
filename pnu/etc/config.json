@@ -44,6 +44,7 @@
     },
 
     "scanner": {
+        "num_threads": 10,
         "min_sec_before_reauth": 60,
         "max_tries_per_request": 10,
         "sleep_per_try_sec": 20,

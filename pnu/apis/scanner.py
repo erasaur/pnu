@@ -5,6 +5,7 @@ from s2sphere import Cell, CellId, LatLng
 
 from pnu.config import pub_config, private_config
 from pnu.models import Pokemon
+from pnu.apis.geo import random_alt, random_coor_in_boundary
 
 import math, random, sys, time, threading
 from threading import Thread, Lock
@@ -38,11 +39,13 @@ class PnuScanner ():
         else:
             raise ValueError("un-supported system")
 
+        self._num_threads = pub_config["scanner"]["num_threads"]
         self._min_sec_before_reauth = pub_config["scanner"]["min_sec_before_reauth"]
         self._max_tries = pub_config["scanner"]["max_tries_per_request"]
         self._sleep_sec = pub_config["scanner"]["sleep_per_try_sec"]
         self._scan_throttle_sec = pub_config["scanner"]["scan_throttle_sec"]
         self._delay_between_login_sec = pub_config["scanner"]["delay_between_login_sec"]
+        self._boundary = private_config["location"]
         users = private_config["poke_api"]["accounts"]
 
         logging.info("Logging in users...")
@@ -57,8 +60,8 @@ class PnuScanner ():
             # stagger logins
             time.sleep(random.random() * self._delay_between_login_sec)
 
-        logging.info("Spinning up threads...")
-        self.start_threads(10)
+        logging.info("Spinning up {} threads...".format(self._num_threads))
+        self.start_threads(self._num_threads)
 
     def encode (self, cellid):
         output = []
@@ -141,7 +144,7 @@ class PnuScanner ():
 
             # get next task (this blocks till there is one)
             loc, group = self._scan_queue.get()
-            user.set_position(loc[0], loc[1], 8)
+            user.set_position(loc[0], loc[1], random_alt())
             failed_consecutive = 0
 
             while True:
@@ -187,9 +190,15 @@ class PnuScanner ():
 
         # for some reason, need to set position before we can login
         if None in user.get_position():
-            lat = float(user_data["latitude"])
-            lon = float(user_data["longitude"])
-            user.set_position(lat, lon, 8)
+            # generate random position within boundaries
+            lat, lon, alt = random_coor_in_boundary(
+                self._boundary["min_lat"],
+                self._boundary["min_lon"],
+                self._boundary["max_lat"],
+                self._boundary["max_lon"]
+            )
+            user.set_position(lat, lon, alt)
 
+        logging.info("Authenticating {} at location {}".format(username, user.get_position()))
         user.set_authentication(provider=auth_service, username=username,
                                 password=password)
