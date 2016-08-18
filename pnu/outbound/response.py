@@ -143,7 +143,7 @@ class BuildResponse:
 
         if self.errors['code'] == 'PNE':
             logging.info("Pokemon Not Existent error")
-            incorrect_pokemon = (', ').join(self.errors)
+            incorrect_pokemon = (', ').join(self.errors['data'])
             err = em.pne(incorrect_pokemon)
         elif self.errors['code'] == 'OOR':
             logging.info("User Out Of Range error")
