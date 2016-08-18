@@ -338,9 +338,6 @@ class PnuRequest:
                 self.get_inbox()
                 msgs = self.get_unread_messages()
                 users_from_msgs = self.parse_msgs(msgs)
-                logging.info("Successfully connected to IMAP inbox and " +
-                             "parsed messages after {} tries."
-                             .format(get_inbox_attempts))
                 return users_from_msgs
 
             except Exception as e:
