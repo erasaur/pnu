@@ -36,7 +36,7 @@ class PnuRequestHandler (PnuRunnable):
             # check if current user is already active
             old_user = User(PnuUserDataStore.get(phone_number))
             old_user_exists = not old_user.empty()
-            old_user_active = old_user_exists and old_user.is_active()
+            old_user_active = old_user_exists and old_user.is_enrolled()
 
             # check for status update on the inbound_user
             if status in constants.RESPONSE_STATUS_LIST:
@@ -58,6 +58,7 @@ class PnuRequestHandler (PnuRunnable):
                     if inbound_user.get_status() == constants.PAUSE:
                         PnuUserDataStore.update(phone_number, inbound_user)
                         user_to_notify = PnuUserDataStore.get(phone_number)
+                        self._poke_api.delete_user(phone_number)
                         logging.info("Pausing user based on PAUSE message")
 
                     # so we don't actually save the 'RESUME' status
@@ -68,6 +69,7 @@ class PnuRequestHandler (PnuRunnable):
                         PnuUserDataStore.update(phone_number, inbound_user)
                         user_to_notify = PnuUserDataStore.get(phone_number)
                         user_to_notify['status'] = constants.RESUME
+                        self._poke_api.update_data(User(user_to_notify), True)
                         logging.info("Bringing user into normal alert cycle " +
                                      "base on RESUME message")
 
@@ -90,7 +92,7 @@ class PnuRequestHandler (PnuRunnable):
                          .format(user.get_json()))
 
             # user still needs to fully enroll
-            if not user.is_active():
+            if not user.is_enrolled():
                 logging.info("User needs to send us more data")
                 PnuPendingDataStore.append(constants.ENROLL, user)
 

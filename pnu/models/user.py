@@ -1,3 +1,4 @@
+from pnu.etc import constants
 from pnu.models import Base
 import logging
 logging = logging.getLogger(__name__)
@@ -91,8 +92,11 @@ class User (Base):
         pw = self.get_pokemon_wanted()
         return isinstance(pw, list) and len(pw) > 0
 
-    def is_active(self):
+    def is_enrolled(self):
         return self.is_location_set() and self.is_pokemon_wanted_set()
+
+    def is_active(self):
+        return self.is_enrolled() and self.get_status() != constants.PAUSE
 
     def get_last_notif(self):
         return self.last_notif
@@ -119,8 +123,12 @@ class User (Base):
 
     def should_be_alerted(self, poke):
         # user should be alerted of pokemon if:
+        # - status is not paused
         # - the pokemon is one that the user wants
         # - it's a new appearance of the pokemon
+        if self.get_status() == constants.PAUSE:
+            return False
+
         expiration = poke.get_expiration_time()
         last_notif = self.get_last_notif_for_poke(poke)
         poke_id = poke.get_id()

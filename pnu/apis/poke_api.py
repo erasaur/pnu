@@ -82,7 +82,7 @@ class PnuPokeApi (PnuRunnable):
                         del self._groups[group_index]
                     return
 
-    def update_data (self, user, already_active):
+    def update_data (self, user, already_enrolled):
         group_index = 0
 
         # tracks whether or not we updated with our new value yet
@@ -90,7 +90,7 @@ class PnuPokeApi (PnuRunnable):
 
         # tracks whether or not we removed old value yet. if the user wasn't 
         # active before this function, no old one to delete, so default to true
-        deleted_old = not already_active 
+        deleted_old = not already_enrolled 
 
         for group in self._groups:
             index = 0

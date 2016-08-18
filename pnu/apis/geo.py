@@ -10,7 +10,7 @@ group_member_dist = pub_config["geo"]["group_member_dist_km"]
 def pos_changed (user_a, user_b):
     if user_a is None or user_b is None:
         raise ValueError("invalid users")
-    return (user_a.is_active() != user_b.is_active()) or (distance(user_a, user_b) > 0)
+    return (user_a.is_enrolled() != user_b.is_enrolled()) or (distance(user_a, user_b) > 0)
 
 def distance (loc_a, loc_b):
     if isinstance(loc_a, Base):
