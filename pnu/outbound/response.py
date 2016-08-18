@@ -27,7 +27,7 @@ class BuildResponse:
             # user in this case is a list of users' phone numbers
             self.to = alert.get_phone_numbers()
             self.pokemon_wanted = alert.get_pokemon_names()
-            self.link = alert.get_short_link()
+            self.link = alert.get_short_link().split('/')[3]
             # spoofed since we have a list of users we presume to be
             # already valid
             self.location = True
@@ -119,7 +119,7 @@ class BuildResponse:
         self.pokemon_wanted = self.poke_list_to_str()
         msg = MIMEText("There's a wild {pokemon} near you! Go catch 'em!\n"
                        .format(pokemon=self.pokemon_wanted) +
-                       "{link}\n".format(link=self.link))
+                       "pnu.space/sl/{link}\n".format(link=self.link))
 
         # if the message to send is over 160 characters, send it via the mms
         # gateway instead of sms. The minus 2 is for parenthesis that get added
