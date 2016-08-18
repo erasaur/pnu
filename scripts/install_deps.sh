@@ -8,7 +8,8 @@ MISSING_MSG="Missing dependency"
 DOWNLOAD_MSG="Download now? [y/n]"
 EXITING_MSG="${RED}Exiting${NC}"
 
-read -p "Are you running from root of project dir? [y/n]" -n 1 -r
+printf '%s ' 'Are you running from root of project dir? [y/n]'
+read ans
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   echo -e $EXITING_MSG
