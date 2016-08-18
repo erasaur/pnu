@@ -9,7 +9,7 @@ DOWNLOAD_MSG="Download now? [y/n]"
 EXITING_MSG="${RED}Exiting${NC}"
 
 printf '%s ' 'Are you running from root of project dir? [y/n]'
-read ans
+read REPLY
 echo
 if [[ ! $REPLY =~ ^[Yy]$ ]]; then
   echo -e $EXITING_MSG
