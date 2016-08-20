@@ -1,4 +1,8 @@
 import random
+import itertools
+from pnu.models import ErrorMsg
+
+
 
 
 class Message:
@@ -81,23 +85,13 @@ class EnrollMessage(Message):
 
     def __init__(self, to, subject):
         super().__init__(to, subject)
-        commands = self._permute_commands(0, "", self.COMMANDS.copy()))
-        self.MESSAGES.append(tuple(commands))
+        commands = itertools.permutations(self.COMMANDS)
+        com_list = []
+        for command in commands:
+            com_list.append(command)
 
-    def _permute_commands (depth, curr, commands):
-        result = []
-        if depth >= len(commands):
-            if curr != "":
-                result.append(curr)
-            return result
+        self.MESSAGES.append(com_list[random.randrange(0, len(com_list))])
 
-        for index, command in enumerate(commands)
-            if command != "":
-                commands[index] = ""
-                rest = self._permute_commands(depth+1, curr + command, commands)
-                result += rest
-                commands[index] = command
-        return result
 
 class ResumeMessage(Message):
     MESSAGES = [
@@ -117,49 +111,50 @@ class PauseMessage(Message):
         ("to ",),
         ("begin ","activate ","start ",),
         ("receiving ","getting ","allowing ","experiencing ",),
-        ("alerts ","notifications ","texts ","sms's ",),
+        ("alerts ","notifications ","texts ","sms's ","messages "),
     ]
 
 
 class StopMessage(Message):
     MESSAGES = [
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
+        ("Sorry to see you go! ",
+         "You will now be removed from alerts. ",
+         "Alerts will no longer be sent. ",
+         "You have been removed from receiving alerts. ",
+         "Thanks for being enrolled! "),
+        ("Best of luck ","Have fun ","Enjoy ","Have a good time ",),
+        ("catchin' ","finding ", "capturing ",),
+        ("all of 'em!","'em all!","all of them!","Pokemon!",),
     ]
 
 
 class NoPokemonMessage(Message):
     MESSAGES = [
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
+        ("There are no Pokemon ","No Pokemon are ","Pokemon are not ",),
+        ("associated ","listed ","paired ","assigned ",),
+        ("with your","","","",),
+        ("account. ","user. ","person. ",),
+        ("Reply ","Respond ","Text back ","Message us ",),
+        ("in the form of ","with ","","",),
+        ("\"Pokemon wanted: ",),
+        ("poke1, poke2, poke3...\" ","poke1, poke2...\" ",),
+        ("with ",),
+        ("up to ","as many as ", "",),
+        ("10 Pokemon.",),
     ]
 
 
 class NoLocationMessage(Message):
     MESSAGES = [
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
+        ("It does not look like there is a ","There is no ","No ",),
+        ("location ",),
+        ("associated ","listed ","paired ",),
+        ("with ","to ",),
+        ("your ",),
+        ("user. ","trainer. ","person. ","account. ",),
+        ("Please send ","Send ","Text ","Message","Please give ", "Give ",),
+        ("us your ",),
+        ("location","current location",),
     ]
 
 
@@ -179,30 +174,22 @@ class ReEnrollMessage(Message):
 
 class AlertMessage(Message):
     MESSAGES = [
-        ("Go catch a wild ","There's a ","A ","Go catch a ",""),
-        ("{pokemon}","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
+        ("Go catch a wild ",
+         "There's a ",
+         "A ",
+         "Go catch a ",
+         "Catch the "),
+        ("{pokemon} ",),
+        ("near you. ",
+         "in the area. ",
+         "close by. ",
+         "in the vicinity. ",
+         "by you.",),
+        ("{link}",),
     ]
 
 
 class ErrorMessage(Message):
-    MESSAGES = [
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-    ]
 
     def make_msg(self, **kwargs):
         logging.info("Error message being sent")
@@ -222,13 +209,5 @@ class ErrorMessage(Message):
 
 class ReceivedMessaged(Message):
     MESSAGES = [
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
+        ("We are currently tracking these Pokemon for you: {pokemon}",),
     ]
