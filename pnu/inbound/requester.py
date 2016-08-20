@@ -135,8 +135,8 @@ class PnuRequest:
             lat, lon = self.parse_lat_lon(msg)
             if (lat and lon):
                 loc = private_config['location']
-                print("{} < {} < {}".format(float(loc['min_lat'], float(lat), float(loc['max_lat']))))
-                print("{} < {} < {}".format(float(loc['min_lon'], float(lon), float(loc['max_lon']))))
+                print("{} < {} < {}".format(float(loc['min_lat']), float(lat), float(loc['max_lat'])))
+                print("{} < {} < {}".format(float(loc['min_lon']), float(lon), float(loc['max_lon'])))
 
                 # user is within our ranges, so we continue
                 if ((loc['min_lat'] < float(lat) < loc['max_lat']) and
