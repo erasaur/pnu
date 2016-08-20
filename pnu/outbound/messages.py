@@ -25,12 +25,12 @@ class Message:
         return final_msg.as_string()
 
     def _get_rand_msg(self, **kwargs):
-        msg = None
+        msg = ""
         # build message based on randomly selecting from each of the
         # message parts
-        for i in range(0, len(self.MESSAGES)):
-            pick = random.randrange(0, len(msg[i]))
-            msg += self.MESSAGES[i][pick].format(**kwargs)
+        for i, msg_list in enumerate(self.MESSAGES):
+            pick = random.randrange(0, len(msg_list))
+            msg += msg_list[pick].format(**kwargs)
         return msg
 
     def _sms_to_mms(self, msg):
@@ -69,52 +69,35 @@ class EnrollMessage(Message):
         ("", "with ",),
         ("up to ","up to a maximum of ",),
         ("10 Pokemon. ",),
-        ("Commands available ","A list of commands ","Response messages ",),
-        ("are:\n",),
-        ("PAUSE - temporarily suspend alerts\n" +
-         "RESUME - resume previous alerts\n" +
-         "STOP - quit receiving alerts",
-         "PAUSE - temporarily suspend alerts\n" +
-         "STOP - quit receiving alerts\n" +
-         "RESUME - resume previous alerts",
-         "RESUME - resume previous alerts\n" +
-         "PAUSE - temporarily suspend alerts\n" +
-         "STOP - quit receiving alerts",
-         "RESUME - resume previous alerts\n" +
-         "STOP - quit receiving alerts\n" +
-         "PAUSE - temporarily suspend alerts",
-         "STOP - quit receiving alerts\n" +
-         "RESUME - resume previous alerts\n" +
-         "PAUSE - temporarily suspend alerts",
-         "STOP - quit receiving alerts\n" +
-         "PAUSE - temporarily suspend alerts\n" +
-         "RESUME - resume previous alerts",
-         "PAUSE - suspend alerts\n" +
-         "RESUME - resume alerts\n" +
-         "STOP - quit receiving messages",
-         "PAUSE - suspend messages\n" +
-         "STOP - quit messages\n" +
-         "RESUME - resume messages",
-         "RESUME - resume all alerts\n" +
-         "PAUSE - temporarily quit receiving alerts\n" +
-         "STOP - quit receiving alerts",
-         "RESUME - resume messages\n" +
-         "STOP - quit all alerts\n" +
-         "PAUSE - temporarily suspend all messages",
-         "STOP - quit receiving notifications\n" +
-         "RESUME - resume previous notifications\n" +
-         "PAUSE - temporarily suspend notifications",
-         "STOP - quit all notifications\n" +
-         "PAUSE - suspend all notifications\n" +
-         "RESUME - resume all notifications",),
+        ("Commands available ","A list of commands ","Possible commands ",),
+        ("are:\n",)
+    ]
+
+    COMMANDS = [
+        "PAUSE - suspend alerts\n",
+        "RESUME - resume alerts\n",
+        "STOP - quit receiving messages\n"
     ]
 
     def __init__(self, to, subject):
         super().__init__(to, subject)
+        commands = self._permute_commands(0, "", self.COMMANDS.copy()))
+        self.MESSAGES.append(tuple(commands))
 
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
+    def _permute_commands (depth, curr, commands):
+        result = []
+        if depth >= len(commands):
+            if curr != "":
+                result.append(curr)
+            return result
 
+        for index, command in enumerate(commands)
+            if command != "":
+                commands[index] = ""
+                rest = self._permute_commands(depth+1, curr + command, commands)
+                result += rest
+                commands[index] = command
+        return result
 
 class ResumeMessage(Message):
     MESSAGES = [
@@ -125,11 +108,6 @@ class ResumeMessage(Message):
         ("around ","near ","close to ","near by",),
         ("your location.","your location!","you!","you.",),
     ]
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 
 class PauseMessage(Message):
@@ -141,11 +119,6 @@ class PauseMessage(Message):
         ("receiving ","getting ","allowing ","experiencing ",),
         ("alerts ","notifications ","texts ","sms's ",),
     ]
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 
 class StopMessage(Message):
@@ -160,11 +133,6 @@ class StopMessage(Message):
         ("","","","",),
         ("","","","",),
     ]
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 
 class NoPokemonMessage(Message):
@@ -179,11 +147,6 @@ class NoPokemonMessage(Message):
         ("","","","",),
         ("","","","",),
     ]
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 
 class NoLocationMessage(Message):
@@ -199,11 +162,6 @@ class NoLocationMessage(Message):
         ("","","","",),
     ]
 
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 class ReEnrollMessage(Message):
     MESSAGES = [
@@ -218,11 +176,6 @@ class ReEnrollMessage(Message):
         ("","","","",),
     ]
 
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 class AlertMessage(Message):
     MESSAGES = [
@@ -236,11 +189,6 @@ class AlertMessage(Message):
         ("","","","",),
         ("","","","",),
     ]
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
 
 
 class ErrorMessage(Message):
@@ -255,9 +203,6 @@ class ErrorMessage(Message):
         ("","","","",),
         ("","","","",),
     ]
-
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
 
     def make_msg(self, **kwargs):
         logging.info("Error message being sent")
@@ -275,7 +220,6 @@ class ErrorMessage(Message):
         return self._enc_string(err.msg, err.subj)
 
 
-
 class ReceivedMessaged(Message):
     MESSAGES = [
         ("","","","",),
@@ -288,10 +232,3 @@ class ReceivedMessaged(Message):
         ("","","","",),
         ("","","","",),
     ]
-
-
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
-
-    def make_msg(self, **kwargs):
-        return super().make_msg(**kwargs)
