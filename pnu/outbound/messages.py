@@ -1,8 +1,7 @@
 import random
 import itertools
-from pnu.models import ErrorMsg
 
-
+from pnu.config import private_config
 
 
 class Message:
@@ -14,9 +13,14 @@ class Message:
                     "myboostmobile.com", "pm.sprint.com", "tmomail.net",
                     "mms.uscc.net", "vzwpix.com", "vmpix.com"]
 
-    def __init__(self, to, subject):
-        self.to = to
-        self.subject = subject
+    def __init__(self, to, subject=None):
+        if isinstance(to, list):
+            self.to = ', '.join(to)
+        else:
+            self.to = to
+
+        if subject:
+            self.subject = subject
 
     def make_msg(self, **kwargs):
         self.message = self._get_rand_msg(**kwargs)
@@ -26,6 +30,8 @@ class Message:
         final_msg['Subject'] = self.subject
         self._sms_to_mms(final_msg)
         final_msg['To'] = self.to
+
+        logging.log("Sending {} message.".format(self.subject))
         return final_msg.as_string()
 
     def _get_rand_msg(self, **kwargs):
@@ -41,6 +47,7 @@ class Message:
         if len(msg.get_payload()) <= constants.MAX_SMS_MESSAGE_LEN:
             return
 
+        logging.info("Message too long: {}. Sending MMS".format(len(msg)))
         updated_to = []
         # since self.to is a list of phone_numbers, we iterate through it
         for number in [self.to]:
@@ -80,31 +87,48 @@ class EnrollMessage(Message):
     COMMANDS = [
         "PAUSE - suspend alerts\n",
         "RESUME - resume alerts\n",
+        "STOP - quit receiving alerts\n"
+    ]
+
+    MSG_COMMANDS = [
+        "PAUSE - suspend messages\n",
+        "RESUME - resume messages\n",
         "STOP - quit receiving messages\n"
     ]
 
     def __init__(self, to, subject):
         super().__init__(to, subject)
         commands = itertools.permutations(self.COMMANDS)
+        msg_commands = itertools.permutations(self.MSG_COMMANDS)
         com_list = []
         for command in commands:
             com_list.append(command)
+        msg_com_list = []
+        for command in msg_commands:
+            msg_com_list.append(msg_command)
 
-        self.MESSAGES.append(com_list[random.randrange(0, len(com_list))])
+        which_perm = random.randrange(0, len(com_list))
+        which_cmd = random.randrange(0, 2)
+        final_com_list = com_list if which_cmd else msg_com_list
+        self.MESSAGES.append(final_com_list[which_perm])
 
 
 class ResumeMessage(Message):
+
+    subject = "Resuming"
     MESSAGES = [
         ("Alerts ","Notifications ","Messages ","Texts ","SMS's ",),
         ("are now ","will be ","will now be ",),
         ("turned on ",),
-        ("for Pokemon",),
-        ("around ","near ","close to ","near by",),
+        ("for Pokemon ",),
+        ("around ","near ","close to ","near by ",),
         ("your location.","your location!","you!","you.",),
     ]
 
 
 class PauseMessage(Message):
+
+    subject = "Pausing"
     MESSAGES = [
         ("Respond ","Reply ","Text back ","Send a message ",),
         ("with RESUME ","including RESUME in it ",),
@@ -116,12 +140,13 @@ class PauseMessage(Message):
 
 
 class StopMessage(Message):
+
+    subject = "Goodbye"
     MESSAGES = [
         ("Sorry to see you go! ",
          "You will now be removed from alerts. ",
          "Alerts will no longer be sent. ",
-         "You have been removed from receiving alerts. ",
-         "Thanks for being enrolled! "),
+         "You have been removed from any future alerts. ",),
         ("Best of luck ","Have fun ","Enjoy ","Have a good time ",),
         ("catchin' ","finding ", "capturing ",),
         ("all of 'em!","'em all!","all of them!","Pokemon!",),
@@ -129,13 +154,15 @@ class StopMessage(Message):
 
 
 class NoPokemonMessage(Message):
+
+    subject = "Incomplete Pokemon Wanted"
     MESSAGES = [
         ("There are no Pokemon ","No Pokemon are ","Pokemon are not ",),
         ("associated ","listed ","paired ","assigned ",),
-        ("with your","","","",),
-        ("account. ","user. ","person. ",),
+        ("with your ",),
+        ("account. ","user. ","person. ","trainer. "),
         ("Reply ","Respond ","Text back ","Message us ",),
-        ("in the form of ","with ","","",),
+        ("in the form of ","with "),
         ("\"Pokemon wanted: ",),
         ("poke1, poke2, poke3...\" ","poke1, poke2...\" ",),
         ("with ",),
@@ -145,6 +172,8 @@ class NoPokemonMessage(Message):
 
 
 class NoLocationMessage(Message):
+
+    subject = "No Location Listed"
     MESSAGES = [
         ("It does not look like there is a ","There is no ","No ",),
         ("location ",),
@@ -152,62 +181,88 @@ class NoLocationMessage(Message):
         ("with ","to ",),
         ("your ",),
         ("user. ","trainer. ","person. ","account. ",),
-        ("Please send ","Send ","Text ","Message","Please give ", "Give ",),
+        ("Please send ","Send ","Text ","Message ","Please give ", "Give ",),
         ("us your ",),
         ("location","current location",),
     ]
 
 
 class ReEnrollMessage(Message):
+
+    subject = "Oops!"
     MESSAGES = [
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
-        ("","","","",),
+        ("An error occurred. ",
+         "Something went wrong. ",
+         "We messed up. ",
+         "Our bad! ",),
+        ("Please try ","Try ",),
+        ("re-sending ","re-enrolling by sending ","messaging ","texting ",),
+        ("us your location ",),
+        ("again.","once more.","at this time.","now.",),
     ]
 
 
 class AlertMessage(Message):
+
+    subject = "Pokemon Alert!"
     MESSAGES = [
         ("Go catch a wild ",
          "There's a ",
          "A ",
          "Go catch a ",
-         "Catch the "),
+         "Catch the ",
+         "Catch ",
+         "",),
         ("{pokemon} ",),
         ("near you. ",
          "in the area. ",
          "close by. ",
          "in the vicinity. ",
-         "by you.",),
+         "by you. ",
+         "around you. ",
+         "around. ",),
         ("{link}",),
     ]
 
 
-class ErrorMessage(Message):
-
-    def make_msg(self, **kwargs):
-        logging.info("Error message being sent")
-        em = ErrorMsg()
-        err = None
-
-        if self.errors['code'] == 'PNE':
-            logging.info("Pokemon Not Existent error")
-            incorrect_pokemon = (', ').join(self.errors['data'])
-            err = em.pne(incorrect_pokemon)
-        elif self.errors['code'] == 'OOR':
-            logging.info("User Out Of Range error")
-            err = em.oor(self.errors['data'][0], self.errors['data'][1])
-
-        return self._enc_string(err.msg, err.subj)
-
-
 class ReceivedMessaged(Message):
+
+    subject = "Pokemon Tracked"
     MESSAGES = [
-        ("We are currently tracking these Pokemon for you: {pokemon}",),
+        ("We are currently tracking these Pokemon ",
+         "We are watching these Pokemon ",
+         "These Pokemon are being tracked ",
+         "These Pokemon are being watched ",
+         "The following Pokemon are in our database ",
+         "We've stored these Pokemon ",
+         "Tracking these Pokemon ",
+         "Following these Pokemon ",),
+        ("for you: {pokemon}",),
+    ]
+
+
+class PNEError(Message):
+    """
+        error message for when a user submits a pokemon that is
+        non-existent
+    """
+    subject = "Non-Existent Pokemon"
+    MESSAGES = [
+        ("We didn't recognize the following Pokemon: {incorrect_pokemon}. " +
+         "Double check the spelling and try again.",),
+    ]
+
+
+class OORError(Message):
+    """
+        error message for when a user enrolls and is not within the
+        location designated by their host
+    """
+
+    subject = "Out of Range"
+    link = "https://github.com/erasaur/pnu/wiki/Location-Restrictions"
+    MESSAGES = [
+        ("We're sorry, it looks like you are outside this region's " +
+         "designated tracking area. More information can be found " +
+         "here {link}".format(link=self.link)),
     ]

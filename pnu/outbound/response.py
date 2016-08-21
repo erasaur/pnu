@@ -43,148 +43,22 @@ class BuildResponse:
         if self.pokemon_wanted:
             self._title_case_pokemon_wanted()
 
-    def _enc_string(self, msg, subject):
-        msg = MIMEText(msg)
-        msg['From'] = private_config['gmail']['username']
-        msg['Subject'] = subject
-        self.to = self._check_len_of_msg(msg.get_payload())
-        msg['To'] = self.to
-        return msg.as_string()
 
-    def _make_enroll_msg(self):
-        logging.info("Sending WELCOME message")
-        msg = MIMEText("\nTo activate your user, respond in the form of \"" +
-                       "Pokemon wanted: poke1, poke2, poke3...\" with up to " +
-                       "10 Pokemon. A list of commands are:\nPAUSE - " +
-                       "temporarily suspend alerts\nRESUME - resume " +
-                       "previous alerts\nSTOP - quit receiving alerts")
-        self.to = self._check_len_of_msg(msg.get_payload())
-
-        msg['To'] = self.to
-        msg['From'] = private_config['gmail']['username']
-        msg['Subject'] = self.SUBJECT
-
-        return msg.as_string()
-
-    def _make_stop_msg(self):
-        logging.info("Sending STOP message")
-        msg = "Sorry to see you go! Best of luck catchin' 'em all!"
-        subj = "Goodbye"
-        return self._enc_string(msg, subj)
-
-    def _make_pause_msg(self):
-        logging.info("Sending PAUSE message")
-        msg = "Response with RESUME to begin alerts"
-        subj = "Pausing"
-        return self._enc_string(msg, subj)
-
-    def _make_resume_msg(self):
-        logging.info("Sending RESUME message")
-        msg = "Alerts will now be sent for new pokemon near you!"
-        subj = "Resuming"
-        return self._enc_string(msg, subj)
-
-    def _make_no_pokemon_listed_msg(self):
-        logging.info("Sending no pokemon message")
-        msg = ("There are no pokemon listed for your user. Please respond in " +
-               "the form of \"Pokemon wanted: poke1, poke2, poke3...\" with " +
-               "up to 10 pokemon.")
-        subj = "Incomplete Pokemon Wanted"
-        return self._enc_string(msg, subj)
-
-    def _make_no_location_msg(self):
-        logging.info("Sending no location message")
-        msg = ("It does not look like we have your location. Please send " +
-               "us your location and try your request again.")
-        subj = "No Location Listed"
-        return self._enc_string(msg, subj)
-
-    def _make_reenroll_msg(self):
-        logging.info("Sending re-enroll message")
-        msg = ("There seems to be a miscommunication. Please try " +
-               "re-enrolling by sending us your location first.")
-        subj = "Oops!"
-        return self._enc_string(msg, subj)
-
-    def _make_active_msg(self):
-        """ returns the text message to be sent to the receiver
-        Args:
-            info    (dictionary)
-                with keys: link (string), pokemon_wanted (list),
-                and phone_number (string)
-        Returns:
-            msg     MIMEText formatted message
-        """
-        logging.info("Sending ACTIVE message")
+####### finish integrating sending messages with the new code
+####### include poke_list_to_str where necessary and _title_case_pokemon_wated
+####### where necessary, include link where necessary
         self.pokemon_wanted = self.poke_list_to_str()
-        msg = MIMEText("There's a wild {pokemon} near you! Go catch 'em!\n"
-                       .format(pokemon=self.pokemon_wanted) +
-                       "pnu.space/sl/{link}\n".format(link=self.link))
+        {"link": "pnu.space/sl/{link}\n".format(link=self.link)}
 
-        # if the message to send is over 160 characters, send it via the mms
-        # gateway instead of sms. The minus 2 is for parenthesis that get added
-        # to the subject part of the message being sent.
-        self.to = self._check_len_of_msg(msg.get_payload())
-
-        if isinstance(self.to, list):
-            msg['To'] = ', '.join(self.to)
-        else:
-            msg['To'] = self.to
-
-        msg['From'] = private_config['gmail']['username']
-        msg['Subject'] = self.SUBJECT
-
-        return msg.as_string()
-
-    def _make_error_msg(self):
-        logging.info("Error message being sent")
-        em = ErrorMsg()
+    def _choose_error_msg(self):
         err = None
-
         if self.errors['code'] == 'PNE':
-            logging.info("Pokemon Not Existent error")
             incorrect_pokemon = (', ').join(self.errors['data'])
-            err = em.pne(incorrect_pokemon)
+            err = PNEError(self.to).make_msg(incorrect_pokemon=incorrect_pokemon)
         elif self.errors['code'] == 'OOR':
-            logging.info("User Out Of Range error")
-            err = em.oor(self.errors['data'][0], self.errors['data'][1])
+            err = OORError(self.to).make_msg()
 
-        return self._enc_string(err.msg, err.subj)
 
-    def _make_received_msg(self):
-        msg = ("We are currently tracking these Pokemon for you: {}"
-               .format(self.poke_list_to_str()))
-        subj = ""
-        return self._enc_string(msg, subj)
-
-    def _check_len_of_msg(self, msg):
-        """ checks if the message length is longer than 159 chars """
-        if (len(msg) > constants.MAX_SMS_MESSAGE_LEN):
-            logging.info("Message too long: {}. Sending MMS".format(len(msg)))
-            return self._sms_to_mms()
-
-        return self.to
-
-    def _sms_to_mms(self):
-        """ converts the sms carrier gateway to mms carrier gateway """
-        updated_to = []
-        # since self.to is a list of phone_numbers, we iterate through it
-        for number in [self.to]:
-            num, ext = number.split('@')
-
-            # check if the carrier is listed in our sms to mms availability
-            for i, carrier in enumerate(self.SMS_CARRIERS):
-                if ext == carrier:
-                    ext = self.MMS_CARRIERS[i]
-
-            updated_to.append(num + "@" + ext)
-
-        # check if sending to multiple users
-        if len(updated_to) > 1:
-            return updated_to
-
-        # if not multiple users, we only need the 1 'to' address
-        return updated_to[0]
 
     def poke_list_to_str(self):
         """ creates a string from the list of pokemon wanted
@@ -232,7 +106,7 @@ class BuildResponse:
 
         elif self.status == constants.ENROLL:
             if self.errors:
-                return self._make_error_msg(), self.to
+                return self._choose_error_msg(), self.to
             # if they send us pokemon wanted before sending location
             elif self.pokemon_wanted and not self.location:
                 return self._make_no_location_msg(), self.to
