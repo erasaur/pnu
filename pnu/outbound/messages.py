@@ -1,8 +1,12 @@
 import random
 import itertools
+from email.mime.text import MIMEText
 
 from pnu.config import private_config
+from pnu.etc import constants
 
+import logging
+logging = logging.getLogger(__name__)
 
 class Message:
 
@@ -31,7 +35,7 @@ class Message:
         self._sms_to_mms(final_msg)
         final_msg['To'] = self.to
 
-        logging.log("Sending {} message.".format(self.subject))
+        logging.info("Sending {} message.".format(self.subject))
         return final_msg.as_string()
 
     def _get_rand_msg(self, **kwargs):
@@ -70,6 +74,7 @@ class Message:
 
 class EnrollMessage(Message):
 
+    subject = ""
     MESSAGES = [
         ("To activate ", "To enroll ", "To enable ", "To begin using ",),
         ("your account ", "this service ",),
@@ -96,21 +101,25 @@ class EnrollMessage(Message):
         "STOP - quit receiving messages\n"
     ]
 
-    def __init__(self, to, subject):
-        super().__init__(to, subject)
+    def __init__(self, to):
+        super().__init__(to)
         commands = itertools.permutations(self.COMMANDS)
         msg_commands = itertools.permutations(self.MSG_COMMANDS)
         com_list = []
         for command in commands:
             com_list.append(command)
         msg_com_list = []
-        for command in msg_commands:
+        for msg_command in msg_commands:
             msg_com_list.append(msg_command)
 
-        which_perm = random.randrange(0, len(com_list))
+        which_perm = random.randrange(0, max(len(com_list), len(msg_com_list)))
         which_cmd = random.randrange(0, 2)
         final_com_list = com_list if which_cmd else msg_com_list
-        self.MESSAGES.append(final_com_list[which_perm])
+        to_append = ""
+        for cmd in final_com_list[which_perm]:
+            to_append += cmd
+
+        self.MESSAGES.append(cmd)
 
 
 class ResumeMessage(Message):
@@ -225,7 +234,7 @@ class AlertMessage(Message):
     ]
 
 
-class ReceivedMessaged(Message):
+class ReceivedMessage(Message):
 
     subject = "Pokemon Tracked"
     MESSAGES = [
