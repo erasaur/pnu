@@ -50,7 +50,7 @@ class PnuScanner ():
 
         logging.info("Logging in users...")
         for user_data in users:
-            user = PGoApi()
+            user = PGoApi(device_info={})
             user._last_call = 0
             user._data = user_data
             self.auth(user)
