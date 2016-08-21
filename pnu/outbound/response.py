@@ -2,7 +2,9 @@ from email.mime.text import MIMEText
 from pnu.config import private_config
 from pnu.etc import constants
 from pnu.models import Alert
-from pnu.models import ErrorMsg
+from pnu.outbound import (EnrollMessage, ResumeMessage, PauseMessage,
+                          StopMessage, NoPokemonMessage, NoLocationMessage,
+                          ReEnrollMessage, AlertMessage, PNEError, OORError)
 
 import logging
 logging = logging.getLogger(__name__)
@@ -43,12 +45,43 @@ class BuildResponse:
         if self.pokemon_wanted:
             self._title_case_pokemon_wanted()
 
-
-####### finish integrating sending messages with the new code
-####### include poke_list_to_str where necessary and _title_case_pokemon_wated
-####### where necessary, include link where necessary
+    def _make_active_msg(self):
         self.pokemon_wanted = self.poke_list_to_str()
-        {"link": "pnu.space/sl/{link}\n".format(link=self.link)}
+        msg = AlertMessage(self.to).make_msg(
+                link = "https://pnu.space/{}".format(self.link),
+                pokemon = self.pokemon_wanted,
+        )
+
+        return msg
+
+    def _make_received_msg(self):
+        self.pokemon_wanted = self.poke_list_to_str()
+        msg = ReceivedMessage(self.to).make_msg(pokemon=self.pokemon_wanted)
+        return msg
+
+    def _make_enroll_msg(self):
+        msg = EnrollMessage(self.to).make_msg()
+        return msg
+
+    def _make_no_location_msg(self):
+        msg = NoLocationMessage(self.to).make_msg()
+        return msg
+
+    def _make_no_pokemon_listed_msg(self):
+        msg = NoPokemonMessage(self.to).make_msg()
+        return msg
+
+    def _make_resume_msg(self):
+        msg = ResumeMessage(self.to).make_msg()
+        return msg
+
+    def _make_pause_msg(self):
+        msg = PauseMessage(self.to).make_msg()
+        return msg
+
+    def _make_stop_msg(self):
+        msg = StopMessage(self.to).make_msg()
+        return msg
 
     def _choose_error_msg(self):
         err = None
@@ -58,7 +91,11 @@ class BuildResponse:
         elif self.errors['code'] == 'OOR':
             err = OORError(self.to).make_msg()
 
+        return err
 
+    def _make_reenroll_msg(self):
+        msg = ReEnrollMessage(self.to).make_msg()
+        return msg
 
     def poke_list_to_str(self):
         """ creates a string from the list of pokemon wanted
