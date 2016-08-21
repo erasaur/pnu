@@ -216,6 +216,8 @@ class PnuPokeApi (PnuRunnable):
 
         logging.info("Scan queue size: {}".format(scan_queue_size))
         logging.info("Dispatch queue size: {}".format(dispatch_queue_size))
+        logging.info("Number of users: {}".format(len(PnuUserDataStore.list())))
+        logging.info("Number of groups: {}".format(len(self._scanner._groups)))
 
         if scan_queue_size <= self._min_queue_size:
             logging.info("Looks like we should try to rescan now, less than {} in queue".format(self._min_queue_size))
