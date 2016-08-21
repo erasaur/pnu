@@ -34,10 +34,12 @@ class PnuScanFilter (PnuRunnable):
 
         # how often to sync data to file
         self._sync_to_file_interval = pub_config["scan_filter"]["sync_to_file_interval_sec"]
+        self._last_sync = time.time()
 
         super().__init__(update_interval=self._update_interval)
 
     def update (self):
+        logging.info("Updating scan filter")
         now = time.time()
         if now - self._last_sync >= self._sync_to_file_interval:
             self.sync_to_file()
