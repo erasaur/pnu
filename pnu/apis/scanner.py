@@ -129,17 +129,17 @@ class PnuScanner ():
         while True:
             # get next available user (this blocks till there is one)
             user = user_queue.get()
-            start = time.time()
+            start_scan = time.time()
 
             if user._auth_provider._ticket_expire:
-                remaining_time = user._auth_provider._ticket_expire / 1000 - start
+                remaining_time = user._auth_provider._ticket_expire / 1000 - start_scan
                 if remaining_time < self._min_sec_before_reauth:
                     self.auth(user)
 
-            if start - user._last_call < self._scan_throttle_sec:
+            if start_scan - user._last_call < self._scan_throttle_sec:
                 logging.info("Not quite ready to search with this user yet")
                 user_queue.put(user)
-                time.sleep(self.remaining_time(start, self._sleep_sec))
+                time.sleep(self.remaining_time(start_scan, self._sleep_sec))
                 continue
 
             # get next task (this blocks till there is one)
@@ -148,6 +148,8 @@ class PnuScanner ():
             failed_consecutive = 0
 
             while True:
+                last_scan = time.time()
+
                 if failed_consecutive >= self._max_tries:
                     logging.info("Tried too many times to search location {}, giving up".format(loc))
                     queue.task_done()
@@ -159,7 +161,7 @@ class PnuScanner ():
 
                 if not response_dict:
                     logging.info("Got no results when searching location {}, retrying soon".format(loc))
-                    time.sleep(self.remaining_time(start, self._sleep_sec))
+                    time.sleep(self.remaining_time(last_scan, self._sleep_sec))
                     failed_consecutive = 0
                     continue
 
@@ -177,9 +179,11 @@ class PnuScanner ():
                         # don't sleep here while holding onto the lock!
 
                 if am_tired:
-                    time.sleep(self.remaining_time(start, self._sleep_sec))
+                    time.sleep(self.remaining_time(last_scan, self._sleep_sec))
 
-            time.sleep(self.remaining_time(start, self._scan_throttle_sec))
+            # there should be a delay between our last scan and the next scan of
+            # `self._scan_throttle_sec` number of seconds.
+            time.sleep(self.remaining_time(last_scan, self._scan_throttle_sec))
             user_queue.put(user)
 
     def auth (self, user):
