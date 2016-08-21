@@ -185,6 +185,6 @@ if [[ `uname -s` == *"Linux"* ]]; then
 fi
 
 echo "Installing requirements..."
-pip install -r requirements.txt
+pip install --upgrade -r requirements.txt
 
 echo -e "${GREEN}Dependencies have been installed!${NC}"
