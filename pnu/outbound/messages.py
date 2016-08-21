@@ -264,5 +264,5 @@ class OORError(Message):
     MESSAGES = [
         ("We're sorry, it looks like you are outside this region's " +
          "designated tracking area. More information can be found " +
-         "here {link}".format(link=self.link)),
+         "here {link}".format(link=link)),
     ]

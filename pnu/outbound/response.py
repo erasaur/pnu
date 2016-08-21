@@ -2,7 +2,7 @@ from email.mime.text import MIMEText
 from pnu.config import private_config
 from pnu.etc import constants
 from pnu.models import Alert
-from pnu.outbound import (EnrollMessage, ResumeMessage, PauseMessage,
+from pnu.outbound.messages import (EnrollMessage, ResumeMessage, PauseMessage,
                           StopMessage, NoPokemonMessage, NoLocationMessage,
                           ReEnrollMessage, AlertMessage, PNEError, OORError)
 
