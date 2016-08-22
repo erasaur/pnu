@@ -1,6 +1,7 @@
 import time, json
 
 from math import sqrt, cos, radians
+from ast import literal_eval
 from pnu.core.runnable import PnuRunnable
 from pnu.apis.geo import close_enough, get_coor_in_dir, get_center_of_group
 from pnu.config import pub_config
@@ -50,11 +51,19 @@ class PnuScanFilter (PnuRunnable):
         logging.info("Previously had {} locations".format(len(self._spawn_locations)))
 
         with open(self._sync_file, "r") as f:
+            self._spawn_locations = {}
             try:
-                self._spawn_locations = json.load(f) 
-            except:
-                logging.info("Error reading spawn locations from file")
-                self._spawn_locations = {}
+                json_data = json.load(f)
+                # spawn_locations maps locations (tuples) to dictionaries.
+                # because json doesn't support tuples as keys, when serializing
+                # the spawn_locations, the keys (tuples) are converted to their
+                # string representations. so, when reading from the json dump, 
+                # we have to convert the keys back to tuples using literal_eval.
+                for spawn_loc, spawn_data in json_data.items():
+                    loc = literal_eval(spawn_loc)
+                    self._spawn_locations[loc] = spawn_data
+            except Exception as e:
+                logging.info("Error reading spawn locations from file: {}".format(e))
 
         logging.info("Now have {} locations".format(len(self._spawn_locations)))
         logging.info("Done syncing locations")
@@ -63,12 +72,15 @@ class PnuScanFilter (PnuRunnable):
         logging.info("Syncing locations to file...")
 
         with open(self._sync_file, "w") as f:
-            json_data = {}
-            for spawn_loc, spawn_data in self._spawn_locations.items():
-                json_data[str(spawn_loc)] = spawn_data
-            json.dump(json_data, f)
-        self._last_sync = time.time()
+            try:
+                json_data = {}
+                for spawn_loc, spawn_data in self._spawn_locations.items():
+                    json_data[str(spawn_loc)] = spawn_data
+                json.dump(json_data, f)
+            except Exception as e:
+                logging.info("Error writing spawn locations to file: {}".format(e))
 
+        self._last_sync = time.time()
         logging.info("Done syncing locations")
 
     def update_data (self, loc, pokes):
