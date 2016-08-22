@@ -88,8 +88,12 @@ class BuildResponse:
     def _choose_error_msg(self):
         err = None
         if self.errors['code'] == 'PNE':
+            self.pokemon_wanted = self.poke_list_to_str()
             incorrect_pokemon = (', ').join(self.errors['data'])
-            err = PNEError(self.to).make_msg(incorrect_pokemon=incorrect_pokemon)
+            err = PNEError(self.to).make_msg(
+                    incorrect_pokemon=incorrect_pokemon,
+                    pokemon=self.pokemon_wanted,
+            )
         elif self.errors['code'] == 'OOR':
             err = OORError(self.to).make_msg()
 

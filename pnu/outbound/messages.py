@@ -88,6 +88,7 @@ class EnrollMessage(Message):
         ("Commands available ","A list of commands ","Possible commands ",),
         ("are:\n",)
     ]
+    ALREADY_INIT = False
 
     COMMANDS = [
         "PAUSE - suspend alerts\n",
@@ -103,9 +104,14 @@ class EnrollMessage(Message):
 
     def __init__(self, to):
         super().__init__(to)
+        if EnrollMessage.ALREADY_INIT:
+            return
+
+        EnrollMessage.ALREADY_INIT = True
         commands = itertools.permutations(self.COMMANDS)
         msg_commands = itertools.permutations(self.MSG_COMMANDS)
         com_list = []
+
         for command in commands:
             com_list.append(command)
         msg_com_list = []
@@ -258,7 +264,8 @@ class PNEError(Message):
     subject = "Non-Existent Pokemon"
     MESSAGES = [
         ("We didn't recognize the following Pokemon: {incorrect_pokemon}. " +
-         "Double check the spelling and try again.",),
+         "Double check the spelling and try again. We are still " +
+         "tracking these Pokemon for you: {pokemon}",),
     ]
 
 
@@ -273,5 +280,5 @@ class OORError(Message):
     MESSAGES = [
         ("We're sorry, it looks like you are outside this region's " +
          "designated tracking area. More information can be found " +
-         "here {link}".format(link=link)),
+         "here {link}".format(link=link),),
     ]
