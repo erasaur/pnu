@@ -36,7 +36,7 @@ class Message:
         final_msg['To'] = self.to
 
         logging.info("Sending {} message.".format(self.subject))
-        return final_msg.as_string()
+        return (final_msg.as_string(), self.to,)
 
     def _get_rand_msg(self, **kwargs):
         msg = ""
@@ -51,7 +51,7 @@ class Message:
         if len(msg.get_payload()) <= constants.MAX_SMS_MESSAGE_LEN:
             return
 
-        logging.info("Message too long: {}. Sending MMS".format(len(msg)))
+        logging.info("Message too long: {}. Sending MMS".format(len(msg.get_payload())))
         updated_to = []
         # since self.to is a list of phone_numbers, we iterate through it
         for number in [self.to]:
@@ -119,7 +119,7 @@ class EnrollMessage(Message):
         for cmd in final_com_list[which_perm]:
             to_append += cmd
 
-        self.MESSAGES.append(cmd)
+        self.MESSAGES.append((to_append,))
 
 
 class ResumeMessage(Message):

@@ -141,35 +141,35 @@ class BuildResponse:
         logging.info("Sending message with status of {}".format(self.status))
         # new user, no pokemon listed
         if self.status == constants.ACTIVE:
-            return self._make_active_msg(), self.to
+            return self._make_active_msg()
 
         elif self.status == constants.ENROLL:
             if self.errors:
-                return self._choose_error_msg(), self.to
+                return self._choose_error_msg()
             # if they send us pokemon wanted before sending location
             elif self.pokemon_wanted and not self.location:
-                return self._make_no_location_msg(), self.to
+                return self._make_no_location_msg()
             elif self.pokemon_wanted:
-                return self._make_received_msg(), self.to
+                return self._make_received_msg()
 
-            return self._make_enroll_msg(), self.to
+            return self._make_enroll_msg()
 
         elif self.status == constants.RESUME:
             if not self.location:
-                return self._make_no_location_msg(), self.to
+                return self._make_no_location_msg()
             elif not self.pokemon_wanted:
-                return self._make_no_pokemon_listed_msg(), self.to
+                return self._make_no_pokemon_listed_msg()
             else:
-                return self._make_resume_msg(), self.to
+                return self._make_resume_msg()
 
         elif self.status == constants.PAUSE:
-            return self._make_pause_msg(), self.to
+            return self._make_pause_msg()
 
         elif self.status == constants.STOP:
-            return self._make_stop_msg(), self.to
+            return self._make_stop_msg()
 
         logging.error("Type of message is undetermined. Here's some data to " +
                       "help")
         logging.error("Pokemon wanted: {}".format(self. pokemon_wanted))
         logging.error("Status of user: {}".format(self.status))
-        return self._make_reenroll_msg(), self.to
+        return self._make_reenroll_msg()
