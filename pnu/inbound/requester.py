@@ -239,12 +239,11 @@ class PnuRequest:
         """ returns the text from the attachment of an iOS message """
         if msg.get_content_maintype() == 'multipart':
             for part in msg.walk():
-                # find the vcard attachment part
-                if part.get_content_type() != 'text/x-vcard':
-                    continue
+                # find the attachment part
                 filename = part.get_filename()
-                if filename == "Current Location.loc.vcf":
-                    return part.get_payload(decode=True)
+                if (filename is not None):
+                    if ((".txt" in filename) or (".vcf" in filename)):
+                        return part.get_payload(decode=True)
 
     def get_from_address(self, from_addr):
         logging.info("parsing from_addr: {}".format(from_addr))
