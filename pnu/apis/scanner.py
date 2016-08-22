@@ -7,7 +7,7 @@ from pnu.config import pub_config, private_config
 from pnu.models import Pokemon
 from pnu.apis.geo import random_alt, random_coor_in_boundary
 
-import math, random, sys, time, threading
+import math, random, sys, time, threading, uuid
 from threading import Thread, Lock
 from queue import Queue
 
@@ -50,7 +50,19 @@ class PnuScanner ():
 
         logging.info("Logging in users...")
         for user_data in users:
-            user = PGoApi(device_info={})
+            device_info = {}
+            device_info['device_id'] = uuid.uuid4().hex
+            device_info['device_brand'] = "Apple"
+            device_info['device_model'] = "iPhone"
+            device_info['device_model_boot'] = "iPhone8,2"
+            device_info['hardware_manufacturer'] = "Apple"
+            device_info['hardware_model'] = "N66AP"
+            device_info['firmware_brand'] = "iPhone OS"
+            device_info['firmware_type'] = "9.3.3"
+
+
+
+            user = PGoApi(device_info=device_info)
             user._last_call = 0
             user._data = user_data
             self.auth(user)
