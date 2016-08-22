@@ -37,6 +37,7 @@ class PnuScanFilter (PnuRunnable):
         self._last_sync = time.time()
 
         super().__init__(update_interval=self._update_interval)
+        self.run()
 
     def update (self):
         logging.info("Updating scan filter")
@@ -62,7 +63,10 @@ class PnuScanFilter (PnuRunnable):
         logging.info("Syncing locations to file...")
 
         with open(self._sync_file, "w") as f:
-            json.dump(self._spawn_locations, f)
+            json_data = {}
+            for spawn_loc, spawn_data in self._spawn_locations.items():
+                json_data[str(spawn_loc)] = spawn_data
+            json.dump(json_data, f)
         self._last_sync = time.time()
 
         logging.info("Done syncing locations")
