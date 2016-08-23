@@ -1,5 +1,6 @@
 from google.protobuf.internal import encoder
-from pgoapi import PGoApi, exceptions
+from pgoapi import PGoApi
+from pgoapi.exceptions import ServerSideAccessForbiddenException
 from pgoapi import utilities as util
 from s2sphere import Cell, CellId, LatLng
 
@@ -7,7 +8,7 @@ from pnu.config import pub_config, private_config
 from pnu.models import Pokemon
 from pnu.apis.geo import random_alt, random_coor_in_boundary
 
-import math, random, sys, time, threading, uuid
+import math, random, sys, time, threading, uuid, subprocess
 from threading import Thread, Lock
 from queue import Queue
 
@@ -45,6 +46,7 @@ class PnuScanner ():
         self._sleep_sec = pub_config["scanner"]["sleep_per_try_sec"]
         self._scan_throttle_sec = pub_config["scanner"]["scan_throttle_sec"]
         self._delay_between_login_sec = pub_config["scanner"]["delay_between_login_sec"]
+        self._ban_recovery_file = pub_config["scanner"]["ban_recovery_file"]
         self._boundary = private_config["location"]
         users = private_config["poke_api"]["accounts"]
 
@@ -98,9 +100,14 @@ class PnuScanner ():
                 since_timestamp_ms=timestamps,
                 cell_id=cell_ids
             )
+        except ServerSideAccessForbiddenException as e:
+            logging.info("User {} might be banned!".format(user._user_data["username"]))
+            if self._ban_recovery_file is not None:
+                logging.info("Attempting recovery from potential IP ban...")
+                subprocess.call([self._ban_recovery_file])
         except Exception as e:
             logging.info("Uncaught exception when downloading map: {}".format(e))
-            return False
+        return False
 
     def parse_map (self, map_dict):
         res = []
