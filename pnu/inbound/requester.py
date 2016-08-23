@@ -135,12 +135,10 @@ class PnuRequest:
             lat, lon = self.parse_lat_lon(msg)
             if (lat and lon):
                 loc = private_config['location']
-                print("{} < {} < {}".format(float(loc['min_lat'], float(lat), float(loc['max_lat']))))
-                print("{} < {} < {}".format(float(loc['min_lon'], float(lon), float(loc['max_lon']))))
 
                 # user is within our ranges, so we continue
                 if ((loc['min_lat'] < float(lat) < loc['max_lat']) and
-                   (loc['min_lon'] > float(lon) > loc['max_lon'])):
+                   (loc['min_lon'] < float(lon) < loc['max_lon'])):
                     logging.info("User is within location restrictions")
                     user['location'] = {
                         "lat": lat,
@@ -162,11 +160,20 @@ class PnuRequest:
             errors = []
             if body:
                 pokemon_wanted, errors = self.parse_pokemon_wanted(body)
+
                 if errors:
                     user['error_data'] = {
                         "code": "PNE",
                         "data": errors,
                     }
+            logging.info("Pokemon wanted after first try: {}".format(pokemon_wanted))
+
+            if not pokemon_wanted:
+                logging.info("Checking attachment for pokemon wanted")
+                body = self.get_attachment(msg)
+                if body:
+                    logging.info("Body of attachment is {}".format(body))
+                    pokemon_wanted, errors = self.parse_pokemon_wanted(body)
 
             user['pokemon_wanted'] = pokemon_wanted
 
