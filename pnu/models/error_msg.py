@@ -23,7 +23,7 @@ class ErrorMsg:
         location designated by their host
         """
         link = "https://github.com/erasaur/pnu/wiki/Location-Restrictions"
-        msg = ("We're sorry, it looks like you are outside this regions' " +
+        msg = ("We're sorry, it looks like you are outside this region's " +
                "designated tracking area. More information can be found " +
                "here {}".format(link))
         subj = "Out of Range"
