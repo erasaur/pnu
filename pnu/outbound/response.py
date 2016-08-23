@@ -50,7 +50,7 @@ class BuildResponse:
     def _make_active_msg(self):
         self.pokemon_wanted = self.poke_list_to_str()
         msg = AlertMessage(self.to).make_msg(
-                link = "https://pnu.space/{}".format(self.link),
+                link = "https://pnu.space/sl/{}".format(self.link),
                 pokemon = self.pokemon_wanted,
         )
 
@@ -112,14 +112,14 @@ class BuildResponse:
         """
         str_of_poke = self.pokemon_wanted[0].title()
         logging.info("List of pokemon_wanted is: {}".format(
-                self.pokemon_wanted))
+                     self.pokemon_wanted))
 
         if len(self.pokemon_wanted) > 1:
             str_of_poke = (", ".join(self.pokemon_wanted[:-1]) +
                            ", and {}".format(self.pokemon_wanted[-1]))
-            logging.info("List of pokemon from string is: {}"
-                         .format(str_of_poke))
 
+        logging.info("List of pokemon from string is: {}"
+                     .format(str_of_poke))
         return str_of_poke
 
     def _title_case_pokemon_wanted(self):
