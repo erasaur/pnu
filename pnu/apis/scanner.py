@@ -52,7 +52,9 @@ class PnuScanner ():
         self._restart_vpn_file = pub_config["scanner"]["restart_vpn_file"]
         self._switch_vpn_file = pub_config["scanner"]["switch_vpn_file"]
         self._max_vpn_retries_before_switch = pub_config["scanner"]["max_vpn_retries_before_switch"]
+        self._delay_between_vpn_retries = pub_config["scanner"]["delay_between_vpn_retries_sec"]
         self._num_vpn_retries = 0
+        self._last_vpn_retry = time.time()
 
         users = private_config["poke_api"]["accounts"]
         logging.info("Logging in users...")
@@ -105,14 +107,18 @@ class PnuScanner ():
             )
         except ServerSideAccessForbiddenException as e:
             logging.info("User {} or IP might be banned, attempting recovery...".format(user._data["username"]))
-            if self._num_vpn_retries < self._max_vpn_retries_before_switch:
-                logging.info("Restarting vpn ({} times so far)".format(self._num_vpn_retries))
-                subprocess.call([self._restart_vpn_file])
-                self._num_vpn_retries += 1
-            else:
-                logging.info("Restarted vpn too many times. Switching to a different vpn now")
-                subprocess.call([self._switch_vpn_file])
-                self._num_vpn_retries = 0
+            with self._lock:
+                now = time.time()
+                if now - self._last_vpn_retry >= self._delay_between_vpn_retries:
+                    self._last_vpn_retry = now
+                    if self._num_vpn_retries < self._max_vpn_retries_before_switch:
+                        logging.info("Restarting vpn ({} times so far)".format(self._num_vpn_retries))
+                        subprocess.call([self._restart_vpn_file])
+                        self._num_vpn_retries += 1
+                    else:
+                        logging.info("Restarted vpn too many times. Switching to a different vpn now")
+                        subprocess.call([self._switch_vpn_file])
+                        self._num_vpn_retries = 0
         except Exception as e:
             logging.info("Uncaught exception when downloading map: {}".format(e))
         return False
