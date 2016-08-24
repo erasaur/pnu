@@ -46,7 +46,7 @@ class PnuScanner ():
         self._sleep_sec = pub_config["scanner"]["sleep_per_try_sec"]
         self._scan_throttle_sec = pub_config["scanner"]["scan_throttle_sec"]
         self._delay_between_login_sec = pub_config["scanner"]["delay_between_login_sec"]
-        self._ban_recovery_file = pub_config["scanner"]["ban_recovery_file"]
+        self._ban_recovery_command = pub_config["scanner"]["ban_recovery_command"]
         self._boundary = private_config["location"]
         users = private_config["poke_api"]["accounts"]
 
@@ -102,9 +102,9 @@ class PnuScanner ():
             )
         except ServerSideAccessForbiddenException as e:
             logging.info("User {} might be banned!".format(user._user_data["username"]))
-            if self._ban_recovery_file is not None:
+            if self._ban_recovery_command is not None:
                 logging.info("Attempting recovery from potential IP ban...")
-                subprocess.call([self._ban_recovery_file])
+                subprocess.call(self._ban_recovery_command.split())
         except Exception as e:
             logging.info("Uncaught exception when downloading map: {}".format(e))
         return False
