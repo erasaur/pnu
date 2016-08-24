@@ -46,10 +46,15 @@ class PnuScanner ():
         self._sleep_sec = pub_config["scanner"]["sleep_per_try_sec"]
         self._scan_throttle_sec = pub_config["scanner"]["scan_throttle_sec"]
         self._delay_between_login_sec = pub_config["scanner"]["delay_between_login_sec"]
-        self._ban_recovery_command = pub_config["scanner"]["ban_recovery_command"]
         self._boundary = private_config["location"]
-        users = private_config["poke_api"]["accounts"]
 
+        # automatically handle IP bans by restarting/switching vpn servers
+        self._restart_vpn_file = pub_config["scanner"]["restart_vpn_file"]
+        self._switch_vpn_file = pub_config["scanner"]["switch_vpn_file"]
+        self._max_vpn_retries_before_switch = pub_config["scanner"]["max_vpn_retries_before_switch"]
+        self._num_vpn_retries = 0
+
+        users = private_config["poke_api"]["accounts"]
         logging.info("Logging in users...")
         for user_data in users:
             device_info = {}
@@ -61,8 +66,6 @@ class PnuScanner ():
             device_info['hardware_model'] = "N66AP"
             device_info['firmware_brand'] = "iPhone OS"
             device_info['firmware_type'] = "9.3.3"
-
-
 
             user = PGoApi(device_info=device_info)
             user._last_call = 0
@@ -101,10 +104,15 @@ class PnuScanner ():
                 cell_id=cell_ids
             )
         except ServerSideAccessForbiddenException as e:
-            logging.info("User {} might be banned!".format(user._user_data["username"]))
-            if self._ban_recovery_command is not None:
-                logging.info("Attempting recovery from potential IP ban...")
-                subprocess.call(self._ban_recovery_command.split())
+            logging.info("User {} or IP might be banned, attempting recovery...".format(user._data["username"]))
+            if self._num_vpn_retries < self._max_vpn_retries_before_switch:
+                logging.info("Restarting vpn ({} times so far)".format(self._num_vpn_retries))
+                subprocess.call([self._restart_vpn_file])
+                self._num_vpn_retries += 1
+            else:
+                logging.info("Restarted vpn too many times. Switching to a different vpn now")
+                subprocess.call([self._switch_vpn_file])
+                self._num_vpn_retries = 0
         except Exception as e:
             logging.info("Uncaught exception when downloading map: {}".format(e))
         return False

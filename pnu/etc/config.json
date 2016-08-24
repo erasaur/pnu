@@ -50,7 +50,9 @@
         "sleep_per_try_sec": 20,
         "scan_throttle_sec": 60,
         "delay_between_login_sec": 5,
-        "ban_recovery_command": "source ../vpn_config/restart_vpn.sh"
+        "max_vpn_retries_before_switch": 4,
+        "restart_vpn_file": "../vpn_config/restart_vpn.sh",
+        "switch_vpn_file": "../vpn_config/acquire_new_serv.sh"
     },
 
     "pgo_api": {
