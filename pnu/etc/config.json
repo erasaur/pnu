@@ -50,7 +50,7 @@
         "sleep_per_try_sec": 20,
         "scan_throttle_sec": 60,
         "delay_between_login_sec": 5,
-        "max_vpn_retries_before_switch": 4,
+        "max_vpn_retries_before_switch": 2,
         "delay_between_vpn_retries_sec": 8,
         "restart_vpn_file": "../vpn_config/restart_vpn.sh",
         "switch_vpn_file": "../vpn_config/acquire_new_serv.sh"
