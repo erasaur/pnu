@@ -57,7 +57,6 @@ class PnuScanner ():
         self._last_vpn_retry = time.time()
 
         users = private_config["poke_api"]["accounts"]
-        logging.info("Logging in users...")
         for user_data in users:
             device_info = {}
             device_info['device_id'] = uuid.uuid4().hex
@@ -72,15 +71,18 @@ class PnuScanner ():
             user = PGoApi(device_info=device_info)
             user._last_call = 0
             user._data = user_data
-            self.auth(user)
             self._users.append(user)
             self._user_queue.put(user)
 
+        self.auth_users()
+        self.start_threads(self._num_threads)
+
+    def auth_users (self):
+        logging.info("Logging in users...")
+        for user in self._users:
+            self.auth(user)
             # stagger logins
             time.sleep(random.random() * self._delay_between_login_sec)
-
-        logging.info("Spinning up {} threads...".format(self._num_threads))
-        self.start_threads(self._num_threads)
 
     def encode (self, cellid):
         output = []
@@ -88,6 +90,7 @@ class PnuScanner ():
         return ''.join(output)
 
     def start_threads (self, num):
+        logging.info("Spinning up {} threads...".format(self._num_threads))
         for i in range(num):
             t = Thread(target=self.search_thread, name='search_thread-{}'.format(i))
             t.daemon = True
@@ -119,6 +122,9 @@ class PnuScanner ():
                         logging.info("Restarted vpn too many times. Switching to a different vpn now")
                         subprocess.call([self._switch_vpn_file])
                         self._num_vpn_retries = 0
+                # we can hold the lock for a bit during re-auth since there's
+                # no point in retrying in other threads in the meantime
+                self.auth_users()
         except Exception as e:
             logging.info("Uncaught exception when downloading map: {}".format(e))
         return False
