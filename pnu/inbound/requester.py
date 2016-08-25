@@ -115,15 +115,7 @@ class PnuRequest:
                 'error_data': [],
             }
 
-            # need to check if multipart message, walk or don't walk
-            # based on that
-
-            for part in msg.walk():
-                if part.get_content_type() == 'text/html':
-                    body = part.get_payload(decode=True)
-
-            if not body:
-                body = msg.get_payload(decode=True)
+            body = self.get_body_of_msg(msg)
 
             # check for PAUSE, RESUME, STOP
             status = self.check_for_command(body, msg)
@@ -132,7 +124,7 @@ class PnuRequest:
                 yield User(user)
                 continue
 
-            lat, lon = self.parse_lat_lon(msg)
+            lat, lon = self.parse_lat_lon(msg, body)
             if (lat and lon):
                 loc = private_config['location']
 
@@ -188,12 +180,11 @@ class PnuRequest:
 
             yield User(user)
 
-    def parse_lat_lon(self, msg):
+    def parse_lat_lon(self, msg, body):
         """ parses for the latitude and longitude from the email """
         lat = lon = None
         # get the payload if it is an android since the message body contains
         # the location and it's not in an attachment
-        body = msg.get_payload(decode=True)
         lat, lon = self.parse_android_lat_lon(body)
 
         # check for an attachment that may have come from an ios device
@@ -201,6 +192,22 @@ class PnuRequest:
             lat, lon = self.parse_ios_lat_lon(msg)
 
         return lat, lon
+
+    def get_body_of_msg(self, msg):
+        body = None
+        for part in msg.walk():
+            if part.get_content_type() == 'text/plain':
+                body = part.get_payload(decode=True)
+
+        if not body:
+            for part in msg.walk():
+                if part.get_content_type() == 'text/html':
+                    body = part.get_payload(decode=True)
+
+        if not body:
+            body = msg.get_payload(decode=True)
+
+        return body
 
     def parse_pokemon_wanted(self, msg):
         """ parses input message and returns a list of pokemon wanted """
@@ -293,6 +300,7 @@ class PnuRequest:
 
     def parse_for_location(self, body):
         try:
+            logging.info("Checking {} for lat,lon".format(body))
             # if body is None, then it will also throw an AttributeError
             result = re.search(self.location_regex, body.decode('UTF-8'))
             lat = result.group('lat')
