@@ -89,7 +89,7 @@ class PnuScanFilter (PnuRunnable):
             return
         spawn_loc, spawn_data = self.get_spawn_location(loc)
         if len(pokes) > 0:
-            spawn_data["spawn_count"] += 1
+            spawn_data["spawn_count"] = max(spawn_data["spawn_count"] + 1, self._spawn_count_threshold)
         else:
             spawn_data["spawn_count"] -= 1
 
